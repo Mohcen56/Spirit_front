@@ -40,20 +40,22 @@ export default function AnswerDisplay({ question, onShowQuestion, onShowTeamSele
       )}
 
       {/* Action Buttons */}
-      <div className="flex justify-center space-x-4">
+      <div className="absolute -bottom-6 -right-15 transform -translate-x-1/2">
         {/* Back to Question Button */}
         <button
           onClick={onShowQuestion}
-          className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors text-sm"
+          className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors text-lg font-bold"
         >
           <RotateCcw className="h-4 w-4" />
           <span>Show Question</span>
         </button>
+</div>
 
-        {/* Team Selector Button */}
+      {/* Team Selector Button */}
+      <div className="absolute -bottom-6 left-30 transform -translate-x-1/2">
         <button
           onClick={onShowTeamSelector}
-          className="bg-amber-600 hover:bg-amber-500 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors text-sm"
+          className="bg-amber-600 hover:bg-amber-500 text-white px-4 py-3 rounded-lg flex items-center space-x-2 transition-colors font-bold text-lg"
         >
           <Users className="h-4 w-4" />
           <span>Who Answered?</span>

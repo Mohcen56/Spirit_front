@@ -371,12 +371,12 @@ return (
     </main>
 
     {/* Footer / Scoreboard - Fixed height */}
-    <footer className="bg-gradient-to-r from-amber-400 to-orange-400 py-2 md:py-3 flex items-center justify-center gap-3 md:gap-4 border-t-4 border-amber-500 h-16 md:h-25 flex-shrink-0">
+    <footer className="bg-gradient-to-r from-amber-400 to-orange-400 py-2 md:py-3 flex items-center justify-center gap-3 md:gap-4 border-t-4 border-amber-500 h-16 md:h-20 flex-shrink-0">
       {game.teams && game.teams.length > 0 ? (
         game.teams.map((team) => (
           <div key={team.id} className="flex items-center bg-orange-200/95 rounded-2xl px-3 md:px-4 py-1.5 md:py-1 shadow-md border border-orange-300" dir="ltr">
             {/* Team Avatar */}
-            <div className="w-8 h-8 md:w-20 md:h-20 rounded-full bg-white flex items-center justify-center overflow-hidden mr-2 md:mr-3 border-2 border-orange-300">
+            <div className="w-8 h-8 md:w-15 md:h-15 rounded-full bg-white flex items-center justify-center overflow-hidden mr-2 md:mr-3 border-2 border-orange-300">
               <Image 
                 src={`/avatars/${team.avatar}.jpeg`} 
                 alt={team.name} 

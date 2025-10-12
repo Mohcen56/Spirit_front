@@ -281,7 +281,7 @@ export default function QuestionPage() {
                   )}
 
                   {/* Answer Button */}
-                   <div className="absolute -bottom-6 right-1 transform -translate-x-1/2">
+                   <div className="absolute -bottom-6 left-20 transform -translate-x-1/2">
                     <button
                       onClick={handleShowAnswer}
                       className="bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-xl  shadow-lg transition-all duration-200 text-lg"

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Team, Question } from '@/types/game';
-import { Users, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Users, CheckCircle,  RotateCcw } from 'lucide-react';
 import Image from 'next/image';
 import GameCard from './GameCard';
 
@@ -135,12 +135,12 @@ export default function TeamSelector({
 
         {/* Back to Answer Button */}
         {onBackToAnswer && (
-          <div className=" relative flex justify-left -mt-3">
+          <div className=" absolute -bottom-6 -right-15 transform -translate-x-1/2">
             <button
               onClick={onBackToAnswer}
-              className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors text-sm"
+              className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors text-lg font-bold"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <RotateCcw className="h-4 w-4" />
               <span>Back to Answer</span>
             </button>
           </div>
