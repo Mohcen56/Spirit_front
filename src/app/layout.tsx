@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tarbaa - Trivia Game",
+  title: "brainigo - Trivia Game",
   description: "A modern trivia game with categories and team competition",
 };
 
