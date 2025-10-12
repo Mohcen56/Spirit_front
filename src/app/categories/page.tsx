@@ -28,25 +28,24 @@ export default function CategoriesPage() {
     return imageErrors.has(categoryName);
   };
 
-  // Function to get played percentage for a category
+  // Function to get played percentage for a category (user-specific)
   const getPlayedPercentage = (category: Category) => {
-    console.log('Category data for percentage calculation:', {
+    console.log('Category data for user percentage calculation:', {
       name: category.name,
       total_questions: category.total_questions,
-      played_questions: category.played_questions,
-      questions_count: (category as any).questions_count
+      user_played_questions: category.user_played_questions
     });
     
     if (
       typeof category.total_questions === 'number' &&
-      typeof category.played_questions === 'number' &&
+      typeof category.user_played_questions === 'number' &&
       category.total_questions > 0
     ) {
-      const percentage = Math.min(100, Math.round((category.played_questions / category.total_questions) * 100));
-      console.log(`Calculated percentage for ${category.name}: ${percentage}%`);
+      const percentage = Math.min(100, Math.round((category.user_played_questions / category.total_questions) * 100));
+      console.log(`Calculated user percentage for ${category.name}: ${percentage}%`);
       return percentage;
     }
-    console.log(`No valid data for ${category.name}, returning 0%`);
+    console.log(`No valid user data for ${category.name}, returning 0%`);
     return 0;
   };
 

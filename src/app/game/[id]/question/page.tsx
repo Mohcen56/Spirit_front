@@ -6,6 +6,8 @@ import { gameAPI } from '@/lib/api';
 import { Game, Team, Question, Category } from '@/types/game';
 import Image from 'next/image';
 import GameHeader from '@/components/GameHeader';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { startGame, switchToNextTeam, setCurrentTeam, endGame } from '@/store/gameSlice';
 
 interface GameWithDetails extends Game {
   teams: Team[];
@@ -24,22 +26,37 @@ export default function GameBoardPage() {
   const router = useRouter();
   const gameId = params.id as string;
   
+  const dispatch = useAppDispatch();
+  const { currentTeam, isGameActive, gameId: currentGameId } = useAppSelector(state => state.game);
+  
   const [game, setGame] = useState<GameWithDetails | null>(null);
   const [error, setError] = useState('');
-  const [currentTeamTurn, setCurrentTeamTurn] = useState(1);
 
-  // Load current team turn from localStorage when component mounts
+  // Initialize game in Redux when component mounts and game data is loaded
   useEffect(() => {
-    const savedTurn = localStorage.getItem(`game-${gameId}-current-turn`);
-    if (savedTurn) {
-      setCurrentTeamTurn(parseInt(savedTurn));
+    if (game && (!isGameActive || currentGameId !== gameId)) {
+      dispatch(startGame({ 
+        gameId: gameId, 
+        totalTeams: game.teams.length 
+      }));
     }
-  }, [gameId]);
+  }, [game, gameId, isGameActive, currentGameId, dispatch]);
 
-  // Save current team turn to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem(`game-${gameId}-current-turn`, currentTeamTurn.toString());
-  }, [currentTeamTurn, gameId]);
+  // Handle team turn change
+  const handleTeamTurnChange = () => {
+    dispatch(switchToNextTeam());
+  };
+
+  // Handle back to board (navigate to home or games list)
+  const handleBackToBoard = () => {
+    router.push('/');
+  };
+
+  // Handle ending the game
+  const handleEndGame = () => {
+    dispatch(endGame());
+    router.push('/');
+  };
 
   // Handle score updates
   const updateTeamScore = async (teamId: number, increment: number) => {
@@ -156,16 +173,6 @@ export default function GameBoardPage() {
     };
   }, [gameId]);
 
-  // Handle team turn changes
-  const handleTeamTurnChange = () => {
-    const totalTeams = game?.teams.length || 2; // Default to 2 teams if no teams loaded yet
-    setCurrentTeamTurn(prev => (prev % totalTeams) + 1);
-  };
-
-  const handleBackToBoard = () => {
-    router.push('/');
-  };
-
   // Organize questions by category (memoized to prevent recalculation)
   const organizeQuestionsByCategory = React.useMemo(() => {
     if (!game) return {};
@@ -257,8 +264,9 @@ export default function GameBoardPage() {
         {/* Header */}
         <GameHeader 
           onBackToBoard={handleBackToBoard}
-          currentTeamTurn={currentTeamTurn}
+          currentTeamTurn={currentTeam}
           onTeamTurnChange={handleTeamTurnChange}
+          onEndGame={handleEndGame}
         />
 
         {/* Game Board - Shows loading skeleton */}
@@ -309,8 +317,9 @@ return (
     {/* Header */}
     <GameHeader 
       onBackToBoard={handleBackToBoard}
-      currentTeamTurn={currentTeamTurn}
+      currentTeamTurn={currentTeam}
       onTeamTurnChange={handleTeamTurnChange}
+      onEndGame={handleEndGame}
     />
 
     {/* Game Board - Takes remaining height */}

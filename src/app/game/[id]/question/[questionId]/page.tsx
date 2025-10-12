@@ -10,12 +10,17 @@ import TeamSelector from '@/components/TeamSelector';
 import GameCard from '@/components/GameCard';
 import GameHeader from '@/components/GameHeader';
 import { getFullImageUrl } from '@/lib/imageUtils';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { switchToNextTeam, endGame } from '@/store/gameSlice';
 
 export default function QuestionPage() {
   const params = useParams();
   const router = useRouter();
   const gameId = params.id as string;
   const questionId = parseInt(params.questionId as string);
+  
+  const dispatch = useAppDispatch();
+  const { currentTeam } = useAppSelector(state => state.game);
   
   const [question, setQuestion] = useState<QuestionType | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -26,20 +31,56 @@ export default function QuestionPage() {
   const [error, setError] = useState('');
   const [currentView, setCurrentView] = useState<'question' | 'answer' | 'teamSelector'>('question');
   const [isChronoRunning, setIsChronoRunning] = useState(false);
-  const [currentTeamTurn, setCurrentTeamTurn] = useState(1);
+  
+  // Enhanced turn tracking - save turn history and team turn data during game
+  const [turnHistory, setTurnHistory] = useState<Array<{
+    teamId: number;
+    teamName: string;
+    questionId: number;
+    timestamp: number;
+    duration?: number;
+  }>>([]);
+  const [teamTurnData, setTeamTurnData] = useState<Record<number, {
+    totalTurns: number;
+    totalTime: number;
+    averageTime: number;
+    lastTurnTimestamp: number;
+  }>>({});
 
-  // Load current team turn from localStorage when component mounts
+  // Load turn history and team turn data from localStorage when component mounts
   useEffect(() => {
-    const savedTurn = localStorage.getItem(`game-${gameId}-current-turn`);
-    if (savedTurn) {
-      setCurrentTeamTurn(parseInt(savedTurn));
+    try {
+      const savedHistory = localStorage.getItem(`game-${gameId}-turn-history`);
+      if (savedHistory) {
+        setTurnHistory(JSON.parse(savedHistory));
+      }
+      
+      const savedTeamData = localStorage.getItem(`game-${gameId}-team-turn-data`);
+      if (savedTeamData) {
+        setTeamTurnData(JSON.parse(savedTeamData));
+      }
+    } catch (e) {
+      console.warn('Failed to load turn data from localStorage:', e);
     }
   }, [gameId]);
-
-  // Save current team turn to localStorage whenever it changes
+  
+  // Save turn history to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem(`game-${gameId}-current-turn`, currentTeamTurn.toString());
-  }, [currentTeamTurn, gameId]);
+    try {
+      localStorage.setItem(`game-${gameId}-turn-history`, JSON.stringify(turnHistory));
+    } catch (e) {
+      console.warn('Failed to save turn history to localStorage:', e);
+    }
+  }, [turnHistory, gameId]);
+  
+  // Save team turn data to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(`game-${gameId}-team-turn-data`, JSON.stringify(teamTurnData));
+    } catch (e) {
+      console.warn('Failed to save team turn data to localStorage:', e);
+    }
+  }, [teamTurnData, gameId]);
 
   // Chronometer effect - starts when question loads
   useEffect(() => {
@@ -145,8 +186,10 @@ export default function QuestionPage() {
   };
 
   const handleTeamTurnChange = () => {
-    const totalTeams = teams.length || 2; // Default to 2 teams if no teams loaded yet
-    setCurrentTeamTurn(prev => (prev % totalTeams) + 1);
+    // Change to next team (manual change - no turn tracking needed)
+    dispatch(switchToNextTeam());
+    // Reset timer for new team's turn
+    setElapsedTime(0);
   };
 
   // Format elapsed time as MM:SS
@@ -171,10 +214,49 @@ export default function QuestionPage() {
       // Show success immediately for better UX
       setAwardSuccess('Points awarded!');
       
-      // Advance to next team's turn immediately
-      const totalTeams = teams.length || 2;
-      const nextTurn = (currentTeamTurn % totalTeams) + 1;
-      setCurrentTeamTurn(nextTurn);
+      // Record the current turn in history before changing teams
+      const currentTeamData = teams.find(t => t.id === currentTeam) || teams[currentTeam - 1];
+      const timestamp = Date.now();
+      
+      if (currentTeamData && question) {
+        const turnDuration = elapsedTime; // Use elapsed time as turn duration
+        
+        setTurnHistory(prev => [...prev, {
+          teamId: currentTeamData.id,
+          teamName: currentTeamData.name,
+          questionId: question.id,
+          timestamp,
+          duration: turnDuration
+        }]);
+        
+        // Update team turn statistics
+        setTeamTurnData(prev => {
+          const currentData = prev[currentTeamData.id] || {
+            totalTurns: 0,
+            totalTime: 0,
+            averageTime: 0,
+            lastTurnTimestamp: 0
+          };
+          
+          const newTotalTurns = currentData.totalTurns + 1;
+          const newTotalTime = currentData.totalTime + turnDuration;
+          const newAverageTime = newTotalTime / newTotalTurns;
+          
+          return {
+            ...prev,
+            [currentTeamData.id]: {
+              totalTurns: newTotalTurns,
+              totalTime: newTotalTime,
+              averageTime: newAverageTime,
+              lastTurnTimestamp: timestamp
+            }
+          };
+        });
+      }
+      
+      // Advance to next team's turn and reset timer
+      dispatch(switchToNextTeam());
+      setElapsedTime(0);
       
       // Navigate immediately without waiting
       router.push(`/game/${gameId}/question`);
@@ -192,6 +274,11 @@ export default function QuestionPage() {
 
   const handleBackToBoard = () => {
     router.push(`/game/${gameId}/question`);
+  };
+
+  const handleEndGame = () => {
+    dispatch(endGame());
+    router.push('/');
   };
 
   if (isLoading) {
@@ -227,8 +314,9 @@ export default function QuestionPage() {
       {/* Header */}
       <GameHeader 
         onBackToBoard={handleBackToBoard}
-        currentTeamTurn={currentTeamTurn}
+        currentTeamTurn={currentTeam}
         onTeamTurnChange={handleTeamTurnChange}
+        onEndGame={handleEndGame}
       />
 
       {/* Main Game Layout */}

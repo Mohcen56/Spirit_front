@@ -4,7 +4,15 @@ import { Category, Game, Question, Collection } from '@/types/game';
 export const gameAPI = {
   getCategories: async (): Promise<Category[]> => {
     try {
-      const response = await api.get('/api/categories/');
+      const token = localStorage.getItem('authToken');
+      const headers: Record<string, string> = {};
+      
+      // Add authorization header if token exists (for user-specific data)
+      if (token) {
+        headers['Authorization'] = `Token ${token}`;
+      }
+      
+      const response = await api.get('/api/categories/', { headers });
       
       let categoriesData = response.data;
       if (categoriesData && typeof categoriesData === 'object' && 'results' in categoriesData) {
@@ -25,7 +33,15 @@ export const gameAPI = {
 
   getCollectionsWithCategories: async (): Promise<Collection[]> => {
     try {
-      const response = await api.get('/api/collections/with_categories/');
+      const token = localStorage.getItem('authToken');
+      const headers: Record<string, string> = {};
+      
+      // Add authorization header if token exists (for user-specific data)
+      if (token) {
+        headers['Authorization'] = `Token ${token}`;
+      }
+      
+      const response = await api.get('/api/collections/with_categories/', { headers });
       return response.data;
     } catch (error) {
       console.error('Error fetching collections with categories:', error);

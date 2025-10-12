@@ -21,7 +21,7 @@ export interface Category {
   image?: string;
   collection_id?: number;
   total_questions?: number;
-  played_questions?: number;
+  user_played_questions?: number; // Number of questions played by the current user
 }
 
 export interface Collection {

@@ -7,9 +7,10 @@ interface GameHeaderProps {
   onBackToBoard: () => void;
   currentTeamTurn: number;
   onTeamTurnChange: () => void;
+  onEndGame?: () => void;
 }
 
-export default function GameHeader({ onBackToBoard, currentTeamTurn, onTeamTurnChange }: GameHeaderProps) {
+export default function GameHeader({ onBackToBoard, currentTeamTurn, onTeamTurnChange, onEndGame }: GameHeaderProps) {
   return (
     <header className="bg-slate-800/90 backdrop-blur-sm">
       <div className="container mx-auto px-6 py-3">
@@ -23,7 +24,10 @@ export default function GameHeader({ onBackToBoard, currentTeamTurn, onTeamTurnC
               <ArrowRight className="h-4 w-4" />
               <span>Exit</span>
             </button>
-            <button className="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors text-sm">
+            <button 
+              onClick={onEndGame}
+              className="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors text-sm"
+            >
               <span>🏆</span>
               <span>End the Game</span>
             </button>
