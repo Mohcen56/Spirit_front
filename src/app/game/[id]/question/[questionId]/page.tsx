@@ -278,7 +278,7 @@ export default function QuestionPage() {
 
   const handleEndGame = () => {
     dispatch(endGame());
-    router.push('/');
+    router.push(`/game/${gameId}/results`);
   };
 
   if (isLoading) {

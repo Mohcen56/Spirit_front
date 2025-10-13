@@ -55,7 +55,7 @@ export default function GameBoardPage() {
   // Handle ending the game
   const handleEndGame = () => {
     dispatch(endGame());
-    router.push('/');
+    router.push(`/game/${gameId}/results`);
   };
 
   // Handle score updates
