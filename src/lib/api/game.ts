@@ -41,7 +41,7 @@ export const gameAPI = {
         headers['Authorization'] = `Token ${token}`;
       }
       
-      const response = await api.get('/api/collections/with_categories/', { headers });
+      const response = await api.get('/api/content/collections/with_categories/', { headers });
       return response.data;
     } catch (error) {
       console.error('Error fetching collections with categories:', error);
@@ -56,7 +56,7 @@ export const gameAPI = {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/games/`, {
+      const response = await fetch(`${API_BASE_URL}/api/gameplay/games/`, {
         method: 'POST',
         headers: {
           'Authorization': `Token ${token}`,
@@ -84,7 +84,7 @@ export const gameAPI = {
 
   getGames: async (): Promise<Game[]> => {
     try {
-      const response = await api.get('/api/games/');
+      const response = await api.get('/api/gameplay/games/');
       return Array.isArray(response.data) ? response.data : response.data.results || [];
     } catch (error) {
       console.error('Error fetching games:', error);
@@ -103,7 +103,7 @@ export const gameAPI = {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/games/${gameId}/`, {
+      const response = await fetch(`${API_BASE_URL}/api/gameplay/games/${gameId}/`, {
         headers: {
           'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
@@ -124,7 +124,7 @@ export const gameAPI = {
 
   getAvailableQuestions: async (gameId: number): Promise<Question[]> => {
     try {
-      const response = await api.get(`/api/games/${gameId}/available_questions/`);
+      const response = await api.get(`/api/gameplay/games/${gameId}/available_questions/`);
       const data = response.data;
       const questions = data?.results || data?.questions || data;
       return Array.isArray(questions) ? questions : [];
@@ -136,7 +136,7 @@ export const gameAPI = {
 
   awardQuestion: async (gameId: number, questionId: number, teamId: number | null) => {
     try {
-      const response = await api.post(`/api/games/${gameId}/award_question/`, {
+      const response = await api.post(`/api/gameplay/games/${gameId}/award_question/`, {
         question_id: questionId,
         team_id: teamId
       });
@@ -149,7 +149,7 @@ export const gameAPI = {
 
   getStats: async () => {
     try {
-      const response = await api.get('/api/stats/');
+      const response = await api.get('/api/gameplay/stats/');
       return response.data;
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -160,7 +160,7 @@ export const gameAPI = {
   
   updateTeamScore: async (gameId: number, teamId: number, scoreChange: number) => {
     try {
-      const response = await api.post(`/api/teams/${teamId}/update_score/`, {
+      const response = await api.post(`/api/gameplay/teams/${teamId}/update_score/`, {
         score_change: scoreChange
       });
       return response.data;
@@ -171,7 +171,7 @@ export const gameAPI = {
   },
 
   selectQuestion: async (questionId: number): Promise<Question> => {
-    const response = await api.get(`/api/questions/${questionId}/`);
+    const response = await api.get(`/api/content/questions/${questionId}/`);
     return response.data;
   },
 };

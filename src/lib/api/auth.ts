@@ -73,7 +73,8 @@ export const authAPI = {
   },
   
   getProfile: async () => {
-    const response = await api.get('/api/profile/');
+    // Updated path after backend modularization (authentication app)
+    const response = await api.get('/api/auth/profile/');
     return {
       user: response.data.user,
       membership: response.data.membership,
@@ -87,7 +88,8 @@ export const authAPI = {
 
   updateProfile: async (data: { username?: string; email?: string; first_name?: string; last_name?: string }) => {
     try {
-      const response = await api.patch('/api/profile/update/', data);
+      // Updated path after backend modularization
+      const response = await api.patch('/api/auth/profile/update/', data);
       return {
         success: true,
         user: response.data.user,
@@ -110,7 +112,8 @@ export const authAPI = {
       const formData = new FormData();
       formData.append('avatar', imageFile);
       
-      const response = await api.patch('/api/profile/avatar/', formData, {
+      // Updated path after backend modularization
+      const response = await api.patch('/api/auth/profile/avatar/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
