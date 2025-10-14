@@ -6,16 +6,29 @@ import { gameAPI } from '@/lib/api';
 import { Game, Team } from '@/types/game';
 import Image from 'next/image';
 import { Trophy, Medal, Award, Home, RotateCcw } from 'lucide-react';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { resetGame } from '@/store/gameSlice';
 
 export default function GameResultsPage() {
   const params = useParams();
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const gameId = params.id as string;
+  const reduxTeams = useAppSelector(state => state.game.teams);
   
   const [game, setGame] = useState<Game | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Immediately reflect Redux scores without waiting for API
+  useEffect(() => {
+    if (reduxTeams && reduxTeams.length > 0) {
+      const sorted = [...reduxTeams].sort((a, b) => (b.score || 0) - (a.score || 0));
+      setTeams(sorted);
+      setIsLoading(false);
+    }
+  }, [reduxTeams]);
 
   useEffect(() => {
     const loadGameResults = async () => {
@@ -28,11 +41,14 @@ export default function GameResultsPage() {
         const gameData = await gameAPI.getGame(Number(gameId));
         console.log('Game results loaded:', gameData);
         
-        setGame(gameData);
-        
-        // Sort teams by score in descending order
-        const sortedTeams = [...(gameData.teams || [])].sort((a, b) => (b.score || 0) - (a.score || 0));
-        setTeams(sortedTeams);
+  setGame(gameData);
+
+  // Only set teams from backend if we don't already have Redux scores
+  if ((!reduxTeams || reduxTeams.length === 0) && teams.length === 0) {
+    const sourceTeams = gameData.teams || [];
+    const sortedTeams = [...sourceTeams].sort((a, b) => (b.score || 0) - (a.score || 0));
+    setTeams(sortedTeams);
+  }
         
       } catch (error) {
         console.error('Error loading game results:', error);
@@ -43,13 +59,22 @@ export default function GameResultsPage() {
     };
 
     loadGameResults();
-  }, [gameId]);
+  }, [gameId, reduxTeams, teams.length]);
+
+  // Clear game memory when leaving the results page
+  useEffect(() => {
+    return () => {
+      dispatch(resetGame());
+    };
+  }, [dispatch]);
 
   const handlePlayAgain = () => {
+    dispatch(resetGame());
     router.push('/');
   };
 
   const handleBackHome = () => {
+    dispatch(resetGame());
     router.push('/');
   };
 

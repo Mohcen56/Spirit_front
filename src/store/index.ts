@@ -6,7 +6,7 @@ import gameReducer from './gameSlice';
 const persistConfig = {
   key: 'brainigo-game',
   storage,
-  whitelist: ['currentTeam', 'gameId', 'totalTeams', 'isGameActive'], // Only persist game state
+  whitelist: ['currentTeam', 'gameId', 'totalTeams', 'isGameActive', 'teams', 'doublePerkActiveTeamId', 'doublePerkUsed', 'rerollPerkUsed'], // Persist teams/scores & perk state
 };
 
 const persistedGameReducer = persistReducer(persistConfig, gameReducer);

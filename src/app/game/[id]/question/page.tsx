@@ -3,11 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { gameAPI } from '@/lib/api';
-import { Game, Team, Question, Category } from '@/types/game';
+import { Game, Team, Question } from '@/types/game';
 import Image from 'next/image';
 import GameHeader from '@/components/GameHeader';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { startGame, switchToNextTeam, setCurrentTeam, endGame } from '@/store/gameSlice';
+import { startGame, switchToNextTeam, endGame, setTeams, awardPoints } from '@/store/gameSlice';
 
 interface GameWithDetails extends Game {
   teams: Team[];
@@ -27,7 +27,7 @@ export default function GameBoardPage() {
   const gameId = params.id as string;
   
   const dispatch = useAppDispatch();
-  const { currentTeam, isGameActive, gameId: currentGameId } = useAppSelector(state => state.game);
+  const { currentTeam, isGameActive, gameId: currentGameId, teams: liveTeams } = useAppSelector(state => state.game);
   
   const [game, setGame] = useState<GameWithDetails | null>(null);
   const [error, setError] = useState('');
@@ -58,51 +58,9 @@ export default function GameBoardPage() {
     router.push(`/game/${gameId}/results`);
   };
 
-  // Handle score updates
-  const updateTeamScore = async (teamId: number, increment: number) => {
-    if (!game) return;
-    
-    try {
-      // Update local state immediately for better UX
-      setGame(prevGame => {
-        if (!prevGame) return prevGame;
-        
-        const updatedTeams = prevGame.teams.map(team => {
-          if (team.id === teamId) {
-            const newScore = Math.max(0, (team.score || 0) + increment);
-            return { ...team, score: newScore };
-          }
-          return team;
-        });
-        
-        return { ...prevGame, teams: updatedTeams };
-      });
-      
-      // Save to backend
-      const numericGameId = parseInt(gameId);
-      await gameAPI.updateTeamScore(numericGameId, teamId, increment);
-      console.log(`Team ${teamId} score updated by ${increment} points`);
-      
-    } catch (error) {
-      console.error('Failed to update team score:', error);
-      // Revert local state if API call fails
-      setGame(prevGame => {
-        if (!prevGame) return prevGame;
-        
-        const revertedTeams = prevGame.teams.map(team => {
-          if (team.id === teamId) {
-            const revertedScore = Math.max(0, (team.score || 0) - increment);
-            return { ...team, score: revertedScore };
-          }
-          return team;
-        });
-        
-        return { ...prevGame, teams: revertedTeams };
-      });
-      
-      // Show error to user
-      alert('Failed to save points. Please try again.');
-    }
+  // Local score updates via Redux only
+  const updateTeamScore = (teamId: number, increment: number) => {
+    dispatch(awardPoints({ teamId, delta: increment }));
   };
 
   useEffect(() => {
@@ -145,6 +103,24 @@ export default function GameBoardPage() {
             teams,
             availableQuestions: questions,
           });
+
+          // Sync teams to Redux for live scoring.
+          // Preserve existing scores if we already have them in Redux.
+          const mergedTeams = teams.map((t: Team) => {
+            const existing = liveTeams.find(et => et.id === t.id);
+            return { ...t, score: existing?.score ?? t.score ?? 0 };
+          });
+          if (liveTeams.length === 0) {
+            dispatch(setTeams(mergedTeams));
+          } else {
+            // Only update if the roster changed (e.g., avatar/name updates), keep scores
+            const rosterChanged =
+              mergedTeams.length !== liveTeams.length ||
+              mergedTeams.some((t, i) => t.id !== liveTeams[i]?.id || t.name !== liveTeams[i]?.name || t.avatar !== liveTeams[i]?.avatar);
+            if (rosterChanged) {
+              dispatch(setTeams(mergedTeams));
+            }
+          }
           
           console.log('Game loaded successfully:', {
             gameId: numericGameId,
@@ -171,7 +147,7 @@ export default function GameBoardPage() {
       mounted = false;
       clearTimeout(loadingTimer);
     };
-  }, [gameId]);
+  }, [gameId, dispatch, liveTeams]);
 
   // Organize questions by category (memoized to prevent recalculation)
   const organizeQuestionsByCategory = React.useMemo(() => {
@@ -379,10 +355,10 @@ return (
       </div>
     </main>
 
-    {/* Footer / Scoreboard - Fixed height */}
+    {/* Footer / Scoreboard - Fixed height (uses Redux liveTeams) */}
     <footer className="bg-gradient-to-r from-amber-400 to-orange-400 py-2 md:py-3 flex items-center justify-center gap-3 md:gap-4 border-t-4 border-amber-500 h-16 md:h-20 flex-shrink-0">
-      {game.teams && game.teams.length > 0 ? (
-        game.teams.map((team) => (
+      {liveTeams && liveTeams.length > 0 ? (
+        liveTeams.map((team) => (
           <div key={team.id} className="flex items-center bg-orange-200/95 rounded-2xl px-3 md:px-4 py-1.5 md:py-1 shadow-md border border-orange-300" dir="ltr">
             {/* Team Avatar */}
             <div className="w-8 h-8 md:w-15 md:h-15 rounded-full bg-white flex items-center justify-center overflow-hidden mr-2 md:mr-3 border-2 border-orange-300">
@@ -410,7 +386,7 @@ return (
                 -
               </button>
               <span className="text-orange-900 font-extrabold text-base md:text-xl min-w-[35px] md:min-w-[50px] text-center">
-                {team.score || 0}
+                {team.score ?? 0}
               </span>
               <button 
                 onClick={() => updateTeamScore(team.id, 100)}

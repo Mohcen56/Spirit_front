@@ -11,7 +11,7 @@ import GameCard from '@/components/GameCard';
 import GameHeader from '@/components/GameHeader';
 import { getFullImageUrl } from '@/lib/imageUtils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { switchToNextTeam, endGame } from '@/store/gameSlice';
+import { switchToNextTeam, endGame, awardPoints, activateDoublePerk, clearActivePerk, activateRerollPerk } from '@/store/gameSlice';
 
 export default function QuestionPage() {
   const params = useParams();
@@ -21,6 +21,8 @@ export default function QuestionPage() {
   
   const dispatch = useAppDispatch();
   const { currentTeam } = useAppSelector(state => state.game);
+  const { doublePerkActiveTeamId, doublePerkUsed } = useAppSelector(state => state.game);
+  const { rerollPerkUsed } = useAppSelector(state => state.game);
   
   const [question, setQuestion] = useState<QuestionType | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -188,6 +190,8 @@ export default function QuestionPage() {
   const handleTeamTurnChange = () => {
     // Change to next team (manual change - no turn tracking needed)
     dispatch(switchToNextTeam());
+    // Clear any lingering active perk so next team can use theirs
+    dispatch(clearActivePerk());
     // Reset timer for new team's turn
     setElapsedTime(0);
   };
@@ -213,6 +217,18 @@ export default function QuestionPage() {
       
       // Show success immediately for better UX
       setAwardSuccess('Points awarded!');
+
+      // Update local Redux score immediately when a team is selected
+      if (teamId && question) {
+        // Check if double points perk is active for this team
+        const isDouble = doublePerkActiveTeamId === teamId;
+        const delta = isDouble ? question.points * 2 : question.points;
+        dispatch(awardPoints({ teamId, delta }));
+        // Clear active perk after it has been applied
+        if (isDouble) {
+          dispatch(clearActivePerk());
+        }
+      }
       
       // Record the current turn in history before changing teams
       const currentTeamData = teams.find(t => t.id === currentTeam) || teams[currentTeam - 1];
@@ -254,8 +270,10 @@ export default function QuestionPage() {
         });
       }
       
-      // Advance to next team's turn and reset timer
-      dispatch(switchToNextTeam());
+  // Advance to next team's turn and reset timer
+    // Always clear any active perk at the end of a question
+    dispatch(clearActivePerk());
+    dispatch(switchToNextTeam());
       setElapsedTime(0);
       
       // Navigate immediately without waiting
@@ -427,10 +445,53 @@ export default function QuestionPage() {
 
                   {/* Team Actions */}
                   <div className="flex space-x-2">
-                    <button className="bg-white/20 hover:bg-white/30 p-2 rounded transition-colors">
-                      <span>📷</span>
+                    {/* Double Points Perk */}
+                    <button
+                      onClick={() => dispatch(activateDoublePerk({ teamId: team.id }))}
+                      disabled={!!doublePerkUsed[team.id] || doublePerkActiveTeamId !== null || (teams.findIndex(t => t.id === team.id) !== (currentTeam - 1))}
+                      title={
+                        doublePerkUsed[team.id]
+                          ? 'Perk already used'
+                          : doublePerkActiveTeamId !== null
+                            ? 'Another perk is active'
+                            : (teams.findIndex(t => t.id === team.id) !== (currentTeam - 1))
+                              ? "You can only activate on your team's turn"
+                              : 'Use Double Points once'
+                      }
+                      className={`p-2 rounded transition-colors border ${doublePerkActiveTeamId === team.id ? 'bg-green-500 text-white border-green-600' : 'bg-white/20 hover:bg-white/30 text-white border-white/30'} disabled:opacity-50`}
+                    >
+                      <span>2x</span>
                     </button>
-                    <button className="bg-white/20 hover:bg-white/30 p-2 rounded transition-colors">
+                    {/* Reroll Question Perk */}
+                    <button
+                      onClick={async () => {
+                        const teamIndex = teams.findIndex(t => t.id === team.id);
+                        const isTeamsTurn = teamIndex === (currentTeam - 1);
+                        if (!isTeamsTurn || rerollPerkUsed[team.id]) return;
+                        // Mark perk as used in Redux
+                        dispatch(activateRerollPerk({ teamId: team.id }));
+                        try {
+                          // Fetch a random question regardless of category
+                          const numericGameId = parseInt(gameId);
+                          const available = await gameAPI.getAvailableQuestions(numericGameId);
+                          const pool = available.filter(q => q.id !== question?.id);
+                          if (pool.length === 0) return;
+                          const random = pool[Math.floor(Math.random() * pool.length)];
+                          router.push(`/game/${gameId}/question/${random.id}`);
+                        } catch (e) {
+                          console.warn('Failed to reroll question:', e);
+                        }
+                      }}
+                      disabled={!!rerollPerkUsed[team.id] || (teams.findIndex(t => t.id === team.id) !== (currentTeam - 1))}
+                      title={
+                        rerollPerkUsed[team.id]
+                          ? 'Reroll already used'
+                          : (teams.findIndex(t => t.id === team.id) !== (currentTeam - 1))
+                            ? "You can only reroll on your team's turn"
+                            : 'Change to a random new question'
+                      }
+                      className={`p-2 rounded transition-colors border ${rerollPerkUsed[team.id] ? 'bg-gray-400 text-white border-gray-500' : 'bg-white/20 hover:bg-white/30 text-white border-white/30'} disabled:opacity-50`}
+                    >
                       <span>📞</span>
                     </button>
                     <button className="bg-white/20 hover:bg-white/30 p-2 rounded transition-colors">
