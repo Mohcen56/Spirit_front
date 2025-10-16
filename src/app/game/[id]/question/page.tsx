@@ -299,13 +299,13 @@ return (
     />
 
     {/* Game Board - Takes remaining height */}
-    <main className="flex-1 p-4 overflow-hidden bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300">
+    <main className="flex-1 p-2 overflow-hidden bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300">
       <div className="h-full grid grid-cols-3 md:grid-cols-6 gap-3">
         {game.categories.map((category) => (
           <div key={category.id} className="h-full flex flex-col">
             
             {/* Category image + name - Fixed height */}
-            <div className="relative h-24 md:h-32 w-full rounded-xl overflow-hidden border-4 border-white shadow mb-3 flex-shrink-0">
+            <div className="relative h-24 md:h-48 w-full rounded-xl overflow-hidden border-4 border-white shadow mb-3 flex-shrink-0">
               {category.image && !hasImageError(category.name) ? (
                 <Image
                   src={category.image}
@@ -319,8 +319,8 @@ return (
                   <span className="text-gray-600 text-xl md:text-2xl">🎯</span>
                 </div>
               )}
-              <div className="absolute bottom-0 left-0 w-full bg-black/70 py-1 text-center">
-                <span className="text-white text-xs md:text-sm font-bold">{category.name}</span>
+              <div className="absolute bottom-0 left-0 md:h-10 w-full bg-black/70 py-1 text-center">
+                <span className="text-white text-xs md:text-lg font-bold">{category.name}</span>
               </div>
             </div>
 

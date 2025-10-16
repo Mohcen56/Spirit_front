@@ -35,11 +35,11 @@ export default function TeamSelector({
       {/* Header */}
       <div className="text-center mb-8">
         <h2 className="text-gray-800 text-2xl md:text-3xl font-bold mb-2">Who answered the question?</h2>
-        <p className="text-gray-600 text-lg">Select the team that answered correctly or choose &quot;No one&quot;</p>
+   
       </div>
 
       {/* Team Selection Grid - Responsive Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 max-w-2xl mx-auto">
+      <div className="grid grid-cols-2  gap-2 md:gap-4  md:mb-8 max-w-2xl mx-auto">
         {teams.map((team) => (
           <button
             key={team.id}
@@ -48,11 +48,11 @@ export default function TeamSelector({
               clickedTeamId === team.id 
                 ? 'bg-green-500 scale-105' 
                 : 'bg-slate-600 hover:bg-slate-700'
-            } rounded-2xl p-6 text-white shadow-lg border-4 border-white h-20 flex items-center justify-start space-x-4`}
+            } rounded-2xl p-3 text-white shadow-lg border-4 border-white  h-15 md:h-20 flex items-center justify-start space-x-2`}
           >
             {/* Team Avatar - Circular */}
             <div className="flex-shrink-0">
-              <div className="w-15 h-15 rounded-full flex items-center justify-center overflow-hidden   shadow-md">
+              <div className="w-10 h-10 md:w-15 md:h-15 rounded-full flex items-center justify-center overflow-hidden shadow-md">
                 {team.avatar ? (
                   <Image
                     src={`/avatars/${team.avatar}.jpeg`}
@@ -91,12 +91,12 @@ export default function TeamSelector({
             clickedTeamId === 'none'
               ? 'bg-green-500 scale-105'
               : 'bg-slate-600 hover:bg-slate-700'
-          } rounded-2xl p-6 text-white shadow-lg border-4 border-white h-20 flex items-center justify-center col-span-1 md:col-span-2`}
+          } rounded-2xl p-3 text-white shadow-lg border-4 border-white  h-15 md:h-20 flex items-center justify-center col-span-2 `}
         >
           {/* No Answer Icon - Circular with sad face */}
           <div className="flex-shrink-0 mr-4">
-            <div className="w-15 h-15 rounded-full bg-white/90 flex items-center justify-center border-3 border-white shadow-md">
-              <span className="text-2xl">😞</span>
+            <div className="md:w-15 md:h-15 rounded-full bg-white/90  flex items-center justify-center border-3 border-white shadow-md">
+              <span className="text-2xl ">😞</span>
             </div>
           </div>
 
@@ -138,7 +138,7 @@ export default function TeamSelector({
           <div className=" absolute -bottom-6 -right-15 transform -translate-x-1/2">
             <button
               onClick={onBackToAnswer}
-              className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors text-lg font-bold"
+              className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors  text-xs md:text-lg font-bold"
             >
               <RotateCcw className="h-4 w-4" />
               <span>Back to Answer</span>

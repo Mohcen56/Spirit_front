@@ -10,23 +10,23 @@ interface GameCardProps {
 
 export default function GameCard({ question, children }: GameCardProps) {
   return (
-    <div className="relative">
+    <div className="relative px-3 mb-2 lg:ml-10 ">
       {/* Main Card */}
-      <div className="bg-white rounded-3xl mt-4 p-3 shadow-2xl border-4 border-blue-400 relative">
+      <div className="bg-white rounded-[4vw] mt-2 p-3 shadow-2xl border-8 border-blue-400 relative">
         
         {/* === Floating Labels on the border === */}
         {/* Left - Category */}
-        <div className="absolute -top-5 left-6 bg-slate-700 text-white px-4 py-1 rounded-md text-sm font-medium">
+        <div className="absolute -top-5 left-12 bg-slate-700 text-white px-8 py-2 rounded-xl text-md font-medium hidden md:inline-block">
           {question.category?.name || 'Category'}
         </div>
 
         {/* Right - Points */}
-        <div className="absolute -top-5 right-6 bg-amber-600 text-white px-4 py-1 rounded-md text-sm font-bold">
+        <div className="absolute -top-5 right-12 bg-amber-600 text-white px-6 py-2 rounded-xl text-md font-bold hidden md:inline-block">
           {question.points} Points
         </div>
 
         {/* Content */}
-        <div className="mt-6 h-100">
+        <div className=" h-70  sm:mt-6 sm:h-95">
           {children}
         </div>
 

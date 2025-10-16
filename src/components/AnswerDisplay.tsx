@@ -17,7 +17,7 @@ export default function AnswerDisplay({ question, onShowQuestion, onShowTeamSele
   return (
     <GameCard question={question}>
       {/* Answer Text */}
-      <div className="text-center mb-8">
+      <div className="text-center md:-mt-4 md:mb-6">
         <h1 className="text-gray-800 text-2xl md:text-3xl font-bold leading-relaxed">
           {question.answer_ar || question.answer}
         </h1>
@@ -40,11 +40,11 @@ export default function AnswerDisplay({ question, onShowQuestion, onShowTeamSele
       )}
 
       {/* Action Buttons */}
-      <div className="absolute -bottom-6 -right-15 transform -translate-x-1/2">
+      <div className="absolute -bottom-6  -right-18 md:-right-15 transform -translate-x-1/2">
         {/* Back to Question Button */}
         <button
           onClick={onShowQuestion}
-          className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors text-lg font-bold"
+          className=" bg-amber-600 hover:bg-amber-500 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors text-xs md:text-lg font-bold"
         >
           <RotateCcw className="h-4 w-4" />
           <span>Show Question</span>
@@ -52,10 +52,10 @@ export default function AnswerDisplay({ question, onShowQuestion, onShowTeamSele
 </div>
 
       {/* Team Selector Button */}
-      <div className="absolute -bottom-6 left-30 transform -translate-x-1/2">
+      <div className="absolute -bottom-6 left-20 md:left-35 transform -translate-x-1/2">
         <button
           onClick={onShowTeamSelector}
-          className="bg-amber-600 hover:bg-amber-500 text-white px-4 py-3 rounded-lg flex items-center space-x-2 transition-colors font-bold text-lg"
+          className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-3 rounded-xl flex items-center space-x-2 transition-colors font-bold text-xs md:text-lg"
         >
           <Users className="h-4 w-4" />
           <span>Who Answered?</span>
