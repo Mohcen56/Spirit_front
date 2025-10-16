@@ -174,4 +174,142 @@ export const gameAPI = {
     const response = await api.get(`/api/content/questions/${questionId}/`);
     return response.data;
   },
+
+  // User-created categories
+  createUserCategory: async (formData: FormData) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) throw new Error('Authentication required');
+
+      const res = await fetch(`${API_BASE_URL}/api/content/user-categories/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Token ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        console.error('API validation error:', data);
+        throw data;
+      }
+
+      return data;
+    } catch (error) {
+      // Re-throw for upstream handling
+      throw error;
+    }
+  },
+
+  getMyCategories: async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      const response = await api.get('/api/content/user-categories/my_categories/', {
+        headers: {
+          'Authorization': `Token ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching my categories:', error);
+      throw error;
+    }
+  },
+
+  getUserCategories: async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const headers: Record<string, string> = {};
+      
+      if (token) {
+        headers['Authorization'] = `Token ${token}`;
+      }
+
+      const response = await api.get('/api/content/user-categories/', { headers });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching user categories:', error);
+      throw error;
+    }
+  },
+
+  addQuestionsToCategory: async (categoryId: number, formData: FormData) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) throw new Error('Authentication required');
+
+      const res = await fetch(`${API_BASE_URL}/api/content/user-categories/${categoryId}/add_questions/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Token ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        console.error('API validation error:', data);
+        throw data;
+      }
+
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  createCategory: async (formData: FormData) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) throw new Error('Authentication required');
+
+      const res = await fetch(`${API_BASE_URL}/api/content/user-categories/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Token ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        console.error('API validation error:', data);
+        throw data;
+      }
+
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  addCategoryToCollection: async (categoryId: number) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) throw new Error('Authentication required');
+
+      const res = await fetch(`${API_BASE_URL}/api/content/user-categories/${categoryId}/add_to_collection/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        console.error('API error:', data);
+        throw data;
+      }
+
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  },
 };

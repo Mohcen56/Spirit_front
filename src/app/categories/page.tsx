@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { gameAPI } from '@/lib/api/index';
 import { Category, Membership, Collection } from '@/types/game';
-import { ArrowLeft, Users, Crown, Lock } from 'lucide-react';
+import { ArrowLeft, Users, Crown, Lock, Eye, Pencil } from 'lucide-react';
 import Image from 'next/image';
 
 export default function CategoriesPage() {
@@ -16,6 +16,7 @@ export default function CategoriesPage() {
   const [error, setError] = useState('');
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
   const [infoModal, setInfoModal] = useState<{ open: boolean; category: Category | null }>({ open: false, category: null });
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const router = useRouter();
 
   // Function to handle image loading errors
@@ -72,16 +73,37 @@ export default function CategoriesPage() {
         
         // Ensure we have an array
         if (Array.isArray(collectionsData)) {
-          setCollections(collectionsData);
+          // Check if "Added Categories" collection exists
+          const hasAddedCategories = collectionsData.some(
+            collection => collection.name.toLowerCase() === 'added categories'
+          );
+          
+          // If "Added Categories" doesn't exist, create it
+          if (!hasAddedCategories) {
+            const addedCategoriesCollection = {
+              id: 999, // Use a high ID to avoid conflicts
+              name: 'Added Categories',
+              order: 999,
+              categories: [],
+              categories_count: 0
+            };
+            setCollections([...collectionsData, addedCategoriesCollection]);
+          } else {
+            setCollections(collectionsData);
+          }
         } else {
           setError('Invalid data format');
         }
         
-        // Get membership from stored user data (client-side only)
+        // Get membership and user from stored user data (client-side only)
         if (typeof window !== 'undefined') {
           const storedMembership = localStorage.getItem('membership');
           if (storedMembership) {
-            setMembership(JSON.parse(storedMembership));
+            const membershipData = JSON.parse(storedMembership);
+            setMembership(membershipData);
+            if (membershipData.user?.id) {
+              setCurrentUserId(membershipData.user.id);
+            }
           }
         }
       } catch {
@@ -234,6 +256,25 @@ export default function CategoriesPage() {
                 
                 {/* Categories in this collection */}
                 <div className="grid grid-cols-3 md:grid-cols-3   lg:grid-cols-5 gap-4">
+                  {/* Add Category Button - Only show in "Added Categories" collection */}
+                  {collection.name.toLowerCase() === "added categories" && (
+                    <Link
+                      href="/categories/add"
+                      className="relative w-full aspect-[4/5] rounded-3xl border-2 border-dashed border-eastern-blue-400 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 hover:border-eastern-blue-600 bg-white/50 backdrop-blur-sm flex flex-col items-center justify-center group"
+                    >
+                      <div className="flex flex-col items-center justify-center space-y-3">
+                        <div className="w-20 h-20 bg-gradient-to-br from-eastern-blue-400 to-eastern-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                          <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
+                          </svg>
+                        </div>
+                        
+                          <div className="text-sm font-normal text-eastern-blue-600 mt-1">Add Category</div>
+                        </div>
+                      
+                    </Link>
+                  )}
+                  
                   {collection.categories?.map((category) => {
                     const isSelected = selectedCategories.includes(category.id);
                     const isPremium = category.is_premium;
@@ -253,17 +294,28 @@ export default function CategoriesPage() {
                   >
                     {/* Top Section - Cream Background */}
                     <div className="relative h-[80%] bg-gradient-to-br from-amber-50 to-amber-100 p-4">
-                      {/* Info Icon Button */}
+                      {/* Info/Edit/View Icon Button */}
                       <span
                         role="button"
                         tabIndex={0}
                         onClick={e => {
                           e.stopPropagation();
-                          setInfoModal({ open: true, category });
+                          // If user owns this custom category, navigate to edit page
+                          if (category.is_custom && category.created_by_id === currentUserId) {
+                            router.push(`/categories/edit/${category.id}`);
+                          } else {
+                            setInfoModal({ open: true, category });
+                          }
                         }}
                         className="absolute top-2 left-2 bg-slate-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-base font-bold hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400 z-10 cursor-pointer"
                       >
-                        i
+                        {category.is_custom && category.created_by_id === currentUserId ? (
+                          <Pencil className="h-4 w-4" />
+                        ) : category.is_custom ? (
+                          <Eye className="h-4 w-4" />
+                        ) : (
+                          'i'
+                        )}
                       </span>
                       {/* Percentage Badge */}
                       <div className="absolute top-2 right-2 bg-slate-600 text-white text-sm font-bold px-2 py-1  min-w-[40px] text-center z-10">

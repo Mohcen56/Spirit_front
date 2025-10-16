@@ -22,6 +22,12 @@ export interface Category {
   collection_id?: number;
   total_questions?: number;
   user_played_questions?: number; // Number of questions played by the current user
+  is_custom?: boolean; // True if user-created category
+  created_by_id?: number; // User ID who created this category
+  created_by_username?: string; // Username of creator
+  is_approved?: boolean; // True if admin approved
+  privacy?: 'public' | 'private';
+  questions_count?: number; // Number of questions in this category
 }
 
 export interface Collection {
