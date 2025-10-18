@@ -19,6 +19,7 @@ export interface Category {
   is_premium: boolean;
   description?: string;
   image?: string;
+  image_url?: string; // Full URL for display (from backend)
   collection_id?: number;
   total_questions?: number;
   user_played_questions?: number; // Number of questions played by the current user
@@ -28,6 +29,7 @@ export interface Category {
   is_approved?: boolean; // True if admin approved
   privacy?: 'public' | 'private';
   questions_count?: number; // Number of questions in this category
+  is_saved?: boolean; // True if current user has saved this category
 }
 
 export interface Collection {

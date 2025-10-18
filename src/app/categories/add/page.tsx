@@ -5,10 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { gameAPI } from '@/lib/api/index';
 import { Category } from '@/types/game';
-import { ArrowLeft, Eye, Pencil, Crown } from 'lucide-react';
+import { ArrowLeft, Crown } from 'lucide-react';
 import Image from 'next/image';
-import AddCategoryForm from '@/components/added_cat/AddCategoryForm';
-import CategoryQuestionsFormModal from '@/components/added_cat/CategoryQuestionsFormModal';
 
 export default function AddedCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -16,8 +14,6 @@ export default function AddedCategoriesPage() {
   const [error, setError] = useState('');
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [createdCategory, setCreatedCategory] = useState<Category | null>(null);
   const router = useRouter();
 
   // Function to handle image loading errors
@@ -88,57 +84,30 @@ export default function AddedCategoriesPage() {
     }
   };
 
-  const handleAddCategoryClick = () => {
-    setShowAddForm(true);
-  };
-
-  const handleCategoryCreated = (category: Category) => {
-    // Save the created category and show the questions form
-    setCreatedCategory(category);
-  };
-
-  const handleCancelAddForm = () => {
-    setShowAddForm(false);
-    setCreatedCategory(null);
-  };
-
-  const handleQuestionsComplete = async () => {
-    // Reload categories and close forms
-    setShowAddForm(false);
-    setCreatedCategory(null);
+  const handleSaveCategory = async (e: React.MouseEvent, category: Category) => {
+    e.stopPropagation();
     
-    // Refresh the categories list
     try {
-      const categoriesData = await gameAPI.getUserCategories();
-      // Handle paginated response from DRF
-      const allCategories = Array.isArray(categoriesData) 
-        ? categoriesData 
-        : (categoriesData?.results || []);
-      setCategories(allCategories);
+      if (category.is_saved) {
+        // Unsave the category
+        await gameAPI.unsaveCategory(category.id);
+        // Update the local state
+        setCategories(prev => prev.map(cat => 
+          cat.id === category.id ? { ...cat, is_saved: false } : cat
+        ));
+      } else {
+        // Save the category
+        await gameAPI.saveCategory(category.id);
+        // Update the local state
+        setCategories(prev => prev.map(cat => 
+          cat.id === category.id ? { ...cat, is_saved: true } : cat
+        ));
+      }
     } catch (err) {
-      console.error('Error reloading categories:', err);
+      console.error('Error saving/unsaving category:', err);
+      alert('Failed to update category. Please try again.');
     }
   };
-
-  // If showing add form or questions form, render those instead
-  if (showAddForm && !createdCategory) {
-    return (
-      <AddCategoryForm 
-        onSuccess={handleCategoryCreated}
-        onCancel={handleCancelAddForm}
-      />
-    );
-  }
-
-  if (createdCategory) {
-    return (
-      <CategoryQuestionsFormModal
-        category={createdCategory}
-        onComplete={handleQuestionsComplete}
-        onSkip={handleQuestionsComplete}
-      />
-    );
-  }
 
   if (isLoading) {
     return (
@@ -196,8 +165,8 @@ export default function AddedCategoriesPage() {
             {/* Categories Grid */}
             <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {/* Add Category Button */}
-              <button
-                onClick={handleAddCategoryClick}
+              <Link
+                href="/categories/create"
                 className="relative w-full aspect-[4/5] rounded-3xl border-2 border-dashed border-eastern-blue-400 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 hover:border-eastern-blue-600 bg-white/50 backdrop-blur-sm flex flex-col items-center justify-center group"
               >
                 <div className="flex flex-col items-center justify-center space-y-3">
@@ -208,7 +177,7 @@ export default function AddedCategoriesPage() {
                   </div>
                   <div className="text-sm font-normal text-eastern-blue-600 mt-1">Add your own Category</div>
                 </div>
-              </button>
+              </Link>
 
               {/* Existing Categories */}
               {categories.length === 0 ? (
@@ -226,10 +195,10 @@ export default function AddedCategoriesPage() {
                   const isPending = isOwner && !category.is_approved;
 
                   return (
-                    <button
+                    <div
                       key={category.id}
                       onClick={() => handleCategoryClick(category)}
-                      className={`relative w-full aspect-[4/5] rounded-3xl border-primary-300 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 ${
+                      className={`relative w-full aspect-[4/5] rounded-3xl border-primary-300 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 cursor-pointer ${
                         isPending ? 'opacity-75 ring-2 ring-orange-400' : ''
                       }`}
                     >
@@ -256,32 +225,15 @@ export default function AddedCategoriesPage() {
                               <span className="text-eastern-blue-100 text-[10px] leading-tight"> novice</span>
                             </div>
                           </div>
-                          {/* Edit/View Icon */}
-                          <span
-                            role="button"
-                            tabIndex={0}
-                            onClick={e => {
-                              e.stopPropagation();
-                              if (isOwner) {
-                                router.push(`/categories/edit/${category.id}`);
-                              }
-                            }}
-                            className="bg-slate-600 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400 cursor-pointer"
-                          >
-                            {isOwner ? (
-                              <Pencil className="h-3 w-3" />
-                            ) : (
-                              <Eye className="h-3 w-3" />
-                            )}
-                          </span>
+                          
                         </div>
 
                         {/* Category Image with Questions Count Badge */}
                         <div className="h-full w-full justify-center items-center flex ">
                           <div className="relative h-full w-full">
-                            {category.image && !hasImageError(category.id) ? (
+                            {(category.image_url || category.image) && !hasImageError(category.id) ? (
                               <Image
-                                src={category.image}
+                                src={(category.image_url || category.image)!}
                                 alt={category.name}
                                 className="w-full h-full object-cover "
                                 fill
@@ -338,15 +290,15 @@ export default function AddedCategoriesPage() {
 
                           
                           <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // TODO: Implement add to my categories functionality
-                              console.log('Add category to my list:', category.id);
-                            }}
-                            className="flex-1 bg-eastern-blue-500 hover:bg-eastern-blue-400 text-white text-xs font-bold py-1.5 px-3 rounded-full transition-colors flex items-center justify-center space-x-1 rtl:space-x-reverse"
+                            onClick={(e) => handleSaveCategory(e, category)}
+                            className={`flex-1 ${
+                              category.is_saved 
+                                ? 'bg-green-500 hover:bg-green-600' 
+                                : 'bg-eastern-blue-500 hover:bg-eastern-blue-400'
+                            } text-white text-xs font-bold py-1.5 px-3 rounded-full transition-colors flex items-center justify-center space-x-1 rtl:space-x-reverse`}
                           >
-                            <span>+</span>
-                            <span>إضافة الفئة</span>
+                            <span>{category.is_saved ? '✓' : '+'}</span>
+                            <span>{category.is_saved ? 'Saved' : 'add category'}</span>
                           </button>
                         </div>
 
@@ -364,7 +316,7 @@ export default function AddedCategoriesPage() {
                           </div>
                         )}
                       </div>
-                    </button>
+                    </div>
                   );
                 })
               )}

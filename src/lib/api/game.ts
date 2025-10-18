@@ -238,6 +238,65 @@ export const gameAPI = {
     }
   },
 
+  saveCategory: async (categoryId: number) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) throw new Error('Authentication required');
+
+      const response = await api.post(
+        `/api/content/user-categories/${categoryId}/add_to_collection/`,
+        {},
+        {
+          headers: {
+            'Authorization': `Token ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error saving category:', error);
+      throw error;
+    }
+  },
+
+  unsaveCategory: async (categoryId: number) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) throw new Error('Authentication required');
+
+      const response = await api.post(
+        `/api/content/user-categories/${categoryId}/remove_from_collection/`,
+        {},
+        {
+          headers: {
+            'Authorization': `Token ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error unsaving category:', error);
+      throw error;
+    }
+  },
+
+  getMySavedCategories: async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) throw new Error('Authentication required');
+
+      const response = await api.get('/api/content/user-categories/my_saved_categories/', {
+        headers: {
+          'Authorization': `Token ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching saved categories:', error);
+      throw error;
+    }
+  },
+
   addQuestionsToCategory: async (categoryId: number, formData: FormData) => {
     try {
       const token = localStorage.getItem('authToken');
@@ -308,6 +367,126 @@ export const gameAPI = {
       }
 
       return data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Get single user category (for editing)
+  getUserCategory: async (categoryId: number | string) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) throw new Error('Authentication required');
+
+      const response = await api.get(`/api/content/user-categories/${categoryId}/`, {
+        headers: {
+          'Authorization': `Token ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching user category:', error);
+      throw error;
+    }
+  },
+
+  // Update user category (PATCH)
+  updateUserCategory: async (categoryId: number | string, formData: FormData) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) throw new Error('Authentication required');
+
+      const res = await fetch(`${API_BASE_URL}/api/content/user-categories/${categoryId}/`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Token ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        console.error('API error:', data);
+        throw data;
+      }
+
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Delete user category
+  deleteUserCategory: async (categoryId: number | string) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) throw new Error('Authentication required');
+
+      const res = await fetch(`${API_BASE_URL}/api/content/user-categories/${categoryId}/`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Token ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        console.error('API error:', data);
+        throw data;
+      }
+
+      return { success: true };
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Get questions filtered by category ID (reuses existing pattern from selectQuestion)
+  getQuestionsByCategory: async (categoryId: number | string): Promise<Question[]> => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const headers: Record<string, string> = {};
+      
+      if (token) {
+        headers['Authorization'] = `Token ${token}`;
+      }
+
+      const response = await api.get(`/api/content/questions/?category_id=${categoryId}`, { headers });
+      
+      // Handle paginated response or direct array
+      let questionsData = response.data;
+      if (questionsData && typeof questionsData === 'object' && 'results' in questionsData) {
+        questionsData = questionsData.results;
+      }
+      
+      // Ensure we always return an array
+      return Array.isArray(questionsData) ? questionsData : [];
+    } catch (error) {
+      console.error('Error fetching questions by category:', error);
+      return []; // Return empty array on error instead of throwing
+    }
+  },
+
+  // Delete a question
+  deleteQuestion: async (questionId: number) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) throw new Error('Authentication required');
+
+      const res = await fetch(`${API_BASE_URL}/api/content/questions/${questionId}/`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Token ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        console.error('API error:', data);
+        throw data;
+      }
+
+      return { success: true };
     } catch (error) {
       throw error;
     }

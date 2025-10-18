@@ -1,16 +1,19 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, Save, Trash2 } from 'lucide-react';
-import CategoryDetailsForm from '@/components/added_cat/CategoryDetailsForm';
-import CategoryQuestionsForm from '@/components/added_cat/CategoryQuestionsForm';
+import { ArrowLeft } from 'lucide-react';
+import CategoryFormFields from '@/components/added_cat/CategoryFormFields';
+import QuestionsList from '@/components/added_cat/QuestionsList';
+import { gameAPI } from '@/lib/api/game';
 
 interface Question {
-  id?: string;
+  id: number;
   text: string;
   answer: string;
   points: number;
+  image?: string;
+  answer_image?: string;
 }
 
 export default function EditCategoryPage() {
@@ -26,49 +29,44 @@ export default function EditCategoryPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Debug: Track when categoryImage changes
+  useEffect(() => {
+    console.log('🖼️ categoryImage changed:', categoryImage ? `${categoryImage.substring(0, 50)}...` : 'null');
+  }, [categoryImage]);
 
   useEffect(() => {
     const loadCategory = async () => {
       try {
-        // Fetch category details
-        const response = await fetch(`http://localhost:8000/api/content/user-categories/${categoryId}/`, {
-          headers: {
-            'Authorization': `Token ${localStorage.getItem('authToken')}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to load category');
-        }
-
-        const data = await response.json();
+        console.log('🔍 Loading category:', categoryId);
+        
+        // Fetch category details using gameAPI
+        const data = await gameAPI.getUserCategory(categoryId);
+        console.log('✅ Category loaded:', data);
         
         setCategoryName(data.name);
         setCategoryDescription(data.description || '');
-        setCategoryImage(data.image || null);
+        // Use image_url for display (backend sends full URL)
+        setCategoryImage(data.image_url || null);
         setPrivacy(data.privacy || 'public');
         
-        // Fetch questions for this category
-        const questionsResponse = await fetch(`http://localhost:8000/api/questions/?category_id=${categoryId}`, {
-          headers: {
-            'Authorization': `Token ${localStorage.getItem('authToken')}`,
-          },
-        });
-
-        if (questionsResponse.ok) {
-          const questionsData = await questionsResponse.json();
-          setQuestions(questionsData.map((q: any) => ({
-            id: q.id,
-            text: q.text,
-            answer: q.answer,
-            points: q.points,
-          })));
+        // Fetch questions for this category using gameAPI
+        try {
+          console.log('🔍 Loading questions for category:', categoryId);
+          const questionsData = await gameAPI.getQuestionsByCategory(categoryId);
+          console.log('✅ Questions loaded:', questionsData);
+          console.log('📊 Questions count:', questionsData.length);
+          console.log('📋 Questions array check:', Array.isArray(questionsData));
+          setQuestions(questionsData);
+        } catch (err) {
+          console.error('❌ Error loading questions:', err);
+          // Non-critical error, continue loading the page
+          setQuestions([]);
         }
         
         setIsLoading(false);
       } catch (err) {
-        console.error('Error loading category:', err);
+        console.error('❌ Error loading category:', err);
         setError('Failed to load category');
         setIsLoading(false);
       }
@@ -79,30 +77,20 @@ export default function EditCategoryPage() {
     }
   }, [categoryId]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setCategoryImageFile(file);
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        setCategoryImage(ev.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleAddQuestion = () => {
-    setQuestions([...questions, { text: '', answer: '', points: 200 }]);
-  };
-
-  const handleRemoveQuestion = (index: number) => {
-    setQuestions(questions.filter((_, i) => i !== index));
-  };
-
-  const handleUpdateQuestion = (index: number, field: keyof Question, value: string | number) => {
-    const updated = [...questions];
-    updated[index] = { ...updated[index], [field]: value };
-    setQuestions(updated);
+  const handleImageChange = (file: File) => {
+    console.log('📸 Edit page received file:', file.name, file.size, 'bytes');
+    setCategoryImageFile(file);
+    // Create a new preview from the cropped file
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const result = ev.target?.result as string;
+      console.log('📸 Setting preview, length:', result.length);
+      setCategoryImage(result);
+    };
+    reader.onerror = (err) => {
+      console.error('❌ FileReader error:', err);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSave = async () => {
@@ -115,58 +103,26 @@ export default function EditCategoryPage() {
         return;
       }
 
-      if (questions.length < 5) {
-        setError('Please add at least 5 questions');
-        return;
-      }
-
-      if (questions.some(q => !q.text || !q.answer)) {
-        setError('All questions must have both text and answer');
-        return;
-      }
-
-      // Update category details
+      console.log('💾 Saving category...');
+      console.log('💾 categoryImageFile:', categoryImageFile);
+     
+      // Update category details using gameAPI
       const formData = new FormData();
       formData.append('name', categoryName);
       formData.append('description', categoryDescription);
       formData.append('privacy', privacy);
       
       if (categoryImageFile) {
+        console.log('💾 Appending image to FormData:', categoryImageFile.name, categoryImageFile.size);
         formData.append('image', categoryImageFile);
+      } else {
+        console.log('⚠️ No categoryImageFile to upload');
       }
 
-      const updateResponse = await fetch(`http://localhost:8000/api/content/user-categories/${categoryId}/`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Token ${localStorage.getItem('authToken')}`,
-        },
-        body: formData,
-      });
-
-      if (!updateResponse.ok) {
-        throw new Error('Failed to update category');
-      }
-
-      // Update questions
-      const questionsFormData = new FormData();
-      questions.forEach((q, i) => {
-        questionsFormData.append(`questions[${i}][text]`, q.text);
-        questionsFormData.append(`questions[${i}][answer]`, q.answer);
-        questionsFormData.append(`questions[${i}][points]`, q.points.toString());
-      });
-
-      const questionsResponse = await fetch(`http://localhost:8000/api/content/user-categories/${categoryId}/add_questions/`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Token ${localStorage.getItem('authToken')}`,
-        },
-        body: questionsFormData,
-      });
-
-      if (!questionsResponse.ok) {
-        throw new Error('Failed to update questions');
-      }
-
+      console.log('💾 Sending update request...');
+      const responseData = await gameAPI.updateUserCategory(categoryId, formData);
+      console.log('✅ Update successful:', responseData);
+     
       alert('Category updated successfully! ✅');
       router.push('/categories');
       
@@ -182,23 +138,35 @@ export default function EditCategoryPage() {
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/api/content/user-categories/${categoryId}/`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Token ${localStorage.getItem('authToken')}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete category');
-      }
-
+      await gameAPI.deleteUserCategory(categoryId);
       alert('Category deleted successfully');
       router.push('/categories');
     } catch (err) {
       console.error('Error deleting category:', err);
       setError('Failed to delete category');
     }
+  };
+
+  const handleDeleteQuestion = async (questionId: number) => {
+    if (!confirm('Are you sure you want to delete this question?')) {
+      return;
+    }
+
+    try {
+      await gameAPI.deleteQuestion(questionId);
+      setQuestions(prev => prev.filter(q => q.id !== questionId));
+      alert('Question deleted successfully');
+    } catch (err) {
+      console.error('Error deleting question:', err);
+      alert('Failed to delete question');
+    }
+  };
+
+  
+
+  const handleEditQuestion = (questionId: number) => {
+    // Navigate to edit question page (to be created later)
+    router.push(`/categories/edit/${categoryId}/question/${questionId}/edit`);
   };
 
   if (isLoading) {
@@ -220,7 +188,7 @@ export default function EditCategoryPage() {
               className="flex items-center space-x-2 text-white hover:text-gray-200 transition-colors"
             >
               <ArrowLeft className="h-6 w-6" />
-              <span className="font-semibold">مصنع الفئات</span>
+              
             </button>
             <h1 className="text-2xl md:text-3xl font-bold text-white">Edit Category</h1>
             <div className="w-32"></div>
@@ -235,158 +203,32 @@ export default function EditCategoryPage() {
               <p className="text-red-800 text-center">{error}</p>
             </div>
           )}
-
-          {/* Category Details Card */}
-          <div className="rounded-2xl shadow-xl p-10 w-full bg-white mb-6">
-            <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Category Details</h2>
-            
-            {/* Image upload */}
-            <div className="flex justify-center mb-8">
-              <div
-                className="w-40 h-40 rounded-xl bg-gray-100 flex items-center justify-center cursor-pointer border-2 border-gray-300 overflow-hidden"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                {categoryImage ? (
-                  <img src={categoryImage} alt="Category" className="w-full h-full object-cover" />
-                ) : (
-                  <ImagePlus className="h-12 w-12 text-gray-400" />
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  ref={fileInputRef}
-                  className="hidden"
-                  onChange={handleImageChange}
-                />
-              </div>
-            </div>
-
-            {/* Category name */}
-            <input
-              type="text"
-              value={categoryName}
-              onChange={e => setCategoryName(e.target.value)}
-              placeholder="Category name"
-              className="w-full px-6 py-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all mb-6 text-left text-lg"
-              maxLength={50}
-            />
-
-            {/* Category description */}
-            <textarea
-              value={categoryDescription}
-              onChange={e => setCategoryDescription(e.target.value)}
-              placeholder="Category description (optional)"
-              className="w-full px-6 py-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all mb-6 text-left text-lg resize-none"
-              rows={3}
-              maxLength={200}
-            />
-
-            {/* Privacy toggle */}
-            <div className="flex w-full mb-6 gap-2">
-              <button
-                type="button"
-                className={`flex-1 py-3 rounded-l-lg font-bold text-lg ${privacy === 'private' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-900'} transition-all`}
-                onClick={() => setPrivacy('private')}
-              >
-                🔒 Private
-              </button>
-              <button
-                type="button"
-                className={`flex-1 py-3 rounded-r-lg font-bold text-lg ${privacy === 'public' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-900'} transition-all`}
-                onClick={() => setPrivacy('public')}
-              >
-                🌍 Public
-              </button>
-            </div>
-          </div>
-
-          {/* Questions Card */}
-          <div className="rounded-2xl shadow-xl p-10 w-full bg-white mb-6">
-            <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Questions</h2>
-            
-            <button
-              type="button"
-              onClick={handleAddQuestion}
-              className="w-full py-4 rounded-xl bg-blue-600 text-white font-bold text-xl shadow-lg hover:bg-blue-700 transition-all mb-6"
-            >
-              اضافة سؤال
-            </button>
-
-            <div className="space-y-6">
-              {questions.map((question, index) => (
-                <div
-                  key={index}
-                  className="border border-gray-200 rounded-xl p-6 bg-gray-50"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-gray-800 text-lg">Question {index + 1}</h3>
-                    {questions.length > 1 && (
-                      <button
-                        onClick={() => handleRemoveQuestion(index)}
-                        className="text-red-500 hover:text-red-700 transition-colors p-2"
-                        title="Remove question"
-                      >
-                        <Trash2 className="h-5 w-5" />
-                      </button>
-                    )}
-                  </div>
-                  <div className="space-y-4">
-                    <input
-                      type="text"
-                      value={question.text}
-                      onChange={e => handleUpdateQuestion(index, 'text', e.target.value)}
-                      placeholder="Question text"
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-base"
-                    />
-                    <input
-                      type="text"
-                      value={question.answer}
-                      onChange={e => handleUpdateQuestion(index, 'answer', e.target.value)}
-                      placeholder="Answer"
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-base"
-                    />
-                    <select
-                      value={question.points}
-                      onChange={e => handleUpdateQuestion(index, 'points', parseInt(e.target.value))}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-base"
-                    >
-                      <option value={200}>200 points</option>
-                      <option value={400}>400 points</option>
-                      <option value={600}>600 points</option>
-                    </select>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {questions.length < 5 && (
-              <p className="text-red-600 text-center mt-4">
-                لعبوها {questions.length} / ضافوها 5 (You need at least 5 questions)
-              </p>
-            )}
-          </div>
+          <div className="rounded-xl   shadow-xl p-10 w-full bg-white mb-6">
+            <CategoryFormFields
+            categoryName={categoryName}
+            setCategoryName={setCategoryName}
+            categoryDescription={categoryDescription}
+            setCategoryDescription={setCategoryDescription}
+            categoryImage={categoryImage}
+            onImageChange={handleImageChange}
+            privacy={privacy}
+            setPrivacy={setPrivacy}
+            onSave={handleSave}
+            onDelete={handleDelete}
+          />
 
           {/* Action Buttons */}
-          <div className="flex gap-4 justify-center">
-            <button
-              type="button"
-              onClick={handleSave}
-              className="flex items-center space-x-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-10 py-5 rounded-xl shadow-lg transition-all transform hover:scale-105 text-xl font-bold"
-              disabled={questions.length < 5 || questions.some(q => !q.text || !q.answer)}
-            >
-              <Save className="h-6 w-6" />
-              <span>Save Changes</span>
-            </button>
+          
+        </div>
 
-            <button
-              type="button"
-              onClick={handleDelete}
-              className="flex items-center space-x-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-10 py-5 rounded-xl shadow-lg transition-all transform hover:scale-105 text-xl font-bold"
-            >
-              <Trash2 className="h-6 w-6" />
-              <span>Delete</span>
-            </button>
-          </div>
+       
+         {/* Questions Section */}
+        <QuestionsList
+          questions={questions}
+          onAddQuestion={() => router.push(`/categories/edit/${categoryId}/addQ`)}
+          onDeleteQuestion={handleDeleteQuestion}
+          onEditQuestion={handleEditQuestion}
+        />
         </div>
       </main>
     </div>

@@ -71,26 +71,31 @@ export default function CategoriesPage() {
         // Get collections with categories from backend
         const collectionsData = await gameAPI.getCollectionsWithCategories();
         
+        // Get user's saved categories
+        let savedCategories: Category[] = [];
+        try {
+          const savedData = await gameAPI.getMySavedCategories();
+          // Handle paginated response
+          savedCategories = Array.isArray(savedData) 
+            ? savedData 
+            : (savedData?.results || []);
+        } catch {
+          console.log('No saved categories or user not authenticated');
+        }
+        
         // Ensure we have an array
         if (Array.isArray(collectionsData)) {
-          // Check if "Added Categories" collection exists
-          const hasAddedCategories = collectionsData.some(
-            collection => collection.name.toLowerCase() === 'added categories'
-          );
+          // Create "Added Categories" collection with user's saved categories
+          const addedCategoriesCollection: Collection = {
+            id: 999, // Use a high ID to avoid conflicts
+            name: 'Added Categories',
+            order: -1, // Put it at the top
+            categories: savedCategories,
+            categories_count: savedCategories.length
+          };
           
-          // If "Added Categories" doesn't exist, create it
-          if (!hasAddedCategories) {
-            const addedCategoriesCollection = {
-              id: 999, // Use a high ID to avoid conflicts
-              name: 'Added Categories',
-              order: 999,
-              categories: [],
-              categories_count: 0
-            };
-            setCollections([...collectionsData, addedCategoriesCollection]);
-          } else {
-            setCollections(collectionsData);
-          }
+          // Add "Added Categories" collection at the beginning
+          setCollections([addedCategoriesCollection, ...collectionsData]);
         } else {
           setError('Invalid data format');
         }
@@ -323,9 +328,9 @@ export default function CategoriesPage() {
                       </div>
                       {/* Category Illustration */}
                       <div className="h-full w-full">
-                        {(category.image || getLocalIllustration(category.name)) && !hasImageError(category.name) ? (
+                        {((category.image_url || category.image || getLocalIllustration(category.name))) && !hasImageError(category.name) ? (
                           <Image
-                            src={category.image || getLocalIllustration(category.name)}
+                            src={(category.image_url || category.image || getLocalIllustration(category.name))!}
                             alt={category.name}
                             className="w-full h-full object-cover  "
                             fill
