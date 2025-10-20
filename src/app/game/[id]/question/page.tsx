@@ -305,7 +305,7 @@ return (
           <div key={category.id} className="h-full flex flex-col">
             
             {/* Category image + name - Fixed height */}
-            <div className="relative h-24 md:h-48 w-full rounded-xl overflow-hidden border-4 border-white shadow mb-3 flex-shrink-0">
+            <div className="relative h-24 md:h-40 w-full rounded-xl overflow-hidden border-4 border-white shadow mb-3 flex-shrink-0">
               {category.image && !hasImageError(category.name) ? (
                 <Image
                   src={category.image}

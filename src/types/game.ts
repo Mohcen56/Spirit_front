@@ -46,6 +46,9 @@ export interface Question {
   text: string;
   text_ar?: string;
   answer: string;
+  choice_2?: string;
+  choice_3?: string;
+  choice_4?: string;
   answer_ar?: string;
   image?: string;
   answer_image?: string;

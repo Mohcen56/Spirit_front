@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { authAPI } from '@/lib/api/index';
 import { User } from '@/types/game';
-import { Play, Trophy, History, LogOut } from 'lucide-react';
+import { Play, History, LogOut } from 'lucide-react';
 import UserProfile from '@/components/UserProfile';
 
 export default function HomePage() {

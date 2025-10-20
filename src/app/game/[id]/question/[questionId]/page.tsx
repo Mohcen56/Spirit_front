@@ -9,9 +9,11 @@ import AnswerDisplay from '@/components/AnswerDisplay';
 import TeamSelector from '@/components/TeamSelector';
 import GameCard from '@/components/GameCard';
 import GameHeader from '@/components/GameHeader';
+import ChoicesDialog from '@/components/ChoicesDialog';
 import { getFullImageUrl } from '@/lib/imageUtils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { switchToNextTeam, endGame, awardPoints, activateDoublePerk, clearActivePerk, activateRerollPerk } from '@/store/gameSlice';
+import { Loader } from 'lucide-react';
 
 export default function QuestionPage() {
   const params = useParams();
@@ -33,6 +35,10 @@ export default function QuestionPage() {
   const [error, setError] = useState('');
   const [currentView, setCurrentView] = useState<'question' | 'answer' | 'teamSelector'>('question');
   const [isChronoRunning, setIsChronoRunning] = useState(false);
+  
+  // Choices dialog state
+  const [isChoicesDialogOpen, setIsChoicesDialogOpen] = useState(false);
+  const [selectedQuestionForChoices, setSelectedQuestionForChoices] = useState<QuestionType | null>(null);
   
   // Enhanced turn tracking - save turn history and team turn data during game
   const [turnHistory, setTurnHistory] = useState<Array<{
@@ -299,11 +305,22 @@ export default function QuestionPage() {
     router.push(`/game/${gameId}/results`);
   };
 
+  const handleShowChoices = () => {
+    // Show choices for the current question
+    if (question) {
+      setSelectedQuestionForChoices(question);
+      setIsChoicesDialogOpen(true);
+    }
+  };
+
+  const handleCloseChoicesDialog = () => {
+    setIsChoicesDialogOpen(false);
+    setSelectedQuestionForChoices(null);
+  };
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading question...</div>
-      </div>
+      <Loader />
     );
   }
 
@@ -495,8 +512,19 @@ export default function QuestionPage() {
                       >
                         <span>📞</span>
                       </button>
-                      <button className="bg-white/20 hover:bg-white/30 p-1 sm:p-2 rounded transition-colors text-xs sm:text-base">
-                        <span>📋</span>
+                      <button
+                        onClick={handleShowChoices}
+                        disabled={!!rerollPerkUsed[team.id] || (teams.findIndex(t => t.id === team.id) !== (currentTeam - 1))}
+                        title={
+                          rerollPerkUsed[team.id]
+                            ? 'Reroll already used'
+                            : (teams.findIndex(t => t.id === team.id) !== (currentTeam - 1))
+                              ? "You can only reroll on your team's turn"
+                              : 'Change to a random new question'
+                        }
+                        className={`p-1 sm:p-2 rounded transition-colors border text-xs sm:text-base ${rerollPerkUsed[team.id] ? 'bg-gray-400 text-white border-gray-500' : 'bg-white/20 hover:bg-white/30 text-white border-white/30'} disabled:opacity-50`}
+                      >
+                        <span>📞</span>
                       </button>
                       </div>
                     </div>
@@ -507,6 +535,21 @@ export default function QuestionPage() {
           </div>
         </div>
       </main>
+
+      {/* Choices Dialog */}
+      {selectedQuestionForChoices && (
+        <ChoicesDialog
+          open={isChoicesDialogOpen}
+          onClose={handleCloseChoicesDialog}
+         
+          choices={[
+            selectedQuestionForChoices.answer,
+            selectedQuestionForChoices.choice_2 || '',
+            selectedQuestionForChoices.choice_3 || '',
+            selectedQuestionForChoices.choice_4 || ''
+          ]}
+        />
+      )}
     </div>
   );
 }

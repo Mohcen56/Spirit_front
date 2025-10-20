@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { gameAPI } from '@/lib/api/index';
 import { Category, Membership, Collection } from '@/types/game';
-import { ArrowLeft, Users, Crown, Lock, Eye, Pencil } from 'lucide-react';
+import { ArrowLeft, Users, Crown, Lock, Eye, Pencil, Info } from 'lucide-react';
 import Image from 'next/image';
 
 export default function CategoriesPage() {
@@ -291,18 +291,18 @@ export default function CategoriesPage() {
                     key={category.id}
                     onClick={() => handleCategoryToggle(category.id, isPremium)}
                     disabled={!canSelect || isLocked}
-                    className={`relative w-full aspect-[4/5] rounded-3xl border-primary-300  overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 ${
+                    className={`relative w-full aspect-[4/5]   overflow-hidden border-5  rounded-4xl transition-all duration-200 transform hover:scale-105 ${
                       isSelected
-                        ? 'ring-2 ring-green-400'
-                        : ''
+                              ? 'border-amber-600' // Selected border color
+                              : 'border-eastern-blue-500' // Default border color
                     } ${(!canSelect || isLocked) ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {/* Top Section - Cream Background */}
-                    <div className="relative h-[80%] bg-gradient-to-br from-amber-50 to-amber-100 p-4">
+                    <div className="relative h-[80%]  ">
                       {/* Info/Edit/View Icon Button */}
                       <span
                         role="button"
-                        tabIndex={0}
+                        tabIndex={3}
                         onClick={e => {
                           e.stopPropagation();
                           // If user owns this custom category, navigate to edit page
@@ -312,18 +312,18 @@ export default function CategoriesPage() {
                             setInfoModal({ open: true, category });
                           }
                         }}
-                        className="absolute top-2 left-2 bg-slate-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-base font-bold hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400 z-10 cursor-pointer"
+                        className="absolute top-2 right-2 bg-eastern-blue-500 text-white w-7 h-7 rounded-full flex items-center justify-center text-base font-bold hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400 z-10 cursor-pointer"
                       >
                         {category.is_custom && category.created_by_id === currentUserId ? (
                           <Pencil className="h-4 w-4" />
                         ) : category.is_custom ? (
                           <Eye className="h-4 w-4" />
                         ) : (
-                          'i'
+                          <Info className="h-9 w-9" />
                         )}
                       </span>
                       {/* Percentage Badge */}
-                      <div className="absolute top-2 right-2 bg-slate-600 text-white text-sm font-bold px-2 py-1  min-w-[40px] text-center z-10">
+                      <div className="absolute top-2   bg-eastern-blue-500 text-white text-sm font-bold px-3 py-1  min-w-[45px] text-center z-20">
                         {playedPercent}%
                       </div>
                       {/* Category Illustration */}
@@ -335,12 +335,12 @@ export default function CategoriesPage() {
                             className="w-full h-full object-cover  "
                             fill
                             sizes="(max-width: 768px) 100vw, 33vw"
-                            style={{ objectFit: 'cover', borderRadius: '0.1rem' }}
+                            style={{ objectFit: 'cover', borderRadius: '0 rem' }}
                             onError={() => handleImageError(category.name)}
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <div className="w-20 h-20 bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
+                            <div className="w-20 h-20 bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
                               {category.name.charAt(0)}
                             </div>
                           </div>
@@ -348,7 +348,7 @@ export default function CategoriesPage() {
                       </div>
                     </div>
                     {/* Bottom Section - Dark Background */}
-                    <div className="relative h-[20%] bg-gradient-to-br from-eastern-blue-500 to-eastern-blue-700 flex items-center justify-center p-4">
+                    <div className="relative h-[21%] bg-gradient-to-br from-eastern-blue-500 to-eastern-blue-700 flex items-center justify-center p-4">
                       <h3 className="text-white font-bold text-lg text-center leading-tight">
                         {category.name}
                       </h3>
@@ -373,10 +373,7 @@ export default function CategoriesPage() {
                     {isPremium && canSelect && (
                       <div className="absolute inset-0 rounded-3xl border-4 border-yellow-400 pointer-events-none"></div>
                     )}
-                    {/* Selection Border */}
-                    {isSelected && (
-                      <div className="absolute inset-0 rounded-3xl border-4 border-green-400 pointer-events-none"></div>
-                    )}
+                    
                   </button>
                 );
               })}

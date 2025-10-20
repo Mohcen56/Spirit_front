@@ -150,12 +150,10 @@ export default function CreateCategoryPage() {
           )}
 
           {/* Category Details Section */}
-          <div className="bg-eastern-blue-100 backdrop-blur-md rounded-2xl p-6 mb-8 border border-primary-200 shadow-lg">
+          <div className="bg-eastern-blue-50 backdrop-blur-md rounded-2xl p-6 mb-8 border border-primary-200 shadow-lg">
             {/* Section Header */}
             <div className="relative flex justify-center -mt-11 mb-8">
-              <div className="bg-eastern-blue-700 text-white px-6 py-2 rounded-full shadow-md">
-                <h3 className="text-xl font-bold text-center">مصنع الفئات</h3>
-              </div>
+              
             </div>
 
             {/* Category Details Form */}

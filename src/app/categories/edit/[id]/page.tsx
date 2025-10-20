@@ -183,6 +183,7 @@ export default function EditCategoryPage() {
       <header className="bg-gradient-to-r from-blue-600 to-indigo-700 shadow-lg">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
+            
             <button
               onClick={() => router.push('/categories')}
               className="flex items-center space-x-2 text-white hover:text-gray-200 transition-colors"

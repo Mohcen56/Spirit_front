@@ -4,9 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { gameAPI } from '@/lib/api/index';
-import { Category } from '@/types/game';
+import { Category, User } from '@/types/game';
 import { ArrowLeft, Crown } from 'lucide-react';
 import Image from 'next/image';
+import Usersprofiles from '@/components/Usersprofiles';
 
 export default function AddedCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -14,6 +15,8 @@ export default function AddedCategoriesPage() {
   const [error, setError] = useState('');
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
+  const [showProfile, setShowProfile] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const router = useRouter();
 
   // Function to handle image loading errors
@@ -118,7 +121,14 @@ export default function AddedCategoriesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-eastern-blue-50">
+    <>
+      {showProfile && selectedUser ? (
+        <Usersprofiles
+          user={selectedUser}
+          onBack={() => setShowProfile(false)}
+        />
+      ) : (
+        <div className="min-h-screen bg-eastern-blue-50">
       {/* Header */}
       <header className="bg-gradient-to-r from-primary-600 to-primary-700 shadow-lg">
         <div className="container mx-auto px-6 py-4">
@@ -183,10 +193,10 @@ export default function AddedCategoriesPage() {
               {categories.length === 0 ? (
                 <div className="col-span-full text-center py-12">
                   <div className="text-primary-600 text-xl mb-4">
-                    لا توجد فئات بعد
+                  there is no categories here yet   
                   </div>
                   <p className="text-primary-400">
-                    كن أول من يضيف فئة!
+                    Be the first to add a category!
                   </p>
                 </div>
               ) : (
@@ -198,7 +208,7 @@ export default function AddedCategoriesPage() {
                     <div
                       key={category.id}
                       onClick={() => handleCategoryClick(category)}
-                      className={`relative w-full aspect-[4/5] rounded-3xl border-primary-300 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 cursor-pointer ${
+                      className={`relative w-full h-full aspect-[4/5] rounded-xl border-primary-300 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 cursor-pointer ${
                         isPending ? 'opacity-75 ring-2 ring-orange-400' : ''
                       }`}
                     >
@@ -210,40 +220,60 @@ export default function AddedCategoriesPage() {
                       )}
 
                       {/* Top Section - Cream Background with User Profile Header */}
-                      <div className="relative h-[80%]">
+                      <div className=" flex flex-col relative h-[80%]  ">
                         {/* User Profile Header */}
-                        <div className="absolute top-0 left-0 right-0 bg-eastern-blue-500 rounded-t-3xl px-3 py-1 flex items-center justify-between z-20">
+                        <div className="absolute top-0 left-0 right-0 bg-gradient-to-br from-eastern-blue-600 to-eastern-blue-800 rounded-t-xl px-3 py-1 flex items-center justify-between z-20">
                           <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                              
-                              
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-white text-xs font-semibold leading-tight">
-                                {category.created_by_username || 'User'}
+                            {/* LEFT: Avatar + Username */}
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // Create a User object from category data
+                                  if (category.created_by_id) {
+                                    setSelectedUser({
+                                      id: category.created_by_id,
+                                      username: category.created_by_username || 'Unknown',
+                                      email: '', // We don't have email from category
+                                      avatar: '/avatars/tanjiro.jpeg' // Default avatar for now
+                                    });
+                                    setShowProfile(true);
+                                  }
+                                }}
+                                className="w-8 h-8 rounded-full flex items-center justify-center hover:scale-105 transition-transform cursor-pointer overflow-hidden shadow-lg bg-white/20"
+                                aria-label="View creator profile"
+                              >
+                                <Image
+                                  src="/avatars/tanjiro.jpeg"
+                                  alt="Creator Profile"
+                                  width={32}
+                                  height={32}
+                                  className="w-full h-full object-cover rounded-full"
+                                />
+                              </button>
+                              <span className="text-eastern-blue-100 text-[10px] leading-tight">
+                                {category.created_by_username || 'Unknown'}
                               </span>
-                              <span className="text-eastern-blue-100 text-[10px] leading-tight"> novice</span>
                             </div>
                           </div>
-                          
                         </div>
 
                         {/* Category Image with Questions Count Badge */}
-                        <div className="h-full w-full justify-center items-center flex ">
+                        <div className= "relative flex-1 flex justify-center items-center overflow-hidden ">
                           <div className="relative h-full w-full">
                             {(category.image_url || category.image) && !hasImageError(category.id) ? (
                               <Image
                                 src={(category.image_url || category.image)!}
                                 alt={category.name}
-                                className="w-full h-full object-cover "
+                                className="w-full h-full object-contain "
                                 fill
-                                sizes="(max-width: 768px) 100vw, 33vw"
-                                style={{ objectFit: 'cover' }}
+                                sizes="(max-width: 768px) 80vw, 33vw"
+                                style={{ objectFit: 'contain' }}
                                 onError={() => handleImageError(category.id)}
                               />
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center rounded-xl">
-                                <div className="w-20 h-20 bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
+                              <div className="w-full h-full flex items-center justify-center rounded-4xl">
+                                <div className="w-18 h-18 bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 rounded-4xl flex items-center justify-center text-white text-2xl font-bold shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
                                   {category.name.charAt(0).toUpperCase()}
                                 </div>
                               </div>
@@ -260,7 +290,7 @@ export default function AddedCategoriesPage() {
                       {/* Bottom Section - Dark Background with Actions */}
                       <div className="relative h-[20%] bg-gradient-to-br from-eastern-blue-600 to-eastern-blue-800 flex flex-col items-center justify-center p-2">
                         {/* Category Name */}
-                           <div className="flex items-center justify-center space-x-3 rtl:space-x-reverse w-full px-2">
+                           <div className="flex items-center justify-between space-x-3 rtl:space-x-reverse w-full px-2 mb-1 mt-2">
                         <h3 className="text-white font-bold text-base text-center leading-tight  ">
                           {category.name}
                         </h3>
@@ -270,7 +300,7 @@ export default function AddedCategoriesPage() {
                               // TODO: Implement like functionality
                               console.log('Like category:', category.id);
                             }}
-                            className="flex flex-col  "
+                            className="flex flex-col  absolute right-0.5 top-0.5 "
                           >
                             <svg 
                               className="w-6 h-6 text-white group-hover:text-red-400 transition-colors" 
@@ -284,18 +314,15 @@ export default function AddedCategoriesPage() {
                           </button>
                           </div>
                         {/* Action Buttons Row */}
-                        <div className="flex items-center justify-center space-x-3 rtl:space-x-reverse w-full px-2">
-                          {/* Like Button */}
-                       
-
-                          
+                        <div className="flex items-center justify-end space-x-3 rtl:space-x-reverse w-full mb-3  mt-1 px-2.5">
+                          {/* Save/Unsave Button */}
                           <button
                             onClick={(e) => handleSaveCategory(e, category)}
                             className={`flex-1 ${
                               category.is_saved 
                                 ? 'bg-green-500 hover:bg-green-600' 
                                 : 'bg-eastern-blue-500 hover:bg-eastern-blue-400'
-                            } text-white text-xs font-bold py-1.5 px-3 rounded-full transition-colors flex items-center justify-center space-x-1 rtl:space-x-reverse`}
+                            } text-white text-xs font-bold py-1 px-2 rounded-full transition-colors flex items-center justify-center space-x-1 rtl:space-x-reverse`}
                           >
                             <span>{category.is_saved ? '✓' : '+'}</span>
                             <span>{category.is_saved ? 'Saved' : 'add category'}</span>
@@ -325,5 +352,7 @@ export default function AddedCategoriesPage() {
         </div>
       </main>
     </div>
+      )}
+    </>
   );
 }
