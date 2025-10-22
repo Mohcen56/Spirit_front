@@ -175,97 +175,59 @@ export default function GameResultsPage() {
         </div>
 
         {/* Results Grid */}
-        <div className="max-w-4xl mx-auto">
-          {/* Winner Spotlight - First Place */}
-          {teams.length > 0 && (
-            <div className="mb-8">
-              <div className={`${getTeamCardColor(1)} rounded-2xl p-8 shadow-2xl transform hover:scale-105 transition-all duration-300 border-4 border-white`}>
-                <div className="flex flex-col items-center text-center">
-                  <div className="mb-4">
-                    <Trophy className="h-16 w-16 text-yellow-600" />
-                  </div>
-                  
-                  <div className="relative mb-4">
-                    <div className="w-24 h-24 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
-                      {teams[0].avatar ? (
-                        <Image
-                          src={`/avatars/${teams[0].avatar}.jpeg`}
-                          alt={`${teams[0].name} avatar`}
-                          width={96}
-                          height={96}
-                          className="w-full h-full object-cover"
-                          unoptimized
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                          <span className="text-2xl text-gray-600">👥</span>
-                        </div>
-                      )}
-                    </div>
-                    {/* Winner ribbon */}
-                    <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                      🏆
-                    </div>
-                  </div>
-                  
-                  <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
-                    {teams[0].name}
-                  </h2>
-                  <p className="text-white text-lg mb-2">{getRankText(1)}</p>
-                  <p className="text-3xl md:text-4xl font-bold text-white">
-                    {teams[0].score || 0} points
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
+        <div className="max-w-4xl  mx-auto">
+          
+
 
           {/* Other Teams */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {teams.slice(1).map((team, index) => {
-              const position = index + 2; // +2 because we start from 2nd place
-              return (
-                <div
-                  key={team.id}
-                  className={`${getTeamCardColor(position)} rounded-xl p-6 shadow-lg transform hover:scale-105 transition-all duration-300 border-4 border-white`}
-                >
-                  <div className="flex flex-col items-center text-center">
-                    <div className="mb-3">
-                      {getRankIcon(position)}
-                    </div>
-                    
-                    <div className="relative mb-4">
-                      <div className="w-16 h-16 rounded-full border-4 border-white shadow-md overflow-hidden bg-white">
-                        {team.avatar ? (
-                          <Image
-                            src={`/avatars/${team.avatar}.jpeg`}
-                            alt={`${team.name} avatar`}
-                            width={64}
-                            height={64}
-                            className="w-full h-full object-cover"
-                            unoptimized
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                            <span className="text-lg text-gray-600">👥</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <h3 className="text-xl font-bold text-white mb-1">
-                      {team.name}
-                    </h3>
-                    <p className="text-white text-sm mb-2">{getRankText(position)}</p>
-                    <p className="text-2xl font-bold text-white">
-                      {team.score || 0}
-                    </p>
-                  </div>
+  {teams.map((team, index) => {
+    const position = index + 1; // now includes first place too
+    return (
+      <div
+        key={team.id}
+        className={`${getTeamCardColor(position)} rounded-xl p-6 shadow-lg transform hover:scale-105 transition-all duration-300 border-4 border-white ${
+          position === 1 ? 'ring-4 ring-yellow-400 scale-105' : ''
+        }`}
+      >
+        <div className="flex flex-col items-center text-center">
+          <div className="mb-3">{getRankIcon(position)}</div>
+
+          <div className="relative mb-4">
+            <div className="w-16 h-16 rounded-full border-4 border-white shadow-md overflow-hidden bg-white">
+              {team.avatar ? (
+                <Image
+                  src={`/avatars/${team.avatar}.jpeg`}
+                  alt={`${team.name} avatar`}
+                  width={64}
+                  height={64}
+                  className="w-full h-full object-cover"
+                  unoptimized
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                  <span className="text-lg text-gray-600">👥</span>
                 </div>
-              );
-            })}
+              )}
+            </div>
+
+            {/* 🏆 Winner ribbon */}
+            {position === 1 && (
+              <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                🏆
+              </div>
+            )}
           </div>
+
+          <h3 className="text-xl font-bold text-white mb-1">{team.name}</h3>
+          <p className="text-white text-sm mb-2">{getRankText(position)}</p>
+          <p className="text-2xl font-bold text-white">{team.score || 0}</p>
         </div>
+      </div>
+    );
+  })}
+</div>
+
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12">
@@ -294,6 +256,7 @@ export default function GameResultsPage() {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 }

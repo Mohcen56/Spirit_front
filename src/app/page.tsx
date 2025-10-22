@@ -160,7 +160,7 @@ export default function HomePage() {
 
     {/* CENTER: Logo/Title */}
     <h1 className="text-xl font-bold text-gray-800 absolute left-1/2 transform -translate-x-1/2">
-      Brainigo
+      trivia spirit
     </h1>
 
     {/* RIGHT: Logout */}
@@ -181,7 +181,7 @@ export default function HomePage() {
           {/* Welcome Section */}
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-800 mb-4">
-              Welcome to Brainigo
+              Welcome to trivia spirit
             </h2>
             <p className="text-xl text-gray-600">
               Test your knowledge and have fun with your friends

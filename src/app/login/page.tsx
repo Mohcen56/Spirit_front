@@ -25,10 +25,10 @@ export default function LoginPage() {
         localStorage.setItem('membership', JSON.stringify(response.membership))
         router.push('/')
       } else {
-        setError(response.error || 'بيانات الدخول غير صحيحة')
+        setError(response.error || '   the login failed' )
       }
     } catch (err: any) {
-      setError('حدث خطأ أثناء تسجيل الدخول')
+      setError(' An error occurred during login')
     } finally {
       setIsLoading(false)
     }
