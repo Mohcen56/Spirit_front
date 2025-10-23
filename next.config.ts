@@ -4,6 +4,24 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
+        protocol: 'https',
+        hostname: 'pub-fae4cdabfb8b4b2c9ff97f1da038b987.r2.dev',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'questions-bucket.f7ac1437b17c329ca5dcbd482f634410.r2.cloudflarestorage.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'f7ac1437b17c329ca5dcbd482f634410.r2.cloudflarestorage.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
         protocol: 'http',
         hostname: '127.0.0.1',
         port: '8000',

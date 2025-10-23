@@ -337,6 +337,7 @@ export default function CategoriesPage() {
                             sizes="(max-width: 768px) 100vw, 33vw"
                             style={{ objectFit: 'cover', borderRadius: '0 rem' }}
                             onError={() => handleImageError(category.name)}
+                            unoptimized={(category.image_url || category.image || '').includes('r2.dev')}
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
