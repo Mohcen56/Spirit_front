@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { gameAPI } from '@/lib/api';
-import { Team, Question as QuestionType } from '@/types/game';
+import {  Question as QuestionType } from '@/types/game';
 import Image from 'next/image';
 import AnswerDisplay from '@/components/AnswerDisplay';
 import TeamSelector from '@/components/TeamSelector';
@@ -14,6 +14,8 @@ import { getFullImageUrl } from '@/lib/imageUtils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { switchToNextTeam, endGame, awardPoints, activateDoublePerk, clearActivePerk, activateRerollPerk } from '@/store/gameSlice';
 import { Loader } from 'lucide-react';
+import { useGameData } from '@/hooks/useGameData';
+import { useSyncTeams } from '@/hooks/useSyncTeams';
 
 export default function QuestionPage() {
   const params = useParams();
@@ -22,24 +24,33 @@ export default function QuestionPage() {
   const questionId = parseInt(params.questionId as string);
   
   const dispatch = useAppDispatch();
-  const { currentTeam } = useAppSelector(state => state.game);
-  const { doublePerkActiveTeamId, doublePerkUsed } = useAppSelector(state => state.game);
-  const { rerollPerkUsed } = useAppSelector(state => state.game);
-  
-  const [question, setQuestion] = useState<QuestionType | null>(null);
-  const [teams, setTeams] = useState<Team[]>([]);
+  const {
+  currentTeam,
+  doublePerkActiveTeamId,
+  doublePerkUsed,
+  rerollPerkUsed,
+} = useAppSelector((state) => state.game);
   const [awardError, setAwardError] = useState('');
   const [awardSuccess, setAwardSuccess] = useState('');
   const [elapsedTime, setElapsedTime] = useState(0); // Chronometer instead of countdown
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
   const [currentView, setCurrentView] = useState<'question' | 'answer' | 'teamSelector'>('question');
   const [isChronoRunning, setIsChronoRunning] = useState(false);
-  
   // Choices dialog state
   const [isChoicesDialogOpen, setIsChoicesDialogOpen] = useState(false);
   const [selectedQuestionForChoices, setSelectedQuestionForChoices] = useState<QuestionType | null>(null);
-  
+   // 🎯 Fetch game + available questions
+  const { game, isLoading, error } = useGameData(gameId);
+
+  // 🔁 Sync teams with Redux (live scoring)
+  const { teams: liveTeams } = useAppSelector((state) => state.game);
+  useSyncTeams(game?.teams, liveTeams);
+
+  // 🧩 Get the selected question
+  const question = game?.availableQuestions.find((q) => q.id === questionId);
+
+  const teams = game?.teams || [];
+
+
   // Enhanced turn tracking - save turn history and team turn data during game
   const [turnHistory, setTurnHistory] = useState<Array<{
     teamId: number;
@@ -100,72 +111,7 @@ export default function QuestionPage() {
     }
   }, [isLoading, question, currentView, isChronoRunning]);
 
-  useEffect(() => {
-    const loadQuestion = async () => {
-      try {
-        if (!questionId || isNaN(questionId)) {
-          throw new Error('Invalid question ID');
-        }
 
-        // Get questions from the game to find this specific question
-        const numericGameId = parseInt(gameId);
-        const questions = await gameAPI.getAvailableQuestions(numericGameId);
-        console.log('Available questions:', questions);
-        console.log('Looking for question ID:', questionId);
-        console.log('Available question IDs:', questions.map(q => q.id));
-        
-        let selectedQuestion = questions.find(q => q.id === questionId);
-        
-        if (!selectedQuestion) {
-          console.warn('Question not found in available questions, trying direct fetch...');
-          console.warn('Requested question ID:', questionId, 'Type:', typeof questionId);
-          console.warn('Available question IDs:', questions.map(q => `${q.id} (${typeof q.id})`));
-          
-          try {
-            // Fallback: try to fetch the question directly
-            selectedQuestion = await gameAPI.selectQuestion(questionId);
-            console.log('Successfully fetched question directly:', selectedQuestion);
-            
-            // Check if this question was already played in this game
-            const gameDetails = await gameAPI.getGame(numericGameId);
-            const isAlreadyPlayed = gameDetails.played_questions?.some(
-              (pq) => pq.question.id === questionId
-            );
-            
-            if (isAlreadyPlayed) {
-              throw new Error('This question has already been answered in this game');
-            }
-          } catch (directFetchError) {
-            console.error('Failed to fetch question directly:', directFetchError);
-            const errorMessage = directFetchError instanceof Error ? 
-              directFetchError.message : 
-              'Question not found or already answered';
-            throw new Error(errorMessage);
-          }
-        }
-
-        setQuestion(selectedQuestion);
-        // Fetch teams for this game
-        const gameDetails = await gameAPI.getGame(numericGameId);
-        console.log('Game details loaded:', gameDetails);
-        console.log('Teams from game details:', gameDetails.teams);
-        setTeams(gameDetails.teams || []);
-        
-        // Start chronometer when question is loaded
-        setIsChronoRunning(true);
-      } catch (error) {
-        console.error('Error loading question:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Error loading question';
-        setError(errorMessage);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (questionId) {
-      loadQuestion();
-    }
-  }, [questionId, gameId]);
 
   const handleShowAnswer = () => {
     setCurrentView('answer');
@@ -382,7 +328,7 @@ export default function QuestionPage() {
 
                   {/* Question Text */}
                   <div className="text-center mb-8 mt-6">
-                    <h1 className="text-gray-800 text-2xl md:text-3xl font-bold leading-relaxed" dir="ltr">
+                    <h1 className="select-none text-gray-800 text-2xl md:text-3xl font-bold leading-relaxed" dir="ltr">
                       {question.text}
                     </h1>
                   </div>

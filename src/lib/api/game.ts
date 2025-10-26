@@ -1,19 +1,22 @@
 import { api, API_BASE_URL } from './base';
 import { Category, Game, Question, Collection } from '@/types/game';
 
+function authHeaders(extra: Record<string, string> = {}) {
+  const token = localStorage.getItem('authToken');
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Token ${token}`;
+  }
+  return { ...headers, ...extra };
+}
+
 export const gameAPI = {
   getCategories: async (): Promise<Category[]> => {
     try {
-      const token = localStorage.getItem('authToken');
-      const headers: Record<string, string> = {};
+   
       
-      // Add authorization header if token exists (for user-specific data)
-      if (token) {
-        headers['Authorization'] = `Token ${token}`;
-      }
-      
-      const response = await api.get('/api/categories/', { headers });
-      
+      const response = await api.get('/api/categories/', { headers: authHeaders() });
+
       let categoriesData = response.data;
       if (categoriesData && typeof categoriesData === 'object' && 'results' in categoriesData) {
         categoriesData = categoriesData.results;
@@ -33,15 +36,9 @@ export const gameAPI = {
 
   getCollectionsWithCategories: async (): Promise<Collection[]> => {
     try {
-      const token = localStorage.getItem('authToken');
-      const headers: Record<string, string> = {};
+ 
       
-      // Add authorization header if token exists (for user-specific data)
-      if (token) {
-        headers['Authorization'] = `Token ${token}`;
-      }
-      
-      const response = await api.get('/api/content/collections/with_categories/', { headers });
+      const response = await api.get('/api/content/collections/with_categories/', { headers: authHeaders() });
       return response.data;
     } catch (error) {
       console.error('Error fetching collections with categories:', error);

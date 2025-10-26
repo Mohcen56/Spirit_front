@@ -23,7 +23,7 @@ export default function LoginPage() {
         localStorage.setItem('authToken', response.token)
         localStorage.setItem('user', JSON.stringify(response.user))
         localStorage.setItem('membership', JSON.stringify(response.membership))
-        router.push('/')
+        router.push('/dashboard')
       } else {
         setError(response.error || '   the login failed' )
       }

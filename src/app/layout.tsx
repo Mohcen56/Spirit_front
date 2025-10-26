@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { GameProvider } from "@/contexts/GameContext";
-import ReduxProvider from "@/components/ReduxProvider";
 
+import ReduxProvider from "@/components/ReduxProvider";
+<meta name="apple-mobile-web-app-title" content="Trivia Spirit" />
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -31,9 +31,9 @@ export default function RootLayout({
         suppressHydrationWarning={true}
       >
         <ReduxProvider>
-          <GameProvider>
+          
             {children}
-          </GameProvider>
+          
         </ReduxProvider>
       </body>
     </html>

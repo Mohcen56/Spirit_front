@@ -18,7 +18,7 @@ export default function AnswerDisplay({ question, onShowQuestion, onShowTeamSele
     <GameCard question={question}>
       {/* Answer Text */}
       <div className="text-center md:-mt-4 md:mb-6">
-        <h1 className="text-gray-800 text-2xl md:text-3xl font-bold leading-relaxed">
+        <h1 className="select-none text-gray-800 text-2xl md:text-3xl font-bold leading-relaxed">
           {question.answer_ar || question.answer}
         </h1>
       </div>

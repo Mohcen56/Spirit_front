@@ -1,232 +1,480 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
-import { authAPI } from '@/lib/api/index';
-import { User } from '@/types/game';
-import { Play, Trophy, History, LogOut } from 'lucide-react';
-import UserProfile from '@/components/UserProfile';
+import { useEffect, useMemo, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { useAuthGate } from "@/hooks/useAuthFate";
+
+import Link from "next/link";
+import { MorphingText } from "@/components/ui/morphing-text";
 
 export default function HomePage() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showProfile, setShowProfile] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  const { user, isLoading, logout } = useAuthGate();
+
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const userData = await authAPI.getCurrentUser();
-        console.log('User data received:', userData);
-        console.log('User avatar:', userData.avatar);
-        setUser(userData);
-      } catch {
-        router.push('/login');
-      } finally {
-        setIsLoading(false);
+    if (isLoading) return;
+    setShowWelcome(!!user);
+  }, [isLoading, user]);
+
+  const avatarSrc = useMemo(() => {
+    if (!user?.avatar || user.avatar === "/avatars/tanjiro.jpeg") {
+      return "/avatars/tanjiro.jpeg";
+    }
+    return user.avatar;
+  }, [user?.avatar]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
       }
     };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-    checkAuth();
-  }, [router]);
-
-  const handleLogout = async () => {
-    try {
-      await authAPI.logout();
-      router.push('/login');
-    } catch {
-      // Force redirect even if logout fails
-      router.push('/login');
+  const handleJumpIn = () => router.push("/dashboard");
+  const handleHeroCTA = () => {
+    if (user) {
+      router.push("/dashboard");
+      return;
     }
+    router.push("/login");
   };
-
-  const handleProfileSave = async (data: { username: string; email: string; avatar: string; avatarFile?: File; password?: string; currentPassword?: string }) => {
-    try {
-      let updatedUser = user;
-
-      // Update basic profile information
-      if (data.username !== user?.username || data.email !== user?.email) {
-        console.log('Updating profile info...');
-        const profileResult = await authAPI.updateProfile({
-          username: data.username,
-          email: data.email,
-        });
-        
-        if (!profileResult.success) {
-          throw new Error(profileResult.error || 'Failed to update profile');
-        }
-        updatedUser = profileResult.user;
-      }
-
-      // Update profile picture if a new file was selected
-      if (data.avatarFile) {
-        console.log('Updating profile picture...');
-        const avatarResult = await authAPI.updateProfilePicture(data.avatarFile);
-        
-        console.log('Avatar update result:', avatarResult);
-        
-        if (!avatarResult.success) {
-          throw new Error(avatarResult.error || 'Failed to update profile picture');
-        }
-        if (updatedUser) {
-          console.log('Updating user avatar from:', updatedUser.avatar, 'to:', avatarResult.avatar_url);
-          updatedUser = { ...updatedUser, avatar: avatarResult.avatar_url };
-        }
-      }
-
-      // Change password if provided
-      if (data.password && data.currentPassword) {
-        console.log('Changing password...');
-        const passwordResult = await authAPI.changePassword(data.currentPassword, data.password);
-        
-        if (!passwordResult.success) {
-          throw new Error(passwordResult.error || 'Failed to change password');
-        }
-      }
-
-      // Update user state with new data
-      console.log('Setting user state to:', updatedUser);
-      setUser(updatedUser);
-      
-      // Close profile view
-      setShowProfile(false);
-      
-      console.log('Profile updated successfully');
-    } catch (error) {
-      console.error('Profile save error:', error);
-      // You might want to show an error message to the user here
-      alert(error instanceof Error ? error.message : 'Failed to update profile');
-    }
-  };
+  const handleStayHere = () => setShowWelcome(false);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-custom-bg flex items-center justify-center">
-        <div className="text-gray-800 text-xl">Loading...</div>
+      <div className="min-h-dvh grid place-items-center">
+        <div className="opacity-70">Loading…</div>
       </div>
     );
   }
-
-  if (!user) {
-    return null; // Will redirect to login
-  }
-
+  const texts = [
+    "Hello " + (user?.username ?? "Guest"),
+    "welcome BACK!",
+    "to",
+    "Trivia Spirit",
+  ];
   return (
-    <div className="min-h-screen bg-custom-bg">
-      {showProfile && user ? (
-        <UserProfile
-          user={user}
-          onBack={() => setShowProfile(false)}
-          onSave={handleProfileSave}
-        />
-      ) : (
-        <>
-          {/* Header */}
-          <header className="bg-white/80 backdrop-blur-md border-b border-gray-200">
-  <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-    {/* LEFT: Avatar + Username */}
-    <div className="flex items-center space-x-4">
-      <button
-        onClick={() => setShowProfile(true)}
-        className="w-12 h-12 rounded-full flex items-center justify-center hover:scale-105 transition-transform cursor-pointer overflow-hidden shadow-lg"
-        aria-label="Open profile settings"
-      >
-        {user.avatar && user.avatar !== '/avatars/tanjiro.jpeg' ? (
-          <Image
-            src={user.avatar}
-            alt="Profile"
-            width={40}
-            height={40}
-            className="w-full h-full object-cover rounded-full"
-            onError={(e) => {
-              console.log('Custom avatar failed to load:', user.avatar)
-              ;(e.target as HTMLImageElement).src = '/avatars/tanjiro.jpeg'
+    <>
+      <div className="bg-eastern-blue-800">
+        {/* Header */}
+        <header className="relative z-20 backdrop-blur-md">
+          <div className="container relative mx-auto flex w-full items-center justify-center px-4 py-4">
+            <div className="hidden w-full max-w-2xl justify-center md:flex">
+              <MorphingText
+  className="text-white flex-row whitespace-nowrap overflow-hidden text-ellipsis"
+  texts={texts}
+/>
+
+            </div>
+            <div
+              className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center space-x-4"
+              ref={menuRef}
+            >
+              {/* Avatar Button (always clickable) */}
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                title={user?.username ? `${user.username} menu` : "User menu"}
+                aria-label={user?.username ? `Open ${user.username} menu` : "Open user menu"}
+                className="relative mt-5 lg:mt-0 w-10 h-10 lg:w-20 lg:h-20 rounded-full overflow-hidden border-2 border-white hover:ring-2 hover:ring-offset-2 hover:ring-primary-400 transition-all"
+              >
+                <Image
+                  src={avatarSrc}
+                  alt="Profile"
+                  width={80}
+                  height={80}
+                  className="object-cover w-full h-full"
+                  onError={(e) => {
+                    console.log("Avatar failed to load:", avatarSrc);
+                    (e.target as HTMLImageElement).src = "/avatars/tanjiro.jpeg";
+                  }}
+                />
+              </button>
+
+              {/* Dropdown Menu */}
+              {menuOpen && (
+                <div className="absolute right-7 top-22 w-40 bg-white rounded-xl shadow-xl py-2 border border-gray-200 z-50 animate-fadeIn">
+                  {/* Little arrow */}
+                  <div className="absolute top-[-6px] right-4 w-3 h-3 bg-white border-t border-l border-gray-200 rotate-45"></div>
+
+                  {user ? (
+                    <>
+                      <button
+                        onClick={() => {
+                          logout();
+                          setMenuOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 transition"
+                      >
+                        Logout
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        href="/login"
+                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        Login
+                      </Link>
+                      <Link
+                        href="/signup"
+                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        Sign Up
+                      </Link>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </header>
+   
+      
+      
+        <div className="relative isolate px-6 pt-0 lg:px-8">
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
+        >
+          <div
+            style={{
+              clipPath:
+                'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
             }}
+            className="relative left-[calc(50%-11rem)] aspect-1155/678 w-144.5 -translate-x-1/2 rotate-30 bg-linear-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%-30rem)] sm:w-288.75"
           />
-        ) : (
-          <Image
-            src="/avatars/tanjiro.jpeg"
-            alt="Default Profile"
-            width={40}
-            height={40}
-            className="w-full h-full object-cover rounded-full"
-          />
-        )}
-      </button>
-      <p className="hidden md:inline-block text-sm text-gray-600">{user.username}</p>
+        </div>
+        <div className="mx-auto max-w-2xl -mt-20 pt-4 pb-32 sm:pt-10 sm:pb-40 lg:pt-0 lg:pb-12">
+  <div className="text-center">
+    {/* Logo */}
+    <div className="flex justify-center mb-1">
+      <Image
+        src="logo/logo3.svg"
+        alt="Trivia Logo"
+        width={700}
+        height={700}
+        className="mx-auto"
+      />
     </div>
 
-    {/* CENTER: Logo/Title */}
-    <h1 className="text-xl font-bold text-gray-800 absolute left-1/2 transform -translate-x-1/2">
-      trivia spirit
-    </h1>
-
-    {/* RIGHT: Logout */}
-    <button
-      onClick={handleLogout}
-      className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors"
-    >
-      <LogOut className="h-5 w-5" />
-      <span>Logout</span>
-    </button>
+    {/* Paragraphs */}
+    <p className="lg:text-3xl  -mt-20 font-bold lg:-mt-30 text-white mb-4">
+      The best trivia game for families and friends
+    </p>
+    <p className="text-sm lg:text-lg text-gray-300 max-w-lg mx-auto leading-relaxed mb-6 lg:mb-10">
+      Enjoy your time with Trivia — the knowledge and challenge game that brings everyone together.
+    </p>
+    <div className="mt-8 flex justify-center">
+      <button
+        onClick={handleHeroCTA}
+        className="group/button relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-md bg-indianred px-30 py-5 text-xs font-normal text-white transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-red-500/30"
+      >
+        <span className="flex h-8 w-8 items-center justify-center rounded text-white">
+          <svg
+            aria-hidden="true"
+            className="h-8 w-8"
+            viewBox="0 0 12 12"
+            fill="currentColor"
+          >
+            <path d="M4 3.065v5.87a.4.4 0 0 0 .623.331l4.268-2.935a.4.4 0 0 0 0-.662L4.623 2.064A.4.4 0 0 0 4 2.395Z" />
+          </svg>
+        </span>
+        <span className="text-xl font-bold">Start playing</span>
+        <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-13deg)_translateX(-100%)] group-hover/button:duration-1000 group-hover/button:[transform:skew(-13deg)_translateX(100%)]">
+          <div className="relative h-full w-8 bg-white/20" />
+        </div>
+      </button>
+    </div>
   </div>
-</header>
+</div>
+
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
+        >
+          <div
+            style={{
+              clipPath:
+                'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
+            }}
+            className="relative left-[calc(50%+3rem)] aspect-1155/678 w-144.5 -translate-x-1/2 bg-linear-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%+36rem)] sm:w-288.75"
+          />
+        </div>
+      </div>
+      </div>
+<section className="py-20 bg-white text-center">
+  <h2 className="text-4xl font-bold text-gray-800 mb-4">Why Trivia Spirit?</h2>
+  <p className="text-gray-500 p-2 mb-12">
+    Trivia Spirit combines fun and learning in a unique experience suitable for everyone in the family.
+  </p>
+
+  <div className="grid gap-6 md:grid-cols-3 p-4 max-w-6xl mx-auto">
+    <div className="rounded-2xl bg-blue-50 p-8">
+      <div className="flex justify-center mb-4">
+        <div className="bg-blue-500 text-white p-3 rounded-full">
+          <Image src="/icons/people.svg" alt="People icon" width={24} height={24} className="w-6 h-6" />
+        </div>
+      </div>
+      <h3 className="text-xl font-semibold mb-2 text-gray-800">For Family & Friends</h3>
+      <p className="text-gray-600">
+        A fun group game that brings loved ones together and creates beautiful memories filled with laughter and joy.
+      </p>
+    </div>
+
+    <div className="rounded-2xl bg-green-50 p-8">
+      <div className="flex justify-center mb-4">
+        <div className="bg-green-500 text-white p-3 rounded-full">
+          <Image src="/icons/brain.svg" alt="Brain icon" width={24} height={24} className="w-6 h-6" />
+        </div>
+      </div>
+      <h3 className="text-xl font-semibold mb-2 text-gray-800">Boosts Knowledge</h3>
+      <p className="text-gray-600">
+        A variety of questions about culture, history, and science help you expand your knowledge in a fun way.
+      </p>
+    </div>
+
+    <div className="rounded-2xl bg-purple-50 p-8">
+      <div className="flex justify-center mb-4">
+        <div className="bg-purple-500 text-white p-3 rounded-full">
+          <Image src="/icons/cup-reward.svg" alt="Reward cup icon" width={24} height={24} className="w-6 h-6" />
+        </div>
+      </div>
+      <h3 className="text-xl font-semibold mb-2 text-gray-800">Competitive Spirit</h3>
+      <p className="text-gray-600">
+        A points and challenges system that inspires a healthy competitive atmosphere between teams.
+      </p>
+    </div>
+  </div>
+</section>
+<section id="how-to-play" className="py-20 text-center bg-[#f4f6fd]">
+  <h2 className="text-4xl font-bold text-purple-700 mb-4">How to Play?</h2>
+
+  <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto mt-10">
+    {/* Teams */}
+    <div className="bg-purple-50 rounded-2xl shadow-sm p-6 w-56">
+      <div className="text-purple-600 text-4xl mb-3">👥</div>
+      <h3 className="text-xl font-semibold mb-2 text-gray-800">Teams</h3>
+      <p className="text-gray-600 text-sm">Two teams compete against each other.</p>
+    </div>
+
+    {/* Choose Categories */}
+    <div className="bg-purple-50 rounded-2xl shadow-sm p-6 w-56">
+      <div className="text-purple-600 text-4xl mb-3">📲</div>
+      <h3 className="text-xl font-semibold mb-2 text-gray-800">Choose Categories</h3>
+      <p className="text-gray-600 text-sm">Each team selects 3 categories.</p>
+    </div>
+
+    {/* Team Turn */}
+    <div className="bg-purple-50 rounded-2xl shadow-sm p-6 w-56">
+      <div className="text-purple-600 text-4xl mb-3">↔️</div>
+      <h3 className="text-xl font-semibold mb-2 text-gray-800">Team Turn</h3>
+      <p className="text-gray-600 text-sm">Teams take turns choosing questions.</p>
+    </div>
+
+    {/* Time */}
+    <div className="bg-purple-50 rounded-2xl shadow-sm p-6 w-56">
+      <div className="text-purple-600 text-4xl mb-3">⏱️</div>
+      <h3 className="text-xl font-semibold mb-2 text-gray-800">Time</h3>
+      <p className="text-gray-600 text-sm">60 seconds for Team 1, 30 seconds for Team 2.</p>
+    </div>
+
+    {/* Winning */}
+    <div className="bg-purple-50 rounded-2xl shadow-sm p-6 w-56">
+      <div className="text-purple-600 text-4xl mb-3">🏆</div>
+      <h3 className="text-xl font-semibold mb-2 text-gray-800">Winning</h3>
+      <p className="text-gray-600 text-sm">The team with the highest score wins!</p>
+    </div>
+  </div>
+</section>
+<section id="help-perks" className="  py-30">
+  <div className="container mx-auto px-6 text-center">
+    {/* Title */}
+    <h2 className="text-4xl font-bold text-gray-800 -mt-10 mb-20">
+      Help Perks
+    </h2>
+
+    {/* Grid layout */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
+
+      {/* Double Points */}
+      <div className="relative bg-[#cde1f2] rounded-3xl shadow-md px-8 py-15 flex flex-row items-center justify-between overflow-hidden">
+        <div className="text-left max-w-[70%]">
+          <h3 className="text-2xl font-bold text-gray-800 -mt-10  mb-2">Double Points</h3>
+          <p className="text-gray-700 text-sm leading-relaxed">
+            Boost your score! Activate this perk to double your points for one question.
+            
+          </p>
+        </div>
+        <div className="text-6xl flex-shrink-0"><Image src="/icons/multiplier-2x-32-filled.svg" alt="multiplier icon" width={25} height={25} className="w-20 h-20" /></div>
+        <div className="absolute bottom-0 left-0 right-0 bg-[#1f1f2b] text-white text-sm font-medium py-2 rounded-b-3xl">
+          Use before answering
+        </div>
+      </div>
+
+      {/* Change Question */}
+      <div className="relative bg-[#cde1f2] rounded-3xl shadow-md px-8 py-15 flex flex-row items-center justify-between overflow-hidden">
+        <div className="text-left max-w-[70%]">
+          <h3 className="text-2xl font-bold text-gray-800 -mt-11 mb-2">Change Question</h3>
+          <p className="text-gray-700 text-sm leading-relaxed">
+            Don’t like the current question? Swap it for a new one and get another chance
+            to earn points.
+          </p>
+        </div>
+        <div className="text-6xl flex-shrink-0"><Image src="/icons/arrow-change.svg" alt="refresh icon" width={25} height={25} className="w-20 h-20" /></div>
+        <div className="absolute bottom-0 left-0 right-0 bg-[#1f1f2b] text-white text-sm font-medium py-2 rounded-b-3xl">
+          Use after seeing the question
+        </div>
+      </div>
+
+      {/* Show Choices */}
+      <div className="relative bg-[#cde1f2] rounded-3xl shadow-md px-8 py-10 flex flex-row items-center justify-between overflow-hidden">
+        <div className="text-left max-w-[70%]">
+          <h3 className="text-2xl font-bold text-gray-800 -mt-5 mb-2">Show Choices</h3>
+          <p className="text-gray-700 text-sm leading-relaxed mb-2">
+            Reveal the available answer options to make your decision easier and
+            improve your odds of winning.
+          </p>
+        </div>
+        <div className="text-6xl flex-shrink-0"><Image src="/icons/clover-48-regular.svg" alt="multiplier icon" width={25} height={25} className="w-20 h-20" /></div>
+        <div className="absolute bottom-0 left-0 right-0 bg-[#1f1f2b] text-white text-sm font-medium py-2 rounded-b-3xl">
+          Use after seeing the question
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+<footer className="bg-[#2B3A67] text-gray-200 pt-10 pb-8">
+  <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-10  justify-center items-center lg:items-start">
+
+    {/* Logo + Description (LEFT in English) */}
+    <div className="  text-center lg:text-left space-y-3">
+      {/* SVG Logo Placeholder */}
+    <div className="-mt-8 lg:-ml-40 ">
+      <Image
+        src="logo/mylogo.svg"
+        alt="Trivia Logo"
+        width={150}
+        height={150}
+        className="mx-auto"
+      />
+   
+      </div>
+      <h3 className="text-lg font-bold text-white -mt-2">Trivia Spirit – Family & Friends Game</h3>
+      <p className="text-gray-300 text-sm leading-relaxed">
+        The ultimate trivia game that brings family and friends together for laughter,
+        fun, and learning through a variety of unique question categories.
+      </p>
+    </div>
+
+    {/* Download App (CENTER) */}
+    <div className="flex flex-col  justify-content-center items-center md:items-start">
+      <h3 className="text-lg font-bold mb-5">Get the App</h3>
+
+      {/* Google Play */}
+      <div className="relative group mb-4 w-full items-center  max-w-2xs">
+        <div className="flex items-center justify-between bg-[#3c4b6d] text-white px-4 py-3 rounded-xl shadow-md cursor-not-allowed">
+        <div className="flex items-center justify-content-center gap-3">
+             <span className="font-medium text-sm">Available soon <span className="font-semibold text-sm"> on Google Play</span> </span>
+            <Image src="/logo/playstore.svg" alt="Google Play" width={24} height={24} className="w-6 h-6" />
+          </div>
+        </div>
+        <div className="absolute inset-0 bg-black/70 rounded-xl flex items-center justify-center 
+                        text-white text-sm font-semibold opacity-0 group-hover:opacity-100 
+                        transition-opacity duration-300">
+          Coming Soon
+        </div>
+      </div>
+
+      {/* App Store */}
+        <div className="relative group mb-4  w-full max-w-2xs">
+        <div className="flex items-center justify-between bg-[#3c4b6d] text-white px-4 py-3 rounded-xl shadow-md cursor-not-allowed">
+        <div className="flex items-center gap-6">
+           <span className="font-medium text-sm">Available soon <span className="font-semibold text-sm"> on App Store</span> </span>
+          <Image src="/logo/app-store.svg" alt="App Store" width={24} height={24} className="w-6 h-6" />
+        </div>
+        </div>
+        <div className="absolute inset-0 bg-black/70 rounded-xl flex items-center justify-center 
+                        text-white text-sm font-semibold opacity-0 group-hover:opacity-100 
+                        transition-opacity duration-300">
+          Coming Soon
+        </div>
+      </div>
+    </div>
+
+    {/* Useful Links (RIGHT in English) */}
+    <div className=" text-center lg:text-left ">
+      <h3 className="text-xl font-bold mb-5">Useful Links</h3>
+      <ul className="space-y-3 text-gray-300 text-lg">
+        <Link href="#how-to-play" className="flex items-center gap-2 justify-center  lg:justify-start  hover:text-white transition">
+          <Image src="/icons/brain.svg" alt="Brain icon" width={24} height={24} className="w-6 h-6" /> How to Play
+        </Link>
+        <Link href="#help-perks" className="flex items-center gap-2 justify-center lg:justify-start  hover:text-white transition">
+          <Image src="/icons/bars-4.svg" alt="Help perks icon" width={24} height={24} className="w-6 h-6" /> help perks
+        </Link>
+
+        <Link href="#" className="flex items-center gap-2 justify-center lg:justify-start  hover:text-white transition">
+          <Image src="/logo/Instagram_Glyph_Gradient.svg" alt="Instagram" width={24} height={24} className="w-6 h-6" />
+          <span> Follow us on Instagram</span>
+        </Link>
+      </ul>
+    </div>
+  </div>
+
+  {/* Divider + Copyright */}
+  <div className="mt-10 border-t border-gray-500/40 pt-6 text-center text-sm text-gray-400">
+    © {new Date().getFullYear()} Trivia Spirit. All rights reserved.
+  </div>
+</footer>
 
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto">
-          {/* Welcome Section */}
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">
-              Welcome to trivia spirit
-            </h2>
-            <p className="text-xl text-gray-600">
-              Test your knowledge and have fun with your friends
+      {/* Welcome choice overlay — only for logged-in users who don't prefer auto-jump */}
+      {user && showWelcome && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/50">
+          <div className="w-[min(92vw,520px)] rounded-2xl bg-white p-6 shadow-xl dark:bg-neutral-900">
+            <div className="space-y-2 text-center">
+              <h2 className="text-xl font-semibold">
+                👋 Welcome back, {user.username}!
+              </h2>
+              <p className="text-sm opacity-80">
+                Do you want to jump into your games, or stay here to explore updates?
+              </p>
+            </div>
+
+            <div className="mt-5 flex items-center justify-center gap-3">
+              <button
+                onClick={handleJumpIn}
+                className="rounded-lg bg-black px-4 py-2 text-white dark:bg-white dark:text-black"
+              >
+                Jump In →
+              </button>
+              <button
+                onClick={handleStayHere}
+                className="rounded-lg border px-4 py-2"
+              >
+                Stay Here
+              </button>
+            </div>
+
+            <p className="mt-3 text-center text-xs opacity-60">
+              Tip: We’ll remember if you choose “Jump In” for next time.
             </p>
           </div>
-
-          {/* Action Cards */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6">
-            {/* Start New Game */}
-            <Link href="/categories">
-              <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 border border-gray-200 hover:bg-white/90 transition-all duration-200 transform hover:scale-105 cursor-pointer group shadow-lg">
-                <div className="flex flex-col items-center text-center">
-                  <div className="bg-gradient-to-r from-green-400 to-blue-500 w-16 h-16 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <Play className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">New Game</h3>
-                  <p className="text-gray-600 text-sm">Start a new game and choose question categories</p>
-                </div>
-              </div>
-            </Link>
-
-     
-
-            {/* Game History */}
-            <Link href="/history">
-              <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 border border-gray-200 hover:bg-white/90 transition-all duration-200 transform hover:scale-105 cursor-pointer group shadow-lg">
-                <div className="flex flex-col items-center text-center">
-                  <div className="bg-gradient-to-r from-purple-400 to-pink-500 w-16 h-16 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <History className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">your games </h3>
-                  <p className="text-gray-600 text-sm">Your previous games If you keep playing them</p>
-                </div>
-              </div>
-            </Link>
-          </div>
-
-          {/* Quick Stats */}
-         
-           
-          
         </div>
-      </main>
-        </>
       )}
-    </div>
+    
+    </>
   );
 }

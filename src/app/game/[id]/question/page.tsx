@@ -2,17 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { gameAPI } from '@/lib/api';
-import { Game, Team, Question } from '@/types/game';
+import {  Question } from '@/types/game';
 import Image from 'next/image';
 import GameHeader from '@/components/GameHeader';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { startGame, switchToNextTeam, endGame, setTeams, awardPoints } from '@/store/gameSlice';
+import { startGame, switchToNextTeam, endGame, awardPoints } from '@/store/gameSlice';
+import { useGameData } from '@/hooks/useGameData';
+import { useSyncTeams } from '@/hooks/useSyncTeams';
 
-interface GameWithDetails extends Game {
-  teams: Team[];
-  availableQuestions: Question[];
-}
+
 
 interface QuestionSlot {
   points: number;
@@ -25,12 +23,13 @@ export default function GameBoardPage() {
   const params = useParams();
   const router = useRouter();
   const gameId = params.id as string;
-  
   const dispatch = useAppDispatch();
   const { currentTeam, isGameActive, gameId: currentGameId, teams: liveTeams } = useAppSelector(state => state.game);
-  
-  const [game, setGame] = useState<GameWithDetails | null>(null);
-  const [error, setError] = useState('');
+   // 👇 Replace your huge useEffect with:
+  const { game, isLoading, error } = useGameData(gameId);
+   // 👇 Sync fetched teams with Redux
+  useSyncTeams(game?.teams, liveTeams);
+
 
   // Initialize game in Redux when component mounts and game data is loaded
   useEffect(() => {
@@ -63,91 +62,10 @@ export default function GameBoardPage() {
     dispatch(awardPoints({ teamId, delta: increment }));
   };
 
-  useEffect(() => {
-    let mounted = true; // Track if component is still mounted
-    let loadingTimer: NodeJS.Timeout;
+ 
     
-    const loadGame = async () => {
-      if (!gameId || gameId === 'undefined') {
-        if (mounted) {
-          setError('Invalid game ID');
-        }
-        return;
-      }
-      
-      // Add a small delay to batch multiple rapid calls
-      clearTimeout(loadingTimer);
-      loadingTimer = setTimeout(async () => {
-        if (!mounted) return;
-        
-        try {
-          const numericGameId = parseInt(gameId);
-          if (isNaN(numericGameId)) {
-            throw new Error('Game ID must be a number');
-          }
-          
-          console.log(`Loading game ${numericGameId}...`);
-          
-          // Load game details and questions in parallel but only once
-          const [gameData, questions] = await Promise.all([
-            gameAPI.getGame(numericGameId),
-            gameAPI.getAvailableQuestions(numericGameId)
-          ]);
-          
-          if (!mounted) return; // Don't update state if component unmounted
-          
-          const teams = gameData.teams || [];
-          
-          setGame({
-            ...gameData,
-            teams,
-            availableQuestions: questions,
-          });
-
-          // Sync teams to Redux for live scoring.
-          // Preserve existing scores if we already have them in Redux.
-          const mergedTeams = teams.map((t: Team) => {
-            const existing = liveTeams.find(et => et.id === t.id);
-            return { ...t, score: existing?.score ?? t.score ?? 0 };
-          });
-          if (liveTeams.length === 0) {
-            dispatch(setTeams(mergedTeams));
-          } else {
-            // Only update if the roster changed (e.g., avatar/name updates), keep scores
-            const rosterChanged =
-              mergedTeams.length !== liveTeams.length ||
-              mergedTeams.some((t, i) => t.id !== liveTeams[i]?.id || t.name !== liveTeams[i]?.name || t.avatar !== liveTeams[i]?.avatar);
-            if (rosterChanged) {
-              dispatch(setTeams(mergedTeams));
-            }
-          }
-          
-          console.log('Game loaded successfully:', {
-            gameId: numericGameId,
-            teamsCount: teams.length,
-            questionsCount: questions.length,
-            categoriesCount: gameData.categories.length
-          });
-          
-        } catch (error) {
-          if (mounted) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            setError(`Failed to load game: ${errorMessage}`);
-          }
-        } finally {
-          // No loading state to update
-        }
-      }, 200); // Increased debounce to 200ms for better batching
-    };
     
-    loadGame();
-    
-    // Cleanup function to prevent state updates after unmount
-    return () => {
-      mounted = false;
-      clearTimeout(loadingTimer);
-    };
-  }, [gameId, dispatch, liveTeams]);
+ 
 
   // Organize questions by category (memoized to prevent recalculation)
   const organizeQuestionsByCategory = React.useMemo(() => {
@@ -233,52 +151,56 @@ export default function GameBoardPage() {
     );
   }
 
-  if (!game) {
-    // Show empty game board while loading
-    return (
-      <div className="h-screen flex flex-col bg-white overflow-hidden">
-        {/* Header */}
-        <GameHeader 
-          onBackToBoard={handleBackToBoard}
-          currentTeamTurn={currentTeam}
-          onTeamTurnChange={handleTeamTurnChange}
-          onEndGame={handleEndGame}
-        />
 
-        {/* Game Board - Shows loading skeleton */}
-        <main className="flex-1 p-4 overflow-hidden bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300">
-          <div className="h-full grid grid-cols-3 md:grid-cols-6 gap-3">
-            {/* Show skeleton loaders for categories */}
-            {Array.from({length: 6}).map((_, index) => (
-              <div key={index} className="h-full flex flex-col">
-                {/* Category skeleton */}
-                <div className="relative h-24 md:h-32 w-full rounded-xl overflow-hidden border-4 border-white shadow mb-3 flex-shrink-0 bg-gray-200 animate-pulse">
-                  <div className="absolute bottom-0 left-0 w-full bg-gray-300 py-1 text-center">
-                    <span className="text-gray-500 text-xs md:text-sm font-bold">Loading...</span>
-                  </div>
-                </div>
-                
-                {/* Question slots skeleton */}
-                <div className="flex-1 flex flex-col gap-1 md:gap-2">
-                  {Array.from({length: 6}).map((_, qIndex) => (
-                    <div
-                      key={qIndex}
-                      className="flex-1 bg-gray-200 animate-pulse rounded-lg"
-                    />
-                  ))}
+
+if (isLoading) {
+  return (
+    <div className="h-screen flex flex-col bg-white overflow-hidden">
+      <GameHeader 
+        onBackToBoard={handleBackToBoard}
+        currentTeamTurn={currentTeam}
+        onTeamTurnChange={handleTeamTurnChange}
+        onEndGame={handleEndGame}
+      />
+
+      <main className="flex-1 p-4 overflow-hidden bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300">
+        <div className="h-full grid grid-cols-3 md:grid-cols-6 gap-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="h-full flex flex-col">
+              <div className="relative h-24 md:h-32 w-full rounded-xl overflow-hidden border-4 border-white shadow mb-3 flex-shrink-0 bg-gray-200 animate-pulse">
+                <div className="absolute bottom-0 left-0 w-full bg-gray-300 py-1 text-center">
+                  <span className="text-gray-500 text-xs md:text-sm font-bold">Loading...</span>
                 </div>
               </div>
-            ))}
-          </div>
-        </main>
 
-        {/* Footer skeleton */}
-        <footer className="bg-gradient-to-r from-amber-400 to-orange-400 py-2 md:py-3 flex items-center justify-center gap-3 md:gap-4 border-t-4 border-amber-500 h-16 md:h-25 flex-shrink-0">
-          <div className="text-gray-600 text-sm">Loading teams...</div>
-        </footer>
-      </div>
-    );
-  }
+              <div className="flex-1 flex flex-col gap-1 md:gap-2">
+                {Array.from({ length: 6 }).map((_, qIndex) => (
+                  <div
+                    key={qIndex}
+                    className="flex-1 bg-gray-200 animate-pulse rounded-lg"
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </main>
+
+      <footer className="bg-gradient-to-r from-amber-400 to-orange-400 py-2 md:py-3 flex items-center justify-center gap-3 md:gap-4 border-t-4 border-amber-500 h-16 md:h-25 flex-shrink-0">
+        <div className="text-gray-600 text-sm">Loading teams...</div>
+      </footer>
+    </div>
+  );
+}
+
+if (error) {
+  return <div className="text-red-500 text-center mt-10">{error}</div>;
+}
+
+if (!game) {
+  return <div className="text-gray-600 text-center mt-10">No game found.</div>;
+}
+
 
   function handleImageError(name: string): void {
     setImageErrors(prev => ({ ...prev, [name]: true }));

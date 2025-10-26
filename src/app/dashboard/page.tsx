@@ -1,46 +1,18 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+
+import {  useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { authAPI } from '@/lib/api/index';
-import { User } from '@/types/game';
 import { Play, History, LogOut } from 'lucide-react';
 import UserProfile from '@/components/UserProfile';
+import { useAuthGate } from '@/hooks/useAuthFate';
 
 export default function HomePage() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [showProfile, setShowProfile] = useState(false);
-  const router = useRouter();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const userData = await authAPI.getCurrentUser();
-        console.log('User data received:', userData);
-        console.log('User avatar:', userData.avatar);
-        setUser(userData);
-      } catch {
-        router.push('/login');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, [router]);
-
-  const handleLogout = async () => {
-    try {
-      await authAPI.logout();
-      router.push('/login');
-    } catch {
-      // Force redirect even if logout fails
-      router.push('/login');
-    }
-  };
+const { user, setUser, isLoading, logout  } = useAuthGate({ redirectIfGuest: '/login' });
 
   const handleProfileSave = async (data: { username: string; email: string; avatar: string; avatarFile?: File; password?: string; currentPassword?: string }) => {
     try {
@@ -165,7 +137,7 @@ export default function HomePage() {
 
     {/* RIGHT: Logout */}
     <button
-      onClick={handleLogout}
+      onClick={logout}
       className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors"
     >
       <LogOut className="h-5 w-5" />

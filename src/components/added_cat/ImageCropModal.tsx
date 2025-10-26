@@ -19,6 +19,16 @@ interface Area {
 
 type CroppedAreaPixels = Area;
 
+const generateUniqueFileName = (extension: string) => {
+  const safeExtension = extension.startsWith('.') ? extension : `.${extension}`;
+  const cryptoObj = typeof window !== 'undefined' ? window.crypto : undefined;
+  const uniquePart =
+    cryptoObj && typeof cryptoObj.randomUUID === 'function'
+      ? cryptoObj.randomUUID()
+      : `${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
+  return `cropped-${uniquePart}${safeExtension}`;
+};
+
 export default function ImageCropModal({ imageSrc, onCropComplete, onCancel }: ImageCropModalProps) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -84,7 +94,7 @@ export default function ImageCropModal({ imageSrc, onCropComplete, onCancel }: I
           reject(new Error('Canvas is empty'));
           return;
         }
-        const file = new File([blob], 'cropped-image.jpg', { type: 'image/jpeg' });
+        const file = new File([blob], generateUniqueFileName('jpg'), { type: 'image/jpeg' });
         resolve(file);
       }, 'image/jpeg', 0.95);
     });
