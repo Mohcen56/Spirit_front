@@ -1,9 +1,11 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { gameAPI } from "@/lib/api";
-import { ArrowLeft, Mic, Video, Image as ImageIcon, Lock, X } from "lucide-react";
+import {  Mic, Video, Image as ImageIcon, Lock, X } from "lucide-react";
 import ImageCropModal from "@/components/added_cat/ImageCropModal";
+import Header from "@/components/Header";
+import { useHeader } from "@/app/(home)/layout";
 
 export default function AddQuestionPage() {
   const router = useRouter();
@@ -13,7 +15,7 @@ export default function AddQuestionPage() {
   const [points, setPoints] = useState(100);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  
+   const { setHeader } = useHeader();
   // Question image states
   const [questionImage, setQuestionImage] = useState<string | null>(null); // Preview
   const [questionImageFile, setQuestionImageFile] = useState<File | null>(null); // File for upload
@@ -141,7 +143,10 @@ export default function AddQuestionPage() {
       setLoading(false);
     }
   };
-
+ useEffect(() => {
+    setHeader({ title: "Add Question", backHref: `/categories/edit/${id}` });
+  }, [id, setHeader]);
+ 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       {/* Image Crop Modals */}
@@ -160,25 +165,10 @@ export default function AddQuestionPage() {
           onCancel={handleAnswerCropCancel}
         />
       )}
-      {/* Header */}
-      <header className="bg-gradient-to-r from-blue-600 to-indigo-700 shadow-lg mb-4">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center">
-            <button
-              onClick={() => router.push(`/categories/edit/${id}`)}
-              className="text-slate-300 hover:text-black transition-colors"
-            >
-              <ArrowLeft className="h-6 w-6" />
-            </button>
-            <h1 className="text-xl font-bold text-white text-center flex-1 ml-4">
-              Questions maker 
-            </h1>
-          </div>
-        </div>
-      </header>
+    
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6 max-w-4xl rounded-xl shadow-xl p-6 w-full  bg-white ">
+      <main className="container mx-auto mt-2 px-4 py-6 max-w-4xl rounded-xl shadow-xl p-6 w-full  bg-white ">
         <form onSubmit={handleSubmit} className="space-y-6">
           
           {/* Question Section */}
@@ -262,7 +252,7 @@ export default function AddQuestionPage() {
               <button
                 type="button"
                 onClick={() => questionImageInputRef.current?.click()}
-                className="flex flex-col items-center justify-center w-24 h-24 rounded-xl bg-primary-50 border-2 border-yellow-500 hover:bg-primary-200 transition-colors"
+                className="flex flex-col items-center justify-center w-24 h-24 rounded-xl bg-primary-50 border-2  hover:bg-primary-200 transition-colors"
                 title="add an image"
               >
                 <ImageIcon className="h-8 w-8 text-black mb-1" />
@@ -355,7 +345,7 @@ export default function AddQuestionPage() {
               <button
                 type="button"
                 onClick={() => answerImageInputRef.current?.click()}
-                className="flex flex-col items-center justify-center w-24 h-24 rounded-xl bg-primary-50 border-2 border-yellow-500 hover:bg-primary-200 transition-colors"
+                className="flex flex-col items-center justify-center w-24 h-24 rounded-xl bg-primary-50 border-2  hover:bg-primary-200 transition-colors"
                 title="add an image "
               >
                 <ImageIcon className="h-8 w-8 text-black mb-1" />

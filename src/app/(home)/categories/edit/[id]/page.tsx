@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
 import CategoryFormFields from '@/components/added_cat/CategoryFormFields';
 import QuestionsList from '@/components/added_cat/QuestionsList';
 import { gameAPI } from '@/lib/api/game';
+import { useHeader } from '@/app/(home)/layout';
 
 interface Question {
   id: number;
@@ -20,7 +20,7 @@ export default function EditCategoryPage() {
   const router = useRouter();
   const params = useParams();
   const categoryId = params.id as string;
-  
+   const { setHeader } = useHeader();
   const [categoryName, setCategoryName] = useState('');
   const [categoryDescription, setCategoryDescription] = useState('');
   const [categoryImage, setCategoryImage] = useState<string | null>(null);
@@ -29,7 +29,9 @@ export default function EditCategoryPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-
+ useEffect(() => {
+    setHeader({ title: "Edit the category", backHref: "/categories" });
+  }, [setHeader]);
   // Debug: Track when categoryImage changes
   useEffect(() => {
     console.log('🖼️ categoryImage changed:', categoryImage ? `${categoryImage.substring(0, 50)}...` : 'null');
@@ -179,24 +181,6 @@ export default function EditCategoryPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-blue-600 to-indigo-700 shadow-lg">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            
-            <button
-              onClick={() => router.push('/categories')}
-              className="flex items-center space-x-2 text-white hover:text-gray-200 transition-colors"
-            >
-              <ArrowLeft className="h-6 w-6" />
-              
-            </button>
-            <h1 className="text-2xl md:text-3xl font-bold text-white">Edit Category</h1>
-            <div className="w-32"></div>
-          </div>
-        </div>
-      </header>
-
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           {error && (

@@ -25,10 +25,14 @@ export default function LoginPage() {
         localStorage.setItem('membership', JSON.stringify(response.membership))
         router.push('/dashboard')
       } else {
-        setError(response.error || '   the login failed' )
+        setError(response.error || 'the login failed')
       }
-    } catch (err: any) {
-      setError(' An error occurred during login')
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('An error occurred during login')
+      }
     } finally {
       setIsLoading(false)
     }

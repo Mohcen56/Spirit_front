@@ -13,10 +13,8 @@ function authHeaders(extra: Record<string, string> = {}) {
 export const gameAPI = {
   getCategories: async (): Promise<Category[]> => {
     try {
-   
+      const response = await api.get('/api/content/categories/');
       
-      const response = await api.get('/api/categories/', { headers: authHeaders() });
-
       let categoriesData = response.data;
       if (categoriesData && typeof categoriesData === 'object' && 'results' in categoriesData) {
         categoriesData = categoriesData.results;
@@ -33,6 +31,7 @@ export const gameAPI = {
       throw error;
     }
   },
+
 
   getCollectionsWithCategories: async (): Promise<Collection[]> => {
     try {
@@ -278,10 +277,12 @@ export const gameAPI = {
   },
 
   getMySavedCategories: async () => {
-    try {
-      const token = localStorage.getItem('authToken');
-      if (!token) throw new Error('Authentication required');
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      return [];
+    }
 
+    try {
       const response = await api.get('/api/content/user-categories/my_saved_categories/', {
         headers: {
           'Authorization': `Token ${token}`,

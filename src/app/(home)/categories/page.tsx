@@ -4,21 +4,24 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { gameAPI } from '@/lib/api/index';
-import { Category, Membership, Collection } from '@/types/game';
-import { ArrowLeft, Users, Crown, Lock, Eye, Pencil, Info } from 'lucide-react';
+import { Category, Collection } from '@/types/game';
+import { Users, Crown, Lock, Eye, Pencil, Info } from 'lucide-react';
 import Image from 'next/image';
+import { useMembership } from '@/hooks/useMembership';
+import { useHeader } from '../layout';
 
 export default function CategoriesPage() {
   const [collections, setCollections] = useState<Collection[]>([]);
-  const [membership, setMembership] = useState<Membership | null>(null);
+  const { membership, currentUserId, error, setError } = useMembership();
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
   const [infoModal, setInfoModal] = useState<{ open: boolean; category: Category | null }>({ open: false, category: null });
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+   const { setHeader } = useHeader();
   const router = useRouter();
-
+ useEffect(() => {
+    setHeader({ title: "Categories", backHref: "/dashboard" });
+  }, [setHeader]);
   // Function to handle image loading errors
   const handleImageError = (categoryName: string) => {
     setImageErrors(prev => new Set(prev).add(categoryName));
@@ -68,8 +71,14 @@ export default function CategoriesPage() {
   useEffect(() => {
     const loadData = async () => {
       try {
+        let collectionsData: Collection[] | null = null;
+        
         // Get collections with categories from backend
-        const collectionsData = await gameAPI.getCollectionsWithCategories();
+        try {
+          collectionsData = await gameAPI.getCollectionsWithCategories();
+        } catch (error) {
+          console.error('Error fetching collections with categories:', error);
+        }
         
         // Get user's saved categories
         let savedCategories: Category[] = [];
@@ -83,52 +92,45 @@ export default function CategoriesPage() {
           console.log('No saved categories or user not authenticated');
         }
         
+        // Create "Added Categories" collection with user's saved categories
+        const addedCategoriesCollection: Collection = {
+          id: 999, // Use a high ID to avoid conflicts
+          name: 'Added Categories',
+          order: -1, // Put it at the top
+          categories: savedCategories,
+          categories_count: savedCategories.length
+        };
+        
+        let finalCollections: Collection[] | null = null;
+        
         // Ensure we have an array
         if (Array.isArray(collectionsData)) {
-          // Create "Added Categories" collection with user's saved categories
-          const addedCategoriesCollection: Collection = {
-            id: 999, // Use a high ID to avoid conflicts
-            name: 'Added Categories',
-            order: -1, // Put it at the top
-            categories: savedCategories,
-            categories_count: savedCategories.length
-          };
-          
-          // Add "Added Categories" collection at the beginning
-          setCollections([addedCategoriesCollection, ...collectionsData]);
+          finalCollections = [addedCategoriesCollection, ...collectionsData];
         } else {
-          setError('Invalid data format');
-        }
-        
-        // Get membership and user from stored user data (client-side only)
-        if (typeof window !== 'undefined') {
-          const storedMembership = localStorage.getItem('membership');
-          if (storedMembership) {
-            const membershipData = JSON.parse(storedMembership);
-            setMembership(membershipData);
-            if (membershipData.user?.id) {
-              setCurrentUserId(membershipData.user.id);
+          // Fallback to regular categories API if collections fail
+          try {
+            const categoriesData = await gameAPI.getCategories();
+            if (Array.isArray(categoriesData)) {
+              finalCollections = [
+                addedCategoriesCollection,
+                {
+                  id: 0,
+                  name: 'All Categories',
+                  order: 0,
+                  categories: categoriesData,
+                  categories_count: categoriesData.length
+                }
+              ];
             }
+          } catch (fallbackError) {
+            console.error('Fallback categories fetch failed:', fallbackError);
           }
         }
-      } catch {
-        setError('An error occurred while loading data');
         
-        // Fallback to regular categories API if collections fail
-        try {
-          const categoriesData = await gameAPI.getCategories();
-          if (Array.isArray(categoriesData)) {
-            // Create a default collection for fallback
-            setCollections([{
-              id: 0,
-              name: 'All Categories',
-              order: 0,
-              categories: categoriesData,
-              categories_count: categoriesData.length
-            }]);
-          }
-        } catch {
-          // Silent fallback failure
+        if (finalCollections) {
+          setCollections(finalCollections);
+        } else {
+          setError('Unable to load categories');
         }
       } finally {
         setIsLoading(false);
@@ -136,7 +138,7 @@ export default function CategoriesPage() {
     };
 
     loadData();
-  }, []);
+  }, [setError]);
 
   const handleCategoryToggle = (categoryId: number, isPremium: boolean) => {
     if (isPremium && !membership?.is_premium) {
@@ -184,50 +186,6 @@ export default function CategoriesPage() {
 
   return (
     <div className="min-h-screen bg-eastern-blue-50">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-primary-600 to-primary-700 shadow-lg">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            {/* Left: Logo and Title */}
-            <div className="flex items-center space-x-4">
-              <Link 
-                href="/"
-                className="flex items-center space-x-3 text-white hover:text-primary-100 transition-colors group"
-              >
-                <ArrowLeft className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                <span className="font-medium">Back</span>
-              </Link>
-              <div className="h-8 w-px bg-white/30"></div>
-              <div className="flex items-center space-x-3">
-                <span className="text-3xl">🎮</span>
-                <h1 className="text-xl font-bold text-white">New Game Setup</h1>
-              </div>
-            </div>
-
-            {/* Right: Membership Status */}
-            {membership && (
-              <div className={`flex items-center space-x-2 px-4 py-2 rounded-full shadow-md ${
-                membership.is_premium 
-                  ? 'bg-yellow-400 text-yellow-900' 
-                  : 'bg-white/20 text-white backdrop-blur-sm'
-              }`}>
-                {membership.is_premium ? (
-                  <>
-                    <Crown className="h-5 w-5" />
-                    <span className="font-semibold text-sm">Premium</span>
-                  </>
-                ) : (
-                  <>
-                    <Users className="h-5 w-5" />
-                    <span className="font-medium text-sm">Free</span>
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
-
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto space-y-8">
           {error && (
@@ -240,7 +198,7 @@ export default function CategoriesPage() {
           <div className="space-y-6">
             <div className="flex justify-center">
               <div className="bg-eastern-blue-400 text-white px-8 py-2 mb-4 rounded-full shadow-lg">
-                <h2 className="text-2xl font-bold text-center">
+                <h2 className="lg:text-2xl font-bold text-center">
                   Choose Categories (2-6 categories)
                 </h2>
               </div>
@@ -252,9 +210,9 @@ export default function CategoriesPage() {
                 {/* Collection Header */}
                 <div className="relative flex justify-center  -mt-11 mb-4">
                   <div className="bg-eastern-blue-700 text-white px-6 py-2   rounded-full shadow-md">
-                    <h3 className="text-xl font-bold text-center">{collection.name}</h3>
+                    <h3 className="lg:text-xl font-bold text-center">{collection.name}</h3>
                   </div>
-                  <div className="absolute right-0 top-1/2 transform -translate-y-1/2 text-primary-600 text-sm bg-primary-50 px-3 py-1 rounded-full">
+                  <div className="absolute -right-3 lg:right-0 top-1/2 transform -translate-y-1/2 text-primary-600 text-sm bg-primary-50 px-3 py-1 rounded-full">
                     {collection.categories?.length || 0} categories
                   </div>
                 </div>
@@ -268,8 +226,8 @@ export default function CategoriesPage() {
                       className="relative w-full aspect-[4/5] rounded-3xl border-2 border-dashed border-eastern-blue-400 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 hover:border-eastern-blue-600 bg-white/50 backdrop-blur-sm flex flex-col items-center justify-center group"
                     >
                       <div className="flex flex-col items-center justify-center space-y-3">
-                        <div className="w-20 h-20 bg-gradient-to-br from-eastern-blue-400 to-eastern-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
-                          <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="w-15 h-15 lg:w-20 lg:h-20 bg-gradient-to-br from-eastern-blue-400 to-eastern-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                          <svg className="w-8 h-8 lg:w-12 lg:h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
                           </svg>
                         </div>
@@ -323,7 +281,7 @@ export default function CategoriesPage() {
                         )}
                       </span>
                       {/* Percentage Badge */}
-                      <div className="absolute top-2   bg-eastern-blue-500 text-white text-sm font-bold px-3 py-1  min-w-[45px] text-center z-20">
+                      <div className="absolute top-2   bg-eastern-blue-500 text-white text-xs lg:text-sm font-bold px-2 lg:px-3 py-1  lg:min-w-[45px] text-center z-20">
                         {playedPercent}%
                       </div>
                       {/* Category Illustration */}
@@ -350,7 +308,7 @@ export default function CategoriesPage() {
                     </div>
                     {/* Bottom Section - Dark Background */}
                     <div className="relative h-[21%] bg-gradient-to-br from-eastern-blue-500 to-eastern-blue-700 flex items-center justify-center p-4">
-                      <h3 className="text-white font-bold text-lg text-center leading-tight">
+                      <h3 className="text-white  items-center font-bold text-sm lg:text-lg text-center leading-tight">
                         {category.name}
                       </h3>
                       {/* Premium/Lock Indicator */}
@@ -365,7 +323,7 @@ export default function CategoriesPage() {
                       )}
                       {/* Selection Indicator */}
                       {isSelected && (
-                        <div className="absolute top-2 left-2 bg-green-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold">
+                        <div className="absolute top-0 left-2 lg:top-2 lg:left-2 bg-green-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold">
                           ✓
                         </div>
                       )}

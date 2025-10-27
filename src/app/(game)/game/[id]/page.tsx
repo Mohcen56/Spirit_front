@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { gameAPI } from '@/lib/api/index';
 import { Game, Category, Team } from '@/types/game';
+import Header from '@/components/Header';
 
 export default function GamePage() {
   const { id } = useParams();
@@ -86,17 +87,12 @@ export default function GamePage() {
 
   return (
     <div className="min-h-screen bg-eastern-blue-50">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-primary-600 to-primary-700 shadow-lg">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-center">
-            <div className="flex items-center space-x-3">
-              <span className="text-3xl">🎮</span>
-              <h1 className="text-2xl font-bold text-white">Quiz Game</h1>
-            </div>
-          </div>
-        </div>
-      </header>
+     {/* Header */}
+          <Header
+           title="Starting the Game"
+           backHref="/categories"
+           
+         />
 
       <div className="container mx-auto px-4 py-8">
         {/* Game ID */}

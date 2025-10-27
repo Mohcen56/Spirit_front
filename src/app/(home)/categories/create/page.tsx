@@ -1,16 +1,19 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { gameAPI } from '@/lib/api/index';
 import { ArrowLeft, ImagePlus } from 'lucide-react';
 import ImageCropModal from '@/components/added_cat/ImageCropModal';
+import Header from '@/components/Header';
+import { useHeader } from '../../layout';
 
 
 export default function CreateCategoryPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+   const { setHeader } = useHeader();
   
   // Form state
   const [categoryName, setCategoryName] = useState('');
@@ -104,7 +107,9 @@ export default function CreateCategoryPage() {
       setIsSubmitting(false);
     }
   };
-  
+   useEffect(() => {
+    setHeader({ title: "Create Category", backHref: "/categories/add" });
+  }, [setHeader]);
 
   // Show details form
   return (
@@ -118,29 +123,7 @@ export default function CreateCategoryPage() {
         />
       )}
 
-      {/* Header */}
-      <header className="bg-gradient-to-r from-primary-600 to-primary-700 shadow-lg">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            {/* Left: Logo and Title */}
-            <div className="flex items-center space-x-4">
-              <Link 
-                href="/categories/add"
-                className="flex items-center space-x-3 text-white hover:text-primary-100 transition-colors group"
-              >
-                <ArrowLeft className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                <span className="font-medium">Back</span>
-              </Link>
-              <div className="h-8 w-px bg-white/30"></div>
-              <div className="flex items-center space-x-3">
-                <span className="text-3xl">🎮</span>
-                <h1 className="text-xl font-bold text-white">Create New Category</h1>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
+    
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto space-y-8">
           {error && (

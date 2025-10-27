@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { gameAPI } from '@/lib/api/index';
 import { Category, User } from '@/types/game';
-import { ArrowLeft, Crown } from 'lucide-react';
+import {  Crown } from 'lucide-react';
 import Image from 'next/image';
 import Usersprofiles from '@/components/Usersprofiles';
+
+import { useHeader } from '../../layout';
 
 export default function AddedCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -18,6 +20,11 @@ export default function AddedCategoriesPage() {
   const [showProfile, setShowProfile] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const router = useRouter();
+   const { setHeader } = useHeader();
+
+  useEffect(() => {
+    setHeader({ title: " Categories Added by Users", backHref: "/categories" });
+  }, [setHeader]);
 
   // Function to handle image loading errors
   const handleImageError = (categoryId: number) => {
@@ -36,7 +43,7 @@ export default function AddedCategoriesPage() {
     const loadData = async () => {
       try {
         console.log('🔍 Loading user categories...');
-        console.log('🔑 Auth token:', localStorage.getItem('authToken') ? 'Present' : 'Missing');
+        
         
         // Get categories from backend:
         // - User's own custom categories (approved or not)
@@ -129,29 +136,7 @@ export default function AddedCategoriesPage() {
         />
       ) : (
         <div className="min-h-screen bg-eastern-blue-50">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-primary-600 to-primary-700 shadow-lg">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            {/* Left: Logo and Title */}
-            <div className="flex items-center space-x-4">
-              <Link 
-                href="/categories"
-                className="flex items-center space-x-3 text-white hover:text-primary-100 transition-colors group"
-              >
-                <ArrowLeft className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                <span className="font-medium">Back</span>
-              </Link>
-              <div className="h-8 w-px bg-white/30"></div>
-              <div className="flex items-center space-x-3">
-                <span className="text-3xl">🎮</span>
-                <h1 className="text-xl font-bold text-white">Added Categories</h1>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
+ 
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto space-y-8">
           {error && (

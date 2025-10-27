@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { gameAPI } from '@/lib/api/index';
-import { ArrowLeft, Play, Plus, Minus, ChevronLeft, ChevronRight } from 'lucide-react';
+import {  Play, Plus, Minus, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
+import { useHeader } from '../layout';
 
 interface TeamForm {
   name: string;
@@ -32,6 +32,10 @@ export default function TeamsPage() {
   const [error, setError] = useState('');
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
   const router = useRouter();
+   const { setHeader } = useHeader();
+    useEffect(() => {
+    setHeader({ title: "Team Setup", backHref: "/categories" });
+  }, [setHeader]);
 
   useEffect(() => {
     // Load selected categories from localStorage
@@ -172,28 +176,8 @@ export default function TeamsPage() {
 
   return (
     <div className="min-h-screen bg-eastern-blue-50">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-primary-600 to-primary-700 shadow-lg">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            {/* Left: Logo and Title */}
-            <div className="flex items-center space-x-4">
-              <Link 
-                href="/categories"
-                className="flex items-center space-x-3 text-white hover:text-primary-100 transition-colors group"
-              >
-                <ArrowLeft className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                <span className="font-medium">Back to Categories</span>
-              </Link>
-              <div className="h-8 w-px bg-white/30"></div>
-              <div className="flex items-center space-x-3">
-                <span className="text-3xl">🎮</span>
-                <h1 className="text-xl font-bold text-white">Team Setup</h1>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+     
+      
 
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto space-y-8">

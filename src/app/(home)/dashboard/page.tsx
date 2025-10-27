@@ -1,18 +1,18 @@
 'use client';
 
 
-import {  useState } from 'react';
+import {  useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { authAPI } from '@/lib/api/index';
-import { Play, History, LogOut } from 'lucide-react';
+import { Play, History,  } from 'lucide-react';
 import UserProfile from '@/components/UserProfile';
 import { useAuthGate } from '@/hooks/useAuthFate';
 
+import { useHeader } from '../layout';
 export default function HomePage() {
   const [showProfile, setShowProfile] = useState(false);
-
-const { user, setUser, isLoading, logout  } = useAuthGate({ redirectIfGuest: '/login' });
+ const { setHeader } = useHeader();
+const { user, setUser, isLoading,  } = useAuthGate({ redirectIfGuest: '/login' });
 
   const handleProfileSave = async (data: { username: string; email: string; avatar: string; avatarFile?: File; password?: string; currentPassword?: string }) => {
     try {
@@ -72,7 +72,9 @@ const { user, setUser, isLoading, logout  } = useAuthGate({ redirectIfGuest: '/l
       alert(error instanceof Error ? error.message : 'Failed to update profile');
     }
   };
-
+ useEffect(() => {
+    setHeader({ title: "", backHref: "/" });
+  }, [setHeader]);
   if (isLoading) {
     return (
       <div className="min-h-screen bg-custom-bg flex items-center justify-center">
@@ -95,56 +97,7 @@ const { user, setUser, isLoading, logout  } = useAuthGate({ redirectIfGuest: '/l
         />
       ) : (
         <>
-          {/* Header */}
-          <header className="bg-white/80 backdrop-blur-md border-b border-gray-200">
-  <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-    {/* LEFT: Avatar + Username */}
-    <div className="flex items-center space-x-4">
-      <button
-        onClick={() => setShowProfile(true)}
-        className="w-12 h-12 rounded-full flex items-center justify-center hover:scale-105 transition-transform cursor-pointer overflow-hidden shadow-lg"
-        aria-label="Open profile settings"
-      >
-        {user.avatar && user.avatar !== '/avatars/tanjiro.jpeg' ? (
-          <Image
-            src={user.avatar}
-            alt="Profile"
-            width={40}
-            height={40}
-            className="w-full h-full object-cover rounded-full"
-            onError={(e) => {
-              console.log('Custom avatar failed to load:', user.avatar)
-              ;(e.target as HTMLImageElement).src = '/avatars/tanjiro.jpeg'
-            }}
-          />
-        ) : (
-          <Image
-            src="/avatars/tanjiro.jpeg"
-            alt="Default Profile"
-            width={40}
-            height={40}
-            className="w-full h-full object-cover rounded-full"
-          />
-        )}
-      </button>
-      <p className="hidden md:inline-block text-sm text-gray-600">{user.username}</p>
-    </div>
-
-    {/* CENTER: Logo/Title */}
-    <h1 className="text-xl font-bold text-gray-800 absolute left-1/2 transform -translate-x-1/2">
-      trivia spirit
-    </h1>
-
-    {/* RIGHT: Logout */}
-    <button
-      onClick={logout}
-      className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors"
-    >
-      <LogOut className="h-5 w-5" />
-      <span>Logout</span>
-    </button>
-  </div>
-</header>
+  
 
 
       {/* Main Content */}
@@ -161,7 +114,7 @@ const { user, setUser, isLoading, logout  } = useAuthGate({ redirectIfGuest: '/l
           </div>
 
           {/* Action Cards */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-2   gap-6">
             {/* Start New Game */}
             <Link href="/categories">
               <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 border border-gray-200 hover:bg-white/90 transition-all duration-200 transform hover:scale-105 cursor-pointer group shadow-lg">
