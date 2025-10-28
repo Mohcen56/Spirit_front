@@ -130,15 +130,14 @@ export const gameAPI = {
     }
   },
 
-  awardQuestion: async (gameId: number, questionId: number, teamId: number | null) => {
+  finishRound: async (gameId: number, playedQuestionIds: number[]) => {
     try {
-      const response = await api.post(`/api/gameplay/games/${gameId}/award_question/`, {
-        question_id: questionId,
-        team_id: teamId
+      const response = await api.post(`/api/gameplay/games/${gameId}/finish_round/`, {
+        played_question_ids: playedQuestionIds,
       });
       return response.data;
     } catch (error) {
-      console.error('Error awarding question:', error);
+      console.error('Error finishing round:', error);
       throw error;
     }
   },
@@ -154,22 +153,9 @@ export const gameAPI = {
   },
 
   
-  updateTeamScore: async (gameId: number, teamId: number, scoreChange: number) => {
-    try {
-      const response = await api.post(`/api/gameplay/teams/${teamId}/update_score/`, {
-        score_change: scoreChange
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Error updating team score:', error);
-      throw error;
-    }
-  },
+  
 
-  selectQuestion: async (questionId: number): Promise<Question> => {
-    const response = await api.get(`/api/content/questions/${questionId}/`);
-    return response.data;
-  },
+  
 
   // User-created categories
   createUserCategory: async (formData: FormData) => {
@@ -464,6 +450,11 @@ export const gameAPI = {
       return []; // Return empty array on error instead of throwing
     }
   },
+getRandomQuestion: async (categoryIds: number[]) => {
+  const query = categoryIds.map(id => `category_ids=${id}`).join("&");
+  const response = await api.get(`/api/content/questions/random/?${query}&count=1`);
+  return response.data[0];
+},
 
   // Delete a question
   deleteQuestion: async (questionId: number) => {

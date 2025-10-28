@@ -1,15 +1,9 @@
 import { useState, useEffect } from 'react';
 import { gameAPI } from '@/lib/api';
-import { Game, Question, Team } from '@/types/game';
-
-// Optional: a type for combined game data
-export interface GameWithDetails extends Game {
-  teams: Team[];
-  availableQuestions: Question[];
-}
+import { Game } from '@/types/game';
 
 export function useGameData(gameId: string | number) {
-  const [game, setGame] = useState<GameWithDetails | null>(null);
+  const [game, setGame] = useState<Game | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,18 +20,8 @@ export function useGameData(gameId: string | number) {
         if (isNaN(numericId)) throw new Error('Invalid game ID');
 
         // Fetch game details and questions in parallel
-        const [gameData, questions] = await Promise.all([
-          gameAPI.getGame(numericId),
-          gameAPI.getAvailableQuestions(numericId)
-        ]);
-
-        if (mounted) {
-          setGame({
-            ...gameData,
-            teams: gameData.teams || [],
-            availableQuestions: questions || [],
-          });
-        }
+        const gameData = await gameAPI.getGame(numericId);
+        if (mounted) setGame(gameData);
       } catch (err) {
         if (mounted) {
           const message = err instanceof Error ? err.message : 'Failed to load game data';

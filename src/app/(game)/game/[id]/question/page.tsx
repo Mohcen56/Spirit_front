@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import {  Question } from '@/types/game';
+import { gameAPI } from '@/lib/api';
+import { Question } from '@/types/game';
 import Image from 'next/image';
 import GameHeader from '@/components/GameHeader';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { startGame, switchToNextTeam, endGame, awardPoints } from '@/store/gameSlice';
+import { startGame, switchToNextTeam, awardPoints, setGameQuestions, endGame } from '@/store/gameSlice';
 import { useGameData } from '@/hooks/useGameData';
 import { useSyncTeams } from '@/hooks/useSyncTeams';
 
@@ -24,11 +25,44 @@ export default function GameBoardPage() {
   const router = useRouter();
   const gameId = params.id as string;
   const dispatch = useAppDispatch();
-  const { currentTeam, isGameActive, gameId: currentGameId, teams: liveTeams } = useAppSelector(state => state.game);
+  const {
+    currentTeam,
+    isGameActive,
+    gameId: currentGameId,
+    teams: liveTeams,
+    questions,
+    playedQuestions,
+  } = useAppSelector(state => state.game);
    // 👇 Replace your huge useEffect with:
   const { game, isLoading, error } = useGameData(gameId);
    // 👇 Sync fetched teams with Redux
   useSyncTeams(game?.teams, liveTeams);
+
+  useEffect(() => {
+    if (!game || questions.length > 0) return;
+
+    const numericGameId = Number(gameId);
+    if (!Number.isFinite(numericGameId)) return;
+
+    let cancelled = false;
+
+    const loadQuestions = async () => {
+      try {
+        const data = await gameAPI.getAvailableQuestions(numericGameId);
+        if (!cancelled) {
+          dispatch(setGameQuestions(data));
+        }
+      } catch (err) {
+        console.error('Failed to load available questions:', err);
+      }
+    };
+
+    loadQuestions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [dispatch, game, gameId, questions.length]);
 
 
   // Initialize game in Redux when component mounts and game data is loaded
@@ -52,7 +86,16 @@ export default function GameBoardPage() {
   };
 
   // Handle ending the game
-  const handleEndGame = () => {
+  const handleEndGame = async () => {
+    try {
+      const numericGameId = Number(gameId);
+      if (Number.isFinite(numericGameId)) {
+        await gameAPI.finishRound(numericGameId, playedQuestions);
+      }
+    } catch (error) {
+      console.error('Failed to finish round:', error);
+    }
+
     dispatch(endGame());
     router.push(`/game/${gameId}/results`);
   };
@@ -71,28 +114,24 @@ export default function GameBoardPage() {
   const organizeQuestionsByCategory = React.useMemo(() => {
     if (!game) return {};
     const organized: Record<number, Question[]> = {};
-    
-    // Initialize categories
-    game.categories.forEach(category => {
+
+    game.categories.forEach((category) => {
       organized[category.id] = [];
     });
-    
-    // Group questions by category
-    game.availableQuestions.forEach(question => {
+
+    questions.forEach((question) => {
       const questionCategoryId = question.category?.id;
       if (questionCategoryId && organized[questionCategoryId]) {
         organized[questionCategoryId].push(question);
       }
     });
-    
-    // Sort questions within each category by points
-    Object.keys(organized).forEach(categoryId => {
-      organized[parseInt(categoryId)].sort((a, b) => a.points - b.points);
+
+    Object.keys(organized).forEach((categoryId) => {
+      organized[parseInt(categoryId, 10)].sort((a, b) => a.points - b.points);
     });
-    
-    console.log('Questions organized by category:', organized);
+
     return organized;
-  }, [game]);
+  }, [game, questions]);
 
   // Create question grid for a category using only backend-returned questions
   const createQuestionGrid = (categoryId: number): QuestionSlot[] => {
@@ -106,20 +145,21 @@ export default function GameBoardPage() {
     }
     
     // Sort by points descending (harder questions first)
-    const sortedQuestions = categoryQuestions.sort((a: Question, b: Question) => b.points - a.points);
+    const sortedQuestions = [...categoryQuestions].sort((a: Question, b: Question) => b.points - a.points);
     
     console.log(`Category ${categoryId} after sorting:`, sortedQuestions.length, 'questions');
     
     return sortedQuestions.map((question: Question, index: number): QuestionSlot => ({
       points: question.points,
-      question: question,
-      isSolved: false, // Since these are available questions, they're not solved
+      question,
+      isSolved: playedQuestions.includes(question.id),
       index
     }));
   };
 
   // Handle question select
   const handleQuestionSelect = (question: Question) => {
+    if (!question || playedQuestions.includes(question.id)) return;
     router.push(`/game/${gameId}/question/${question.id}`);
   };
 
@@ -223,8 +263,10 @@ return (
     {/* Game Board - Takes remaining height */}
     <main className="flex-1 p-2 overflow-hidden bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300">
       <div className="h-full grid grid-cols-3 md:grid-cols-6 gap-3">
-        {game.categories.map((category) => (
-          <div key={category.id} className="h-full flex flex-col">
+        {game.categories.map((category) => {
+          const questionGrid = createQuestionGrid(category.id);
+          return (
+            <div key={category.id} className="h-full flex flex-col">
             
             {/* Category image + name - Fixed height */}
             <div className="relative h-24 md:h-40 w-full rounded-xl overflow-hidden border-4 border-white shadow mb-3 flex-shrink-0">
@@ -248,7 +290,7 @@ return (
 
             {/* Questions - Takes remaining height */}
             <div className="flex-1 flex flex-col gap-1 md:gap-2">
-              {createQuestionGrid(category.id).map((slot: QuestionSlot) => (
+              {questionGrid.map((slot: QuestionSlot) => (
                 <button
                   key={`${category.id}-${slot.question.id}`}
                   onClick={() => slot.question && handleQuestionSelect(slot.question)}
@@ -265,15 +307,16 @@ return (
                 </button>
               ))}
               {/* Add empty slots if less than 6 questions to maintain consistent height */}
-              {Array.from({length: Math.max(0, 6 - createQuestionGrid(category.id).length)}).map((_, index) => (
+              {Array.from({length: Math.max(0, 6 - questionGrid.length)}).map((_, index) => (
                 <div
                   key={`empty-${category.id}-${index}`}
                   className="flex-1 bg-[#8a95ab] opacity-30 rounded-lg"
                 />
               ))}
             </div>
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </div>
     </main>
 

@@ -12,7 +12,7 @@ import GameHeader from '@/components/GameHeader';
 import ChoicesDialog from '@/components/ChoicesDialog';
 import { getFullImageUrl } from '@/lib/imageUtils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { switchToNextTeam, endGame, awardPoints, activateDoublePerk, clearActivePerk, activateRerollPerk } from '@/store/gameSlice';
+import { switchToNextTeam, awardPoints, activateDoublePerk, clearActivePerk, activateRerollPerk, setGameQuestions, markQuestionPlayed, endGame } from '@/store/gameSlice';
 import { Loader } from 'lucide-react';
 import { useGameData } from '@/hooks/useGameData';
 import { useSyncTeams } from '@/hooks/useSyncTeams';
@@ -25,11 +25,14 @@ export default function QuestionPage() {
   
   const dispatch = useAppDispatch();
   const {
-  currentTeam,
-  doublePerkActiveTeamId,
-  doublePerkUsed,
-  rerollPerkUsed,
-} = useAppSelector((state) => state.game);
+    currentTeam,
+    doublePerkActiveTeamId,
+    doublePerkUsed,
+    rerollPerkUsed,
+    questions,
+    playedQuestions,
+    teams: liveTeams,
+  } = useAppSelector((state) => state.game);
   const [awardError, setAwardError] = useState('');
   const [awardSuccess, setAwardSuccess] = useState('');
   const [elapsedTime, setElapsedTime] = useState(0); // Chronometer instead of countdown
@@ -42,13 +45,39 @@ export default function QuestionPage() {
   const { game, isLoading, error } = useGameData(gameId);
 
   // 🔁 Sync teams with Redux (live scoring)
-  const { teams: liveTeams } = useAppSelector((state) => state.game);
   useSyncTeams(game?.teams, liveTeams);
+  useEffect(() => {
+    if (questions.length > 0) return;
+
+    const numericGameId = Number(gameId);
+    if (!Number.isFinite(numericGameId)) return;
+
+    let cancelled = false;
+
+    const loadQuestions = async () => {
+      try {
+        const data = await gameAPI.getAvailableQuestions(numericGameId);
+        if (!cancelled) {
+          dispatch(setGameQuestions(data));
+        }
+      } catch (err) {
+        console.error("Failed to load available questions:", err);
+      }
+    };
+
+    loadQuestions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [dispatch, gameId, questions.length]);
+
+
 
   // 🧩 Get the selected question
-  const question = game?.availableQuestions.find((q) => q.id === questionId);
+  const question = questions.find((q) => q.id === questionId);
 
-  const teams = game?.teams || [];
+  const teams = liveTeams.length > 0 ? liveTeams : (game?.teams || []);
 
 
   // Enhanced turn tracking - save turn history and team turn data during game
@@ -162,32 +191,30 @@ export default function QuestionPage() {
     setAwardSuccess('');
     
     try {
-      const numericGameId = parseInt(gameId);
-      
-      // Start API call in background while showing immediate success
-      const apiPromise = gameAPI.awardQuestion(numericGameId, questionId, teamId);
-      
-      // Show success immediately for better UX
+      if (!question) {
+        throw new Error('Question not found');
+      }
+
       setAwardSuccess('Points awarded!');
 
-      // Update local Redux score immediately when a team is selected
       if (teamId && question) {
-        // Check if double points perk is active for this team
         const isDouble = doublePerkActiveTeamId === teamId;
         const delta = isDouble ? question.points * 2 : question.points;
         dispatch(awardPoints({ teamId, delta }));
-        // Clear active perk after it has been applied
         if (isDouble) {
           dispatch(clearActivePerk());
         }
       }
+
+      if (!playedQuestions.includes(question.id)) {
+        dispatch(markQuestionPlayed(question.id));
+      }
       
-      // Record the current turn in history before changing teams
       const currentTeamData = teams.find(t => t.id === currentTeam) || teams[currentTeam - 1];
       const timestamp = Date.now();
       
-      if (currentTeamData && question) {
-        const turnDuration = elapsedTime; // Use elapsed time as turn duration
+      if (currentTeamData) {
+        const turnDuration = elapsedTime;
         
         setTurnHistory(prev => [...prev, {
           teamId: currentTeamData.id,
@@ -197,7 +224,6 @@ export default function QuestionPage() {
           duration: turnDuration
         }]);
         
-        // Update team turn statistics
         setTeamTurnData(prev => {
           const currentData = prev[currentTeamData.id] || {
             totalTurns: 0,
@@ -222,23 +248,16 @@ export default function QuestionPage() {
         });
       }
       
-  // Advance to next team's turn and reset timer
-    // Always clear any active perk at the end of a question
-    dispatch(clearActivePerk());
-    dispatch(switchToNextTeam());
+      dispatch(clearActivePerk());
+      dispatch(switchToNextTeam());
       setElapsedTime(0);
       
-      // Navigate immediately without waiting
       router.push(`/game/${gameId}/question`);
-      
-      // Let API call complete in background
-      await apiPromise;
       
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An error occurred while awarding points';
       console.error('Award error:', errorMessage);
       setAwardError(errorMessage);
-      // Don't navigate if there's an error
     }
   };
 
@@ -246,7 +265,18 @@ export default function QuestionPage() {
     router.push(`/game/${gameId}/question`);
   };
 
-  const handleEndGame = () => {
+  const handleEndGame = async () => {
+    try {
+      const numericGameId = Number(gameId);
+      if (Number.isFinite(numericGameId)) {
+        await gameAPI.finishRound(numericGameId, playedQuestions);
+      }
+    } catch (error) {
+      console.error('Failed to finish round:', error);
+      setAwardError('Failed to sync played questions, please try again.');
+      return;
+    }
+
     dispatch(endGame());
     router.push(`/game/${gameId}/results`);
   };
@@ -435,10 +465,9 @@ export default function QuestionPage() {
                           // Mark perk as used in Redux
                           dispatch(activateRerollPerk({ teamId: team.id }));
                           try {
-                            // Fetch a random question regardless of category
-                            const numericGameId = parseInt(gameId);
-                            const available = await gameAPI.getAvailableQuestions(numericGameId);
-                            const pool = available.filter(q => q.id !== question?.id);
+                            const pool = questions.filter(
+                              q => q.id !== question?.id && !playedQuestions.includes(q.id)
+                            );
                             if (pool.length === 0) return;
                             const random = pool[Math.floor(Math.random() * pool.length)];
                             router.push(`/game/${gameId}/question/${random.id}`);

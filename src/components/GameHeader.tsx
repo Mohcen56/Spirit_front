@@ -7,7 +7,7 @@ interface GameHeaderProps {
   onBackToBoard: () => void;
   currentTeamTurn: number;
   onTeamTurnChange: () => void;
-  onEndGame?: () => void;
+  onEndGame?: () => void | Promise<void>;
 }
 
 export default function GameHeader({ onBackToBoard, currentTeamTurn, onTeamTurnChange, onEndGame }: GameHeaderProps) {

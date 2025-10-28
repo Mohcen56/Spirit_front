@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { gameAPI } from '@/lib/api';
-import { Game, Team } from '@/types/game';
+import type { Team } from '@/types/game';
 import Image from 'next/image';
 import { Trophy, Medal, Award, Home, RotateCcw } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { resetGame } from '@/store/gameSlice';
+
 
 export default function GameResultsPage() {
   const params = useParams();
@@ -15,67 +15,43 @@ export default function GameResultsPage() {
   const dispatch = useAppDispatch();
   const gameId = params.id as string;
   const reduxTeams = useAppSelector(state => state.game.teams);
+  const reduxPlayedQuestions = useAppSelector(state => state.game.playedQuestions);
   
-  const [game, setGame] = useState<Game | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [playedCount, setPlayedCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-
-  // Immediately reflect Redux scores without waiting for API
+  
   useEffect(() => {
-    if (reduxTeams && reduxTeams.length > 0) {
-      const sorted = [...reduxTeams].sort((a, b) => (b.score || 0) - (a.score || 0));
-      setTeams(sorted);
+    if (!gameId) {
+      setTeams([]);
+      setPlayedCount(0);
+      setError('No saved results for this game.');
       setIsLoading(false);
+      return;
     }
-  }, [reduxTeams]);
 
-  useEffect(() => {
-    const loadGameResults = async () => {
-      if (!gameId) return;
-      
-      try {
-        setIsLoading(true);
-        console.log('Loading game results for ID:', gameId);
-        
-        const gameData = await gameAPI.getGame(Number(gameId));
-        console.log('Game results loaded:', gameData);
-        
-  setGame(gameData);
+    if (reduxTeams && reduxTeams.length > 0) {
+      const sorted = [...reduxTeams].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+      setTeams(sorted);
+      setPlayedCount(reduxPlayedQuestions.length);
+      setError('');
+    } else {
+      setTeams([]);
+      setPlayedCount(0);
+      setError('No saved results for this game.');
+    }
 
-  // Only set teams from backend if we don't already have Redux scores
-  if ((!reduxTeams || reduxTeams.length === 0) && teams.length === 0) {
-    const sourceTeams = gameData.teams || [];
-    const sortedTeams = [...sourceTeams].sort((a, b) => (b.score || 0) - (a.score || 0));
-    setTeams(sortedTeams);
-  }
-        
-      } catch (error) {
-        console.error('Error loading game results:', error);
-        setError('Failed to load game results');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    setIsLoading(false);
+  }, [gameId, reduxTeams, reduxPlayedQuestions.length]);
 
-    loadGameResults();
-  }, [gameId, reduxTeams, teams.length]);
+ 
 
-  // Clear game memory when leaving the results page
-  useEffect(() => {
-    return () => {
-      dispatch(resetGame());
-    };
-  }, [dispatch]);
 
-  const handlePlayAgain = () => {
-    dispatch(resetGame());
-    router.push('/');
-  };
 
   const handleBackHome = () => {
     dispatch(resetGame());
-    router.push('/');
+    router.push('/dashboard');
   };
 
   const getRankIcon = (position: number) => {
@@ -231,13 +207,7 @@ export default function GameResultsPage() {
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12">
-          <button
-            onClick={handlePlayAgain}
-            className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors"
-          >
-            <RotateCcw className="h-5 w-5" />
-            Play Again
-          </button>
+         
           <button
             onClick={handleBackHome}
             className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors"
@@ -247,11 +217,11 @@ export default function GameResultsPage() {
           </button>
         </div>
 
-        {/* Game Info */}
-        {game && (
+        {/* Summary */}
+        {playedCount > 0 && (
           <div className="text-center mt-8 text-gray-600">
             <p className="text-sm">
-              Game played on {new Date(game.date_played).toLocaleDateString()}
+              Questions answered this round: {playedCount}
             </p>
           </div>
         )}
