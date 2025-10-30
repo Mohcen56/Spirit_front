@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import type { Team } from '@/types/game';
 import Image from 'next/image';
-import { Trophy, Medal, Award, Home, RotateCcw } from 'lucide-react';
+import { Trophy, Medal, Award, Home } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { resetGame } from '@/store/gameSlice';
 

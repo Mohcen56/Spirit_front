@@ -69,75 +69,30 @@ export default function CategoriesPage() {
   };
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        let collectionsData: Collection[] | null = null;
-        
-        // Get collections with categories from backend
-        try {
-          collectionsData = await gameAPI.getCollectionsWithCategories();
-        } catch (error) {
-          console.error('Error fetching collections with categories:', error);
-        }
-        
-        // Get user's saved categories
-        let savedCategories: Category[] = [];
-        try {
-          const savedData = await gameAPI.getMySavedCategories();
-          // Handle paginated response
-          savedCategories = Array.isArray(savedData) 
-            ? savedData 
-            : (savedData?.results || []);
-        } catch {
-          console.log('No saved categories or user not authenticated');
-        }
-        
-        // Create "Added Categories" collection with user's saved categories
-        const addedCategoriesCollection: Collection = {
-          id: 999, // Use a high ID to avoid conflicts
-          name: 'Added Categories',
-          order: -1, // Put it at the top
-          categories: savedCategories,
-          categories_count: savedCategories.length
-        };
-        
-        let finalCollections: Collection[] | null = null;
-        
-        // Ensure we have an array
-        if (Array.isArray(collectionsData)) {
-          finalCollections = [addedCategoriesCollection, ...collectionsData];
-        } else {
-          // Fallback to regular categories API if collections fail
-          try {
-            const categoriesData = await gameAPI.getCategories();
-            if (Array.isArray(categoriesData)) {
-              finalCollections = [
-                addedCategoriesCollection,
-                {
-                  id: 0,
-                  name: 'All Categories',
-                  order: 0,
-                  categories: categoriesData,
-                  categories_count: categoriesData.length
-                }
-              ];
-            }
-          } catch (fallbackError) {
-            console.error('Fallback categories fetch failed:', fallbackError);
-          }
-        }
-        
-        if (finalCollections) {
-          setCollections(finalCollections);
-        } else {
-          setError('Unable to load categories');
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const loadData = async () => {
+    setIsLoading(true);
+    try {
+      const data = await gameAPI.getAllCategoryData();
 
-    loadData();
+      const addedCollection = {
+        id: 999,
+        name: 'Added Categories',
+        order: -1,
+        categories: data.saved_categories || [],
+        categories_count: (data.saved_categories || []).length,
+      };
+
+      const finalCollections = [addedCollection, ...(data.collections || [])];
+      setCollections(finalCollections);
+    } catch (error) {
+      console.error('Error loading all category data:', error);
+      setError('Failed to load categories');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  loadData();
   }, [setError]);
 
   const handleCategoryToggle = (categoryId: number, isPremium: boolean) => {

@@ -11,6 +11,28 @@ function authHeaders(extra: Record<string, string> = {}) {
 }
 
 export const gameAPI = {
+  getAllCategoryData: async (): Promise<{
+  collections: Collection[];
+  saved_categories: Category[];
+  fallback_categories: Category[];
+}> => {
+      try {
+        const response = await api.get('/api/content/collections/all_data/', {
+          headers: authHeaders(),
+        });
+
+        // Validate the shape
+        if (!response.data || typeof response.data !== 'object') {
+          throw new Error('Invalid response from /all_data/');
+        }
+
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching all category data:', error);
+        throw error;
+      }
+    },
+  
   getCategories: async (): Promise<Category[]> => {
     try {
       const response = await api.get('/api/content/categories/');
