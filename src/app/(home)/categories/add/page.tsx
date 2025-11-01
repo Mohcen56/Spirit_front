@@ -7,7 +7,7 @@ import { gameAPI } from '@/lib/api/index';
 import { Category, User } from '@/types/game';
 import {  Crown } from 'lucide-react';
 import Image from 'next/image';
-import Usersprofiles from '@/components/Usersprofiles';
+import Usersprofiles from '@/components/User/Usersprofiles';
 
 import { useHeader } from '../../layout';
 
@@ -220,7 +220,7 @@ export default function AddedCategoriesPage() {
                                       id: category.created_by_id,
                                       username: category.created_by_username || 'Unknown',
                                       email: '', // We don't have email from category
-                                      avatar: '/avatars/tanjiro.jpeg' // Default avatar for now
+                                      avatar: category.created_by_avatar || '/avatars/tanjiro.jpeg'// Default avatar for now
                                     });
                                     setShowProfile(true);
                                   }
@@ -229,7 +229,7 @@ export default function AddedCategoriesPage() {
                                 aria-label="View creator profile"
                               >
                                 <Image
-                                  src="/avatars/tanjiro.jpeg"
+                                  src={category.created_by_avatar || '/avatars/tanjiro.jpeg'}
                                   alt="Creator Profile"
                                   width={32}
                                   height={32}

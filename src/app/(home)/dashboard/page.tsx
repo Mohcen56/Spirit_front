@@ -5,7 +5,7 @@ import {  useEffect, useState } from 'react';
 import Link from 'next/link';
 import { authAPI } from '@/lib/api/index';
 import { Play, History,  } from 'lucide-react';
-import UserProfile from '@/components/UserProfile';
+import UserProfile from '@/components/User/UserProfile';
 import { useAuthGate } from '@/hooks/useAuthFate';
 
 import { useHeader } from '../layout';

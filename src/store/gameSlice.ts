@@ -12,6 +12,8 @@ interface GameState {
   rerollPerkUsed: Record<number, boolean>;
   questions: Question[];
   playedQuestions: number[];
+  loading: boolean;
+  error: string | null;
 }
 
 const initialState: GameState = {
@@ -25,12 +27,20 @@ const initialState: GameState = {
   rerollPerkUsed: {},
   questions: [],
   playedQuestions: [],
+  loading: false,
+  error: null,
 };
 
 const gameSlice = createSlice({
   name: 'game',
   initialState,
   reducers: {
+     setLoading: (state, action: PayloadAction<boolean>) => {
+      state.loading = action.payload;
+    },
+    setError: (state, action: PayloadAction<string | null>) => {
+      state.error = action.payload;
+    },
     startGame: (state, action: PayloadAction<{ gameId: string; totalTeams: number }>) => {
       const { gameId, totalTeams } = action.payload;
       state.gameId = gameId;

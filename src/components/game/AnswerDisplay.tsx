@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Question } from '@/types/game';
 import { RotateCcw, Users } from 'lucide-react';
 import Image from 'next/image';
@@ -14,17 +14,32 @@ interface AnswerDisplayProps {
 }
 
 export default function AnswerDisplay({ question, onShowQuestion, onShowTeamSelector }: AnswerDisplayProps) {
+  const [answerImageStatus, setAnswerImageStatus] = useState<'idle' | 'loading' | 'loaded' | 'error'>('idle');
+
+  useEffect(() => {
+    if (question.answer_image) {
+      setAnswerImageStatus('loading');
+    } else {
+      setAnswerImageStatus('idle');
+    }
+  }, [question.id, question.answer_image]);
+
+  const shouldCenterAnswerText = answerImageStatus !== 'loaded';
+  const showAnswerImage = Boolean(question.answer_image) && answerImageStatus !== 'error';
+
   return (
     <GameCard question={question}>
       {/* Answer Text */}
-      <div className="text-center md:-mt-4 md:mb-6">
+      <div
+        className={`text-center md:-mt-4 md:mb-6 ${shouldCenterAnswerText ? 'flex min-h-[18rem] items-center justify-center' : ''}`}
+      >
         <h1 className="select-none text-gray-800 text-2xl md:text-3xl font-bold leading-relaxed">
           {question.answer_ar || question.answer}
         </h1>
       </div>
       
       {/* Answer Image if available */}
-      {question.answer_image && (
+      {showAnswerImage && (
         <div className="mb-8">
           <div className="relative max-w-lg mx-auto rounded-xl overflow-hidden">
            <Image
@@ -34,6 +49,8 @@ export default function AnswerDisplay({ question, onShowQuestion, onShowTeamSele
              height={400}
              className="w-full h-59 object-contain mx-auto"
              unoptimized
+             onLoadingComplete={() => setAnswerImageStatus('loaded')}
+             onError={() => setAnswerImageStatus('error')}
            />
           </div>
         </div>

@@ -1,15 +1,14 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { gameAPI } from '@/lib/api';
 import {  Question as QuestionType } from '@/types/game';
 import Image from 'next/image';
-import AnswerDisplay from '@/components/AnswerDisplay';
-import TeamSelector from '@/components/TeamSelector';
-import GameCard from '@/components/GameCard';
-import GameHeader from '@/components/GameHeader';
-import ChoicesDialog from '@/components/ChoicesDialog';
+import AnswerDisplay from '@/components/game/AnswerDisplay';
+import TeamSelector from '@/components/game/TeamSelector';
+import GameCard from '@/components/game/GameCard';
+import GameHeader from '@/components/game/GameHeader';
+import ChoicesDialog from '@/components/game/ChoicesDialog';
 import { getFullImageUrl } from '@/lib/imageUtils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { switchToNextTeam, awardPoints, activateDoublePerk, clearActivePerk, activateRerollPerk, setGameQuestions, markQuestionPlayed, endGame } from '@/store/gameSlice';
@@ -41,6 +40,7 @@ export default function QuestionPage() {
   // Choices dialog state
   const [isChoicesDialogOpen, setIsChoicesDialogOpen] = useState(false);
   const [selectedQuestionForChoices, setSelectedQuestionForChoices] = useState<QuestionType | null>(null);
+  const [questionImageStatus, setQuestionImageStatus] = useState<'idle' | 'loading' | 'loaded' | 'error'>('idle');
    // 🎯 Fetch game + available questions
   const { game, isLoading, error } = useGameData(gameId);
 
@@ -76,6 +76,14 @@ export default function QuestionPage() {
 
   // 🧩 Get the selected question
   const question = questions.find((q) => q.id === questionId);
+
+  useEffect(() => {
+    if (question?.image) {
+      setQuestionImageStatus('loading');
+    } else {
+      setQuestionImageStatus('idle');
+    }
+  }, [question?.id, question?.image]);
 
   const teams = liveTeams.length > 0 ? liveTeams : (game?.teams || []);
 
@@ -320,6 +328,9 @@ export default function QuestionPage() {
     return null;
   }
 
+  const shouldCenterQuestionText = questionImageStatus !== 'loaded';
+  const showQuestionImage = Boolean(question.image) && questionImageStatus !== 'error';
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
@@ -357,14 +368,16 @@ export default function QuestionPage() {
                   </div>
 
                   {/* Question Text */}
-                  <div className="text-center mb-8 mt-6">
+                  <div
+                    className={`text-center mb-8 mt-6 ${shouldCenterQuestionText ? 'flex min-h-[18rem] items-center justify-center' : ''}`}
+                  >
                     <h1 className="select-none text-gray-800 text-2xl md:text-3xl font-bold leading-relaxed" dir="ltr">
                       {question.text}
                     </h1>
                   </div>
 
                   {/* Question Image */}
-                  {question.image && (
+                  {showQuestionImage && (
                     <div className="mb-8">
                       <div className="relative max-w-2xl mx-auto rounded-xl overflow-hidden">
                         <Image
@@ -374,6 +387,8 @@ export default function QuestionPage() {
                           height={400}
                           className="w-full h-59 object-contain mx-auto"
                           unoptimized
+                          onLoadingComplete={() => setQuestionImageStatus('loaded')}
+                          onError={() => setQuestionImageStatus('error')}
                         />
                       </div>
                     </div>

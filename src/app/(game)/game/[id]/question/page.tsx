@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { gameAPI } from '@/lib/api';
 import { Question } from '@/types/game';
 import Image from 'next/image';
-import GameHeader from '@/components/GameHeader';
+import GameHeader from '@/components/game/GameHeader';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { startGame, switchToNextTeam, awardPoints, setGameQuestions, endGame } from '@/store/gameSlice';
 import { useGameData } from '@/hooks/useGameData';

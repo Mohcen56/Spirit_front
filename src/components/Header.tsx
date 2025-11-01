@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, } from "lucide-react";
 
-import UserDropdown from "./UserProfileDropdown";
+import UserDropdown from "./User/UserProfileDropdown";
 
 
 interface HeaderProps {

@@ -26,6 +26,7 @@ export interface Category {
   is_custom?: boolean; // True if user-created category
   created_by_id?: number; // User ID who created this category
   created_by_username?: string; // Username of creator
+  created_by_avatar?: string; // Avatar URL of creator
   is_approved?: boolean; // True if admin approved
   privacy?: 'public' | 'private';
   questions_count?: number; // Number of questions in this category

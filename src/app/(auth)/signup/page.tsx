@@ -4,7 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 
 import { authAPI } from '@/lib/api/index';
-import {SignupForm} from '@/components/signup-form' // adjust default/export if needed
+import {SignupForm} from '@/components/User/signup-form' // adjust default/export if needed
 
 export default function SignupPage() {
   const router = useRouter();
