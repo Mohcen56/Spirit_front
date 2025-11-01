@@ -3,90 +3,83 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { gameAPI } from '@/lib/api/index';
-import { Category, User } from '@/types/game';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { userCategoriesAPI } from '@/lib/api';
+import { User, Category } from '@/types/game';
 import {  Crown } from 'lucide-react';
 import Image from 'next/image';
 import Usersprofiles from '@/components/User/Usersprofiles';
+import { useAuthGate } from '@/hooks/useAuthFate';
+import { useImageError } from '@/hooks/useImageError';
+import { useCategoriesData } from '@/hooks/useCategoriesData';
 
 import { useHeader } from '../../layout';
 
 export default function AddedCategoriesPage() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
-  const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
   const [showProfile, setShowProfile] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const router = useRouter();
-   const { setHeader } = useHeader();
+  const { setHeader } = useHeader();
+  const { user, isLoading: authLoading } = useAuthGate();
+  const { handleError: handleImageError, hasError: hasImageError } = useImageError<number>();
+  const { categories, isLoading: isLoadingCategories, error: categoriesError } = useCategoriesData('user');
+  const [error, setError] = useState('');
+  const queryClient = useQueryClient();
+
+  // Mutation for saving/unsaving categories with optimistic updates
+  const saveMutation = useMutation({
+    mutationFn: async ({ categoryId, isSaved }: { categoryId: number; isSaved: boolean }) => {
+      if (isSaved) {
+        return userCategoriesAPI.unsaveCategory(categoryId);
+      } else {
+        return userCategoriesAPI.saveCategory(categoryId);
+      }
+    },
+    onMutate: async ({ categoryId, isSaved }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['categories', 'user'] });
+
+      // Snapshot the previous value
+      const previousCategories = queryClient.getQueryData(['categories', 'user']);
+
+      // Optimistically update to the new value
+      queryClient.setQueryData(['categories', 'user'], (old: Category[] | undefined) => {
+        if (!old) return old;
+        return old.map(cat =>
+          cat.id === categoryId ? { ...cat, is_saved: !isSaved } : cat
+        );
+      });
+
+      return { previousCategories };
+    },
+    onError: (err, variables, context) => {
+      // Rollback on error
+      if (context?.previousCategories) {
+        queryClient.setQueryData(['categories', 'user'], context.previousCategories);
+      }
+      console.error('Error saving/unsaving category:', err);
+      setError('Failed to update category. Please try again.');
+    },
+    onSuccess: () => {
+      // Optionally refetch to ensure consistency
+      queryClient.invalidateQueries({ queryKey: ['categories', 'user'] });
+    },
+  });
 
   useEffect(() => {
     setHeader({ title: " Categories Added by Users", backHref: "/categories" });
   }, [setHeader]);
 
-  // Function to handle image loading errors
-  const handleImageError = (categoryId: number) => {
-    setImageErrors(prev => new Set(prev).add(categoryId));
-  };
-
-  // Function to check if image has error
-  const hasImageError = (categoryId: number) => {
-    return imageErrors.has(categoryId);
-  };
-
-  
-
-
+  // Sync categories error to local error state
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        console.log('🔍 Loading user categories...');
-        
-        
-        // Get categories from backend:
-        // - User's own custom categories (approved or not)
-        // - All approved public custom categories from other users
-        const categoriesData = await gameAPI.getUserCategories();
-        
-        console.log('📦 Categories data received:', categoriesData);
-        console.log('📊 Is array?', Array.isArray(categoriesData));
-        console.log('📊 Length:', Array.isArray(categoriesData) ? categoriesData.length : 'N/A');
-        
-        // Handle paginated response from DRF
-        const allCategories = Array.isArray(categoriesData) 
-          ? categoriesData 
-          : (categoriesData?.results || []);
-        
-        setCategories(allCategories);
-        console.log('✅ Categories set in state:', allCategories.length);
-        
-        // Get current user ID
-        if (typeof window !== 'undefined') {
-          const userData = localStorage.getItem('user');
-          if (userData) {
-            const user = JSON.parse(userData);
-            setCurrentUserId(user.id);
-            console.log('👤 Current user ID:', user.id);
-          } else {
-            console.log('⚠️ No user data in localStorage');
-          }
-        }
-      } catch (err) {
-        console.error('❌ Error loading categories:', err);
-        setError('Failed to load categories');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
-  }, []);
+    if (categoriesError) {
+      setError(categoriesError);
+    }
+  }, [categoriesError]);
 
   const handleCategoryClick = (category: Category) => {
     // If user owns this category, go to edit, otherwise show info
-    if (category.created_by_id === currentUserId) {
+    if (user && category.created_by_id === user.id) {
       router.push(`/categories/edit/${category.id}`);
     } else {
       // Could show a modal or just navigate to play
@@ -97,29 +90,14 @@ export default function AddedCategoriesPage() {
   const handleSaveCategory = async (e: React.MouseEvent, category: Category) => {
     e.stopPropagation();
     
-    try {
-      if (category.is_saved) {
-        // Unsave the category
-        await gameAPI.unsaveCategory(category.id);
-        // Update the local state
-        setCategories(prev => prev.map(cat => 
-          cat.id === category.id ? { ...cat, is_saved: false } : cat
-        ));
-      } else {
-        // Save the category
-        await gameAPI.saveCategory(category.id);
-        // Update the local state
-        setCategories(prev => prev.map(cat => 
-          cat.id === category.id ? { ...cat, is_saved: true } : cat
-        ));
-      }
-    } catch (err) {
-      console.error('Error saving/unsaving category:', err);
-      alert('Failed to update category. Please try again.');
-    }
+    // Use the mutation with optimistic updates
+    saveMutation.mutate({
+      categoryId: category.id,
+      isSaved: category.is_saved || false,
+    });
   };
 
-  if (isLoading) {
+  if (authLoading || isLoadingCategories) {
     return (
       <div className="min-h-screen bg-eastern-blue-50 flex items-center justify-center">
         <div className="text-primary-800 text-xl">Loading...</div>
@@ -186,7 +164,7 @@ export default function AddedCategoriesPage() {
                 </div>
               ) : (
                 categories.map((category) => {
-                  const isOwner = category.created_by_id === currentUserId;
+                  const isOwner = user && category.created_by_id === user.id;
                   const isPending = isOwner && !category.is_approved;
 
                   return (
@@ -234,6 +212,8 @@ export default function AddedCategoriesPage() {
                                   width={32}
                                   height={32}
                                   className="w-full h-full object-cover rounded-full"
+                                  loading="lazy"
+                                  quality={75}
                                 />
                               </button>
                               <span className="text-eastern-blue-100 text-[10px] leading-tight">
@@ -254,6 +234,8 @@ export default function AddedCategoriesPage() {
                                 fill
                                 sizes="(max-width: 768px) 80vw, 33vw"
                                 style={{ objectFit: 'contain' }}
+                                loading="lazy"
+                                quality={85}
                                 onError={() => handleImageError(category.id)}
                               />
                             ) : (

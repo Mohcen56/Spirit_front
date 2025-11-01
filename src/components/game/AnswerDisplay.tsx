@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Question } from '@/types/game';
 import { RotateCcw, Users } from 'lucide-react';
 import Image from 'next/image';
-import { getFullImageUrl } from '@/lib/imageUtils';
+import { getFullImageUrl } from '@/lib/utils/imageUtils';
 import GameCard from './GameCard';
 
 interface AnswerDisplayProps {

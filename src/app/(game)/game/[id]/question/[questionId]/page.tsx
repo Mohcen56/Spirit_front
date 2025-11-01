@@ -9,7 +9,7 @@ import TeamSelector from '@/components/game/TeamSelector';
 import GameCard from '@/components/game/GameCard';
 import GameHeader from '@/components/game/GameHeader';
 import ChoicesDialog from '@/components/game/ChoicesDialog';
-import { getFullImageUrl } from '@/lib/imageUtils';
+import { getFullImageUrl } from '@/lib/utils/imageUtils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { switchToNextTeam, awardPoints, activateDoublePerk, clearActivePerk, activateRerollPerk, setGameQuestions, markQuestionPlayed, endGame } from '@/store/gameSlice';
 import { Loader } from 'lucide-react';

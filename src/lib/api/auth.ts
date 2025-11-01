@@ -1,5 +1,6 @@
 import { api } from './base';
 import { User } from '@/types/game';
+import { clearAuthData } from '@/lib/utils/auth-utils';
 
 export const authAPI = {
   login: async (email: string, password: string) => {
@@ -65,9 +66,7 @@ export const authAPI = {
   
   logout: async () => {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('user');
-      localStorage.removeItem('membership');
+      clearAuthData();
     }
     return { success: true };
   },

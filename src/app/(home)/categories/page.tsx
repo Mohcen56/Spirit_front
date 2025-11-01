@@ -1,36 +1,57 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { gameAPI } from '@/lib/api/index';
+import { useQuery } from '@tanstack/react-query';
+import { categoriesAPI } from '@/lib/api';
 import { Category, Collection } from '@/types/game';
 import { Users, Crown, Lock, Eye, Pencil, Info } from 'lucide-react';
 import Image from 'next/image';
 import { useMembership } from '@/hooks/useMembership';
+import { useImageError } from '@/hooks/useImageError';
 import { useHeader } from '../layout';
 
 export default function CategoriesPage() {
-  const [collections, setCollections] = useState<Collection[]>([]);
   const { membership, currentUserId, error, setError } = useMembership();
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
   const [infoModal, setInfoModal] = useState<{ open: boolean; category: Category | null }>({ open: false, category: null });
-   const { setHeader } = useHeader();
+  const { setHeader } = useHeader();
   const router = useRouter();
- useEffect(() => {
+  const { handleError: handleImageError, hasError: hasImageError } = useImageError<string>();
+  
+  // Fetch all category data using React Query
+  const { data, isLoading, error: queryError } = useQuery({
+    queryKey: ['allCategoryData'],
+    queryFn: categoriesAPI.getAllCategoryData,
+  });
+
+  // Build collections array with added categories
+  const collections = useMemo(() => {
+    if (!data) return [];
+
+    const addedCollection: Collection = {
+      id: 999,
+      name: 'Added Categories',
+      order: -1,
+      categories: data.saved_categories || [],
+      categories_count: (data.saved_categories || []).length,
+    };
+
+    return [addedCollection, ...(data.collections || [])];
+  }, [data]);
+
+  useEffect(() => {
     setHeader({ title: "Categories", backHref: "/dashboard" });
   }, [setHeader]);
-  // Function to handle image loading errors
-  const handleImageError = (categoryName: string) => {
-    setImageErrors(prev => new Set(prev).add(categoryName));
-  };
 
-  // Function to check if image has error
-  const hasImageError = (categoryName: string) => {
-    return imageErrors.has(categoryName);
-  };
+  // Handle query errors
+  useEffect(() => {
+    if (queryError) {
+      console.error('Error loading all category data:', queryError);
+      setError('Failed to load categories');
+    }
+  }, [queryError, setError]);
 
   // Function to get played percentage for a category (user-specific)
   const getPlayedPercentage = (category: Category) => {
@@ -67,33 +88,6 @@ export default function CategoriesPage() {
     };
     return illustrationMap[categoryName];
   };
-
-  useEffect(() => {
-  const loadData = async () => {
-    setIsLoading(true);
-    try {
-      const data = await gameAPI.getAllCategoryData();
-
-      const addedCollection = {
-        id: 999,
-        name: 'Added Categories',
-        order: -1,
-        categories: data.saved_categories || [],
-        categories_count: (data.saved_categories || []).length,
-      };
-
-      const finalCollections = [addedCollection, ...(data.collections || [])];
-      setCollections(finalCollections);
-    } catch (error) {
-      console.error('Error loading all category data:', error);
-      setError('Failed to load categories');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  loadData();
-  }, [setError]);
 
   const handleCategoryToggle = (categoryId: number, isPremium: boolean) => {
     if (isPremium && !membership?.is_premium) {
@@ -240,7 +234,7 @@ export default function CategoriesPage() {
                         {playedPercent}%
                       </div>
                       {/* Category Illustration */}
-                      <div className="h-full w-full">
+                      <div className={`h-full w-full ${(!canSelect ? 'grayscale' : '')}`}>
                         {((category.image_url || category.image || getLocalIllustration(category.name))) && !hasImageError(category.name) ? (
                           <Image
                             src={(category.image_url || category.image || getLocalIllustration(category.name))!}
@@ -249,6 +243,8 @@ export default function CategoriesPage() {
                             fill
                             sizes="(max-width: 768px) 100vw, 33vw"
                             style={{ objectFit: 'cover', borderRadius: '0 rem' }}
+                            loading="lazy"
+                            quality={85}
                             onError={() => handleImageError(category.name)}
                             unoptimized={(category.image_url || category.image || '').includes('r2.dev')}
                           />
@@ -257,6 +253,13 @@ export default function CategoriesPage() {
                             <div className="w-20 h-20 bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
                               {category.name.charAt(0)}
                             </div>
+                          </div>
+                        )}
+                        {/* Locked Overlay */}
+                        {isPremium && !membership?.is_premium && (
+                          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex flex-col items-center justify-center z-10">
+                            <Lock className="h-8 w-8 text-white mb-2" />
+                            <span className="text-white text-xs font-semibold">Premium</span>
                           </div>
                         )}
                       </div>

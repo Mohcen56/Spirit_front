@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import CategoryFormFields from '@/components/added_cat/CategoryFormFields';
 import QuestionsList from '@/components/added_cat/QuestionsList';
-import { gameAPI } from '@/lib/api/game';
+import { gameAPI } from '@/lib/api';
 import { useHeader } from '@/app/(home)/layout';
 
 interface Question {

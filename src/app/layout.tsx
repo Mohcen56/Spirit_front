@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import ReduxProvider from "@/components/ReduxProvider";
+import { QueryProvider } from "@/providers/QueryProvider";
+import ErrorBoundary from "@/components/ErrorBoundary";
 <meta name="apple-mobile-web-app-title" content="Trivia Spirit" />
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,11 +32,13 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning={true}
       >
-        <ReduxProvider>
-          
-            {children}
-          
-        </ReduxProvider>
+        <QueryProvider>
+          <ReduxProvider>
+            <ErrorBoundary>
+              {children}
+            </ErrorBoundary>
+          </ReduxProvider>
+        </QueryProvider>
       </body>
     </html>
   );

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getAuthToken, clearAuthData } from '@/lib/utils/auth-utils';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ;
 
@@ -13,7 +14,7 @@ export const api = axios.create({
 // Add Authorization token handling for Django REST Framework
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('authToken');
+    const token = getAuthToken();
     if (token) {
       config.headers['Authorization'] = `Token ${token}`;
       
@@ -31,9 +32,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       console.error('Authentication failed - token may be invalid or expired');
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
-        localStorage.removeItem('membership');
+        clearAuthData();
       }
     }
     return Promise.reject(error);
