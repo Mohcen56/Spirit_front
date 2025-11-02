@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
-import { ImagePlus, Save, Trash2, Edit3, Lock, Globe } from 'lucide-react';
+import { ImagePlus, Trash2, Edit3, Lock, Globe } from 'lucide-react';
 import ImageCropModal from './ImageCropModal';
+import { ProcessingButton } from '@/components/ui/button2';
+import { useNotification } from '@/hooks/useNotification';
 
 interface CategoryFormFieldsProps {
   categoryName: string;
@@ -13,7 +15,7 @@ interface CategoryFormFieldsProps {
   onImageChange: (file: File) => void;
   privacy: 'public' | 'private';
   setPrivacy: (value: 'public' | 'private') => void;
-  onSave: () => void;
+  onSave: () => Promise<boolean>;
   onDelete: () => void;
 }
 
@@ -29,6 +31,7 @@ export default function CategoryFormFields({
   onSave,
   onDelete,
 }: CategoryFormFieldsProps) {
+  const notify = useNotification();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [tempImageForCrop, setTempImageForCrop] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -213,17 +216,25 @@ export default function CategoryFormFields({
             >
               Cancel
             </button>
-            <button
-              type="button"
-              onClick={() => {
-                onSave();
-                setIsEditing(false);
+            <ProcessingButton
+              onProcess={async () => {
+                const success = await onSave();
+                if (success) {
+                  setIsEditing(false);
+                  notify.success('Category Saved', 'Category has been updated successfully.', 3000);
+                } else {
+                  notify.error('Save Failed', 'Failed to save category. Please try again.', 5000);
+                }
+                return success;
               }}
               className="flex items-center space-x-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-8 py-4 rounded-xl shadow-lg transition-all transform hover:scale-105 font-semibold"
+              icon="save"
+              processingText="Saving..."
+              successText="Saved!"
+              errorText="Failed"
             >
-              <Save className="h-5 w-5" />
-              <span>Save Changes</span>
-            </button>
+              Save Changes
+            </ProcessingButton>
         
           </div>
         </div>

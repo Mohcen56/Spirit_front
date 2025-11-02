@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuthGate } from "@/hooks/useAuthFate";
+import { useAuthGate } from "@/hooks/useAuthGate";
 import { useMembership } from "@/hooks/useMembership"; // ✅ import your hook
 
 const Icon = {

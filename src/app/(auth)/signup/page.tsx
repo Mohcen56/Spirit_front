@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 
 import { authAPI } from '@/lib/api/index';
 import {SignupForm} from '@/components/User/signup-form' // adjust default/export if needed
+import { useNotification } from '@/hooks/useNotification';
 
 export default function SignupPage() {
   const router = useRouter();
+  const notify = useNotification();
 
   type SignupData = {
     email: string;
@@ -20,9 +22,12 @@ export default function SignupPage() {
     if (response?.success) {
       localStorage.setItem('authToken', response.token);
       localStorage.setItem('user', JSON.stringify(response.user));
+      notify.accountVerified();
       router.push('/dashboard');
     } else {
-      throw new Error(response?.error || 'Signup failed');
+      const errorMsg = response?.error || 'Signup failed';
+      notify.error('Signup Failed', errorMsg);
+      throw new Error(errorMsg);
     }
   };
 

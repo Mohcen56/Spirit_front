@@ -9,7 +9,7 @@ import { User, Category } from '@/types/game';
 import {  Crown } from 'lucide-react';
 import Image from 'next/image';
 import Usersprofiles from '@/components/User/Usersprofiles';
-import { useAuthGate } from '@/hooks/useAuthFate';
+import { useAuthGate } from '@/hooks/useAuthGate';
 import { useImageError } from '@/hooks/useImageError';
 import { useCategoriesData } from '@/hooks/useCategoriesData';
 
@@ -61,8 +61,9 @@ export default function AddedCategoriesPage() {
       setError('Failed to update category. Please try again.');
     },
     onSuccess: () => {
-      // Optionally refetch to ensure consistency
+      // Refetch to ensure consistency across pages
       queryClient.invalidateQueries({ queryKey: ['categories', 'user'] });
+      queryClient.invalidateQueries({ queryKey: ['allCategoryData'] });
     },
   });
 
@@ -78,13 +79,8 @@ export default function AddedCategoriesPage() {
   }, [categoriesError]);
 
   const handleCategoryClick = (category: Category) => {
-    // If user owns this category, go to edit, otherwise show info
-    if (user && category.created_by_id === user.id) {
-      router.push(`/categories/edit/${category.id}`);
-    } else {
-      // Could show a modal or just navigate to play
-      alert(`Category: ${category.name}\nCreated by user\nClick to play!`);
-    }
+    // Navigate to edit/view page for all custom categories
+    router.push(`/categories/edit/${category.id}`);
   };
 
   const handleSaveCategory = async (e: React.MouseEvent, category: Category) => {

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useAuthGate } from "@/hooks/useAuthFate";
+import { useAuthGate } from "@/hooks/useAuthGate";
 
 import Link from "next/link";
 import { MorphingText } from "@/components/ui/morphing-text";

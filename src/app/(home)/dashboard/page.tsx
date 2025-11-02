@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { authAPI } from '@/lib/api/index';
 import { Play, History,  } from 'lucide-react';
 import UserProfile from '@/components/User/UserProfile';
-import { useAuthGate } from '@/hooks/useAuthFate';
+import { useAuthGate } from '@/hooks/useAuthGate';
 
 import { useHeader } from '../layout';
 export default function HomePage() {

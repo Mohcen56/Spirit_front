@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { ChevronLeft, Camera, Eye, EyeOff, Check } from 'lucide-react';
 import Image from 'next/image';
+import { ProcessingButton } from '@/components/ui/button2';
+import { useNotification } from '@/hooks/useNotification';
 
 interface User {
   id: number;
@@ -18,6 +20,7 @@ interface UserProfileProps {
 }
 
 export default function UserProfile({ user, onBack, onSave }: UserProfileProps) {
+  const notify = useNotification();
   const [formData, setFormData] = useState({
     username: user.username,
     email: user.email,
@@ -56,7 +59,7 @@ export default function UserProfile({ user, onBack, onSave }: UserProfileProps) 
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async (): Promise<boolean> => {
     const saveData: { username: string; email: string; avatar: string; avatarFile?: File; password?: string; currentPassword?: string } = {
       username: formData.username,
       email: formData.email,
@@ -74,7 +77,15 @@ export default function UserProfile({ user, onBack, onSave }: UserProfileProps) 
       }
     }
 
-    onSave(saveData);
+    try {
+      await onSave(saveData);
+      notify.profileUpdated();
+      return true;
+    } catch (error) {
+      console.error("Save failed:", error);
+      notify.error('Save Failed', 'Unable to update profile. Please try again.');
+      return false;
+    }
   };
 
   const isPasswordValid = !formData.newPassword || 
@@ -265,17 +276,19 @@ export default function UserProfile({ user, onBack, onSave }: UserProfileProps) 
 
         {/* Save Button */}
         <div className="mt-8 pt-6 border-t">
-          <button
-            onClick={handleSave}
+          <ProcessingButton
+            onProcess={handleSave}
             disabled={!isPasswordValid}
-            className={`w-full py-3 px-6 rounded-lg font-medium transition-colors ${
-              isPasswordValid
-                ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            className={`w-full py-3 px-6 ${
+              !isPasswordValid && 'opacity-50 cursor-not-allowed'
             }`}
+            icon="save"
+            processingText="Saving..."
+            successText="Saved!"
+            errorText="Failed to save"
           >
             Save Changes
-          </button>
+          </ProcessingButton>
         </div>
       </div>
     </div>

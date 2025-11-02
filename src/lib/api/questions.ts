@@ -33,6 +33,19 @@ export const questionsAPI = {
   },
 
   /**
+   * Get a single question by ID
+   */
+  getQuestion: async (questionId: number | string) => {
+    try {
+      const response = await api.get(`/api/content/questions/${questionId}/`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching question:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Get a random question from selected categories
    */
   getRandomQuestion: async (categoryIds: number[]) => {
@@ -48,6 +61,34 @@ export const questionsAPI = {
     try {
       await api.delete(`/api/content/questions/${questionId}/`);
       return { success: true };
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  /**
+   * Create a new question (direct create). Prefer addQuestionsToCategory for bulk/add flows.
+   */
+  createQuestion: async (formData: FormData) => {
+    try {
+      const response = await api.post(`/api/content/questions/`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  /**
+   * Update an existing question by ID
+   */
+  updateQuestion: async (questionId: number, formData: FormData) => {
+    try {
+      const response = await api.put(`/api/content/questions/${questionId}/`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return response.data;
     } catch (error) {
       throw error;
     }

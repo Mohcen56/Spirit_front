@@ -2,7 +2,8 @@
 
 import React, { useState, useCallback } from 'react';
 import Cropper from 'react-easy-crop';
-import { X, Check, ZoomIn, ZoomOut } from 'lucide-react';
+import { X, ZoomIn, ZoomOut } from 'lucide-react';
+import { ProcessingButton } from '@/components/ui/button2';
 
 interface ImageCropModalProps {
   imageSrc: string;
@@ -100,10 +101,10 @@ export default function ImageCropModal({ imageSrc, onCropComplete, onCancel }: I
     });
   };
 
-  const handleSave = async () => {
+  const handleSave = async (): Promise<boolean> => {
     if (!croppedAreaPixels) {
       console.error('❌ No cropped area available');
-      return;
+      return false;
     }
 
     console.log('🎨 Starting crop with area:', croppedAreaPixels);
@@ -112,8 +113,10 @@ export default function ImageCropModal({ imageSrc, onCropComplete, onCancel }: I
       const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels);
       console.log('🎨 Crop successful! File:', croppedImage.name, croppedImage.size, 'bytes');
       onCropComplete(croppedImage);
+      return true;
     } catch (e) {
       console.error('❌ Error cropping image:', e);
+      return false;
     }
   };
 
@@ -175,13 +178,16 @@ export default function ImageCropModal({ imageSrc, onCropComplete, onCancel }: I
           >
             Cancel
           </button>
-          <button
-            onClick={handleSave}
+          <ProcessingButton
+            onProcess={handleSave}
             className="px-6 py-3 rounded-xl bg-green-500 hover:bg-green-600 text-white font-semibold transition-all flex items-center gap-2"
+            icon="save"
+            processingText="Cropping..."
+            successText="Saved!"
+            errorText="Failed"
           >
-            <Check className="w-5 h-5" />
             Save Crop
-          </button>
+          </ProcessingButton>
         </div>
       </div>
     </div>

@@ -6,6 +6,10 @@ import CategoryFormFields from '@/components/added_cat/CategoryFormFields';
 import QuestionsList from '@/components/added_cat/QuestionsList';
 import { gameAPI } from '@/lib/api';
 import { useHeader } from '@/app/(home)/layout';
+import { useAuthGate } from '@/hooks/useAuthGate';
+import { Heart, Flag, Bookmark, BookmarkCheck } from 'lucide-react';
+import { useNotification } from '@/hooks/useNotification';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface Question {
   id: number;
@@ -20,7 +24,10 @@ export default function EditCategoryPage() {
   const router = useRouter();
   const params = useParams();
   const categoryId = params.id as string;
-   const { setHeader } = useHeader();
+  const { setHeader } = useHeader();
+  const { user } = useAuthGate();
+  const notify = useNotification();
+    const queryClient = useQueryClient();
   const [categoryName, setCategoryName] = useState('');
   const [categoryDescription, setCategoryDescription] = useState('');
   const [categoryImage, setCategoryImage] = useState<string | null>(null);
@@ -29,9 +36,19 @@ export default function EditCategoryPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
- useEffect(() => {
-    setHeader({ title: "Edit the category", backHref: "/categories" });
-  }, [setHeader]);
+  const [categoryOwnerId, setCategoryOwnerId] = useState<number | null>(null);
+  const [isSaved, setIsSaved] = useState(false);
+
+  // Determine if current user is the owner
+  const isOwner = user?.id === categoryOwnerId;
+ // Set header based on owner status
+  useEffect(() => {
+    if (isOwner) {
+      setHeader({ title: " Edit the category", backHref: "/categories" });
+    } else {
+      setHeader({ title: categoryName || "Show the Category", backHref: "/categories" });
+    }
+  }, [setHeader, isOwner, categoryName]);
   // Debug: Track when categoryImage changes
   useEffect(() => {
     console.log('🖼️ categoryImage changed:', categoryImage ? `${categoryImage.substring(0, 50)}...` : 'null');
@@ -51,6 +68,8 @@ export default function EditCategoryPage() {
         // Use image_url for display (backend sends full URL)
         setCategoryImage(data.image_url || null);
         setPrivacy(data.privacy || 'public');
+        setCategoryOwnerId(data.created_by_id || null);
+        setIsSaved(data.is_saved || false);
         
         // Fetch questions for this category using gameAPI
         try {
@@ -95,14 +114,14 @@ export default function EditCategoryPage() {
     reader.readAsDataURL(file);
   };
 
-  const handleSave = async () => {
+  const handleSave = async (): Promise<boolean> => {
     try {
       setError('');
 
       // Validate
       if (!categoryName.trim()) {
         setError('Category name is required');
-        return;
+        return false;
       }
 
       console.log('💾 Saving category...');
@@ -125,12 +144,21 @@ export default function EditCategoryPage() {
       const responseData = await gameAPI.updateUserCategory(categoryId, formData);
       console.log('✅ Update successful:', responseData);
      
-      alert('Category updated successfully! ✅');
+      // Invalidate queries to refresh the categories lists
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['categories', 'user'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['savedCategories'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['allCategoryData'], refetchType: 'active' })
+      ]);
+     
+      notify.success('Success', 'Category updated successfully!');
       router.push('/categories');
+      return true;
       
     } catch (err) {
       console.error('Error saving category:', err);
       setError('Failed to save category. Please try again.');
+      return false;
     }
   };
 
@@ -141,11 +169,19 @@ export default function EditCategoryPage() {
 
     try {
       await gameAPI.deleteUserCategory(categoryId);
-      alert('Category deleted successfully');
+      
+      // Invalidate queries to refresh the categories lists
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['categories', 'user'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['savedCategories'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['allCategoryData'], refetchType: 'active' })
+      ]);
+      
+      notify.success('Deleted', 'Category deleted successfully');
       router.push('/categories');
     } catch (err) {
       console.error('Error deleting category:', err);
-      setError('Failed to delete category');
+      notify.error('Delete Failed', 'Failed to delete category. Please try again.');
     }
   };
 
@@ -157,10 +193,10 @@ export default function EditCategoryPage() {
     try {
       await gameAPI.deleteQuestion(questionId);
       setQuestions(prev => prev.filter(q => q.id !== questionId));
-      alert('Question deleted successfully');
+      notify.success('Question Deleted', 'Question removed successfully');
     } catch (err) {
       console.error('Error deleting question:', err);
-      alert('Failed to delete question');
+      notify.error('Delete Failed', 'Failed to delete question. Please try again.');
     }
   };
 
@@ -169,6 +205,38 @@ export default function EditCategoryPage() {
   const handleEditQuestion = (questionId: number) => {
     // Navigate to edit question page (to be created later)
     router.push(`/categories/edit/${categoryId}/question/${questionId}/edit`);
+  };
+
+  const handleToggleSave = async () => {
+    try {
+      if (isSaved) {
+        await gameAPI.unsaveCategory(Number(categoryId));
+        setIsSaved(false);
+        notify.success('Category Unsaved', 'Category removed from your collection');
+      } else {
+        await gameAPI.saveCategory(Number(categoryId));
+        setIsSaved(true);
+        notify.success('Category Saved', 'Category added to your collection');
+      }
+        // Invalidate queries to refresh the category lists
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['allCategoryData'], refetchType: 'active' }),
+          queryClient.invalidateQueries({ queryKey: ['categories', 'user'], refetchType: 'active' })
+        ]);
+    } catch (err) {
+      console.error('Error toggling save:', err);
+      notify.error('Failed', 'Could not update category. Please try again.');
+    }
+  };
+
+  const handleLike = async () => {
+    // TODO: Implement like functionality
+    notify.info('Coming Soon', 'Like feature will be available soon!');
+  };
+
+  const handleReport = () => {
+    // TODO: Implement report functionality
+    notify.info('Report Feature', 'Report functionality will be added soon');
   };
 
   if (isLoading) {
@@ -188,31 +256,116 @@ export default function EditCategoryPage() {
               <p className="text-red-800 text-center">{error}</p>
             </div>
           )}
-          <div className="rounded-xl   shadow-xl p-10 w-full bg-white mb-6">
-            <CategoryFormFields
-            categoryName={categoryName}
-            setCategoryName={setCategoryName}
-            categoryDescription={categoryDescription}
-            setCategoryDescription={setCategoryDescription}
-            categoryImage={categoryImage}
-            onImageChange={handleImageChange}
-            privacy={privacy}
-            setPrivacy={setPrivacy}
-            onSave={handleSave}
-            onDelete={handleDelete}
-          />
 
-          {/* Action Buttons */}
-          
-        </div>
+          {/* Owner Mode: Show edit form */}
+          {isOwner && (
+            <div className="rounded-xl shadow-xl p-10 w-full bg-white mb-6">
+              <CategoryFormFields
+                categoryName={categoryName}
+                setCategoryName={setCategoryName}
+                categoryDescription={categoryDescription}
+                setCategoryDescription={setCategoryDescription}
+                categoryImage={categoryImage}
+                onImageChange={handleImageChange}
+                privacy={privacy}
+                setPrivacy={setPrivacy}
+                onSave={handleSave}
+                onDelete={handleDelete}
+              />
+            </div>
+          )}
 
+          {/* Public Mode: Show category info and action buttons */}
+          {!isOwner && (
+            <div className="rounded-xl shadow-xl p-10 w-full bg-white mb-6">
+              {/* Category Image */}
+              {categoryImage && (
+                <div className="mb-6 flex justify-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={categoryImage}
+                    alt={categoryName}
+                    className="w-48 h-48 object-cover rounded-2xl shadow-lg"
+                  />
+                </div>
+              )}
+
+              {/* Category Name */}
+              <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">
+                {categoryName}
+              </h2>
+
+              {/* Category Description */}
+              {categoryDescription && (
+                <p className="text-gray-600 text-center mb-6 leading-relaxed">
+                  {categoryDescription}
+                </p>
+              )}
+
+              {/* Privacy Badge */}
+              <div className="flex justify-center mb-6">
+                <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                  privacy === 'public' 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-gray-100 text-gray-800'
+                }`}>
+                  {privacy === 'public' ? '🌐 Public' : '🔒 Private'}
+                </span>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-center gap-4 flex-wrap">
+                {/* Save/Unsave Toggle Button */}
+                <button
+                  onClick={handleToggleSave}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all transform hover:scale-105 shadow-lg ${
+                    isSaved
+                      ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                      : 'bg-blue-500 hover:bg-blue-600 text-white'
+                  }`}
+                >
+                  {isSaved ? (
+                    <>
+                      <BookmarkCheck className="h-5 w-5" />
+                      <span>Saved</span>
+                    </>
+                  ) : (
+                    <>
+                      <Bookmark className="h-5 w-5" />
+                      <span>Save Category</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Like Button (for future functionality) */}
+                <button
+                  onClick={handleLike}
+                  className="flex items-center gap-2 px-6 py-3 bg-pink-500 hover:bg-pink-600 text-white rounded-xl font-bold transition-all transform hover:scale-105 shadow-lg"
+                >
+                  <Heart className="h-5 w-5" />
+                  <span>Like</span>
+                </button>
+                
+                {/* Report Button */}
+                <button
+                  onClick={handleReport}
+                  className="flex items-center gap-2 px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl font-bold transition-all transform hover:scale-105 shadow-lg"
+                >
+                  <Flag className="h-5 w-5" />
+                  <span>Report</span>
+                </button>
+              </div>
+            </div>
+          )}
        
-         {/* Questions Section */}
+         {/* Questions Section - Always show questions but control edit capabilities */}
         <QuestionsList
           questions={questions}
-          onAddQuestion={() => router.push(`/categories/edit/${categoryId}/addQ`)}
-          onDeleteQuestion={handleDeleteQuestion}
-          onEditQuestion={handleEditQuestion}
+          {...(isOwner && {
+            onAddQuestion: () => router.push(`/categories/edit/${categoryId}/addQ`),
+            onDeleteQuestion: handleDeleteQuestion,
+            onEditQuestion: handleEditQuestion,
+          })}
         />
         </div>
       </main>

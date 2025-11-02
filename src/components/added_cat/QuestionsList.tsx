@@ -15,7 +15,7 @@ interface Question {
 
 interface QuestionsListProps {
   questions: Question[];
-  onAddQuestion: () => void;
+  onAddQuestion?: () => void;
   onDeleteQuestion?: (questionId: number) => void;
   onEditQuestion?: (questionId: number) => void;
 }
@@ -84,8 +84,17 @@ export default function QuestionsList({
     return acc;
   }, {} as Record<number, Question[]>);
 
-  // If no questions, show add button
+  // If no questions, show add button (only if onAddQuestion is provided)
   if (questionsArray.length === 0) {
+    if (!onAddQuestion) {
+      return (
+        <div className="p-10 w-full mb-6">
+          <div className="flex justify-center">
+            <p className="text-gray-500 text-lg">No questions available in this category</p>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className=" p-10 w-full mb-6">
         <div className="flex justify-center">
@@ -112,14 +121,16 @@ export default function QuestionsList({
             Questions: {filteredAndSortedQuestions.length}
           </div>
         </div>
-        <button
-          type="button"
-          onClick={onAddQuestion}
-          className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-4 py-2 rounded-lg shadow-md transition-all transform hover:scale-105 font-bold"
-        >
-          <PlusCircle className="h-5 w-5" />
-          <span>+ Add Question</span>
-        </button>
+        {onAddQuestion && (
+          <button
+            type="button"
+            onClick={onAddQuestion}
+            className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-4 py-2 rounded-lg shadow-md transition-all transform hover:scale-105 font-bold"
+          >
+            <PlusCircle className="h-5 w-5" />
+            <span>+ Add Question</span>
+          </button>
+        )}
       </div>
 
       {/* Search Bar */}

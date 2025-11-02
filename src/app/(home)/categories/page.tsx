@@ -212,10 +212,11 @@ export default function CategoriesPage() {
                         tabIndex={3}
                         onClick={e => {
                           e.stopPropagation();
-                          // If user owns this custom category, navigate to edit page
-                          if (category.is_custom && category.created_by_id === currentUserId) {
+                          // If custom category, navigate to edit/view page
+                          if (category.is_custom) {
                             router.push(`/categories/edit/${category.id}`);
                           } else {
+                            // For official categories, show info modal
                             setInfoModal({ open: true, category });
                           }
                         }}
@@ -225,6 +226,7 @@ export default function CategoriesPage() {
                           <Pencil className="h-4 w-4" />
                         ) : category.is_custom ? (
                           <Eye className="h-4 w-4" />
+                      
                         ) : (
                           <Info className="h-9 w-9" />
                         )}

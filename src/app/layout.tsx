@@ -5,7 +5,7 @@ import "./globals.css";
 import ReduxProvider from "@/components/ReduxProvider";
 import { QueryProvider } from "@/providers/QueryProvider";
 import ErrorBoundary from "@/components/ErrorBoundary";
-<meta name="apple-mobile-web-app-title" content="Trivia Spirit" />
+import { NotificationProvider } from "@/providers/NotificationProvider";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -35,7 +35,9 @@ export default function RootLayout({
         <QueryProvider>
           <ReduxProvider>
             <ErrorBoundary>
-              {children}
+              <NotificationProvider>
+                {children}
+              </NotificationProvider>
             </ErrorBoundary>
           </ReduxProvider>
         </QueryProvider>

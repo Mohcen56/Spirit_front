@@ -8,9 +8,11 @@ import { ArrowLeft, ImagePlus } from 'lucide-react';
 import ImageCropModal from '@/components/added_cat/ImageCropModal';
 import Header from '@/components/Header';
 import { useHeader } from '../../layout';
+import { useQueryClient } from '@tanstack/react-query';
 
 
 export default function CreateCategoryPage() {
+  const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
    const { setHeader } = useHeader();
@@ -96,6 +98,13 @@ export default function CreateCategoryPage() {
       
       // Extract category from response
       const category = response.category || response;
+
+      // Invalidate queries to refresh the categories lists
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['categories', 'user'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['savedCategories'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['allCategoryData'], refetchType: 'active' })
+      ]);
 
       // Redirect to edit page to add questions
       router.push(`/categories/edit/${category.id}`);
