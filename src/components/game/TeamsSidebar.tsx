@@ -1,11 +1,11 @@
+'use client';
+
 import React from 'react';
 import Image from 'next/image';
-
-interface Team {
-  id: number;
-  name: string;
-  avatar?: string;
-}
+import { useRouter } from 'next/navigation';
+import { useAppDispatch } from '@/store/hooks';
+import { activateDoublePerk, activateRerollPerk } from '@/store/gameSlice';
+import { Question as QuestionType, Team } from '@/types/game';
 
 interface TeamsSidebarProps {
   teams: Team[];
@@ -13,9 +13,11 @@ interface TeamsSidebarProps {
   doublePerkActiveTeamId: number | null;
   doublePerkUsed: Record<number, boolean>;
   rerollPerkUsed: Record<number, boolean>;
-  onActivateDouble: (teamId: number) => void;
-  onActivateReroll: (teamId: number) => void;
-  onShowChoices: (teamId: number) => void;
+  gameId: string;
+  question: QuestionType | null;
+  questions: QuestionType[];
+  playedQuestions: number[];
+  onShowChoices: () => void;
 }
 
 export default function TeamsSidebar({
@@ -24,21 +26,49 @@ export default function TeamsSidebar({
   doublePerkActiveTeamId,
   doublePerkUsed,
   rerollPerkUsed,
-  onActivateDouble,
-  onActivateReroll,
+  gameId,
+  question,
+  questions,
+  playedQuestions,
   onShowChoices,
 }: TeamsSidebarProps) {
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+
+  const handleReroll = async (teamId: number) => {
+    const teamIndex = teams.findIndex(t => t.id === teamId);
+    const isTeamsTurn = teamIndex === (currentTeam - 1);
+    
+    if (!isTeamsTurn || rerollPerkUsed[teamId]) return;
+    
+    // Mark perk as used in Redux
+    dispatch(activateRerollPerk({ teamId }));
+    
+    try {
+      const pool = questions.filter(
+        q => q.id !== question?.id && !playedQuestions.includes(q.id)
+      );
+      
+      if (pool.length === 0) return;
+      
+      const random = pool[Math.floor(Math.random() * pool.length)];
+      router.push(`/game/${gameId}/question/${random.id}`);
+    } catch (e) {
+      console.warn('Failed to reroll question:', e);
+    }
+  };
+
   return (
     <div className="w-full lg:w-80 px-2 flex justify-center">
-      <div className="flex lg:flex-col gap-1 justify-center items-stretch w-full">
+      <div className="flex lg:flex-col gap-1 lg:gap-1 justify-center items-stretch max-w-2xl lg:max-w-none w-full">
         {teams.slice(0, 4).map((team, index) => {
-          const isTurn = teams.findIndex(t => t.id === team.id) === currentTeam - 1;
-
+          const isTeamsTurn = teams.findIndex(t => t.id === team.id) === (currentTeam - 1);
+          
           return (
-            <div key={team.id} className="mt-1">
-              <div className="bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl p-2 flex items-center space-x-3">
-                {/* Avatar */}
-                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center overflow-hidden">
+            <div key={team.id} className="mt-1 lg:max-w-none lg:mb-0">
+              <div className="bg-brown-800  border-brown-900 text-white rounded-xl p-2 lg:p-4 flex flex-col lg:flex-row items-center lg:space-x-4 space-y-1 lg:space-y-0">
+                {/* Team Avatar */}
+                <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-17 lg:h-17 rounded-full bg-white/20 flex items-center justify-center overflow-hidden flex-shrink-0">
                   {team.avatar ? (
                     <Image
                       src={`/avatars/${team.avatar}.jpeg`}
@@ -49,50 +79,84 @@ export default function TeamsSidebar({
                       unoptimized
                     />
                   ) : (
-                    <span className="font-bold text-lg">{index + 1}</span>
+                    <span className="text-white text-base sm:text-lg font-bold">
+                      {index + 1}
+                    </span>
                   )}
                 </div>
 
                 {/* Team Info */}
-                <div>
-                  <div className="font-bold mb-1">{team.name}</div>
-                  <div className="flex space-x-2">
-                    {/* Double Perk */}
+                <div className="flex-col items-center lg:ml-3 lg:items-start">
+                  <div className="font-bold text-base sm:text-lg sm:text-center justify-content-center mb-2">
+                    {team.name}
+                  </div>
+
+                  {/* Team Actions */}
+                  <div className="flex flex-row space-x-1 sm:space-x-2 justify-center lg:justify-start">
+                    {/* Double Points Perk */}
                     <button
-                      onClick={() => onActivateDouble(team.id)}
+                      onClick={() => dispatch(activateDoublePerk({ teamId: team.id }))}
                       disabled={
                         !!doublePerkUsed[team.id] ||
                         doublePerkActiveTeamId !== null ||
-                        !isTurn
+                        !isTeamsTurn
                       }
-                      title="Activate Double Points"
-                      className={`p-1 rounded border text-sm ${
+                      title={
+                        doublePerkUsed[team.id]
+                          ? 'Perk already used'
+                          : doublePerkActiveTeamId !== null
+                            ? 'Another perk is active'
+                            : !isTeamsTurn
+                              ? "You can only activate on your team's turn"
+                              : 'Use Double Points once'
+                      }
+                      className={`p-1 sm:p-2 rounded-md transition-colors border text-xs sm:text-base ${
                         doublePerkActiveTeamId === team.id
-                          ? 'bg-green-500 border-green-600'
-                          : 'bg-white/20 border-white/30 hover:bg-white/30'
+                          ? 'bg-green-500 text-white border-green-600'
+                          : 'bg-brown-900 hover:bg-white/30 text-white border-white/30'
                       } disabled:opacity-50`}
                     >
-                      🔥
+                      <Image src="/icons/Untitled design.svg" alt="multiplier icon" width={25} height={25} className="w-5 h-5" />
                     </button>
 
-                    {/* Reroll */}
+                    {/* Reroll Question Perk */}
                     <button
-                      onClick={() => onActivateReroll(team.id)}
-                      disabled={!!rerollPerkUsed[team.id] || !isTurn}
-                      title="Reroll Question"
-                      className="p-1 rounded border text-sm bg-white/20 border-white/30 hover:bg-white/30 disabled:opacity-50"
+                      onClick={() => handleReroll(team.id)}
+                      disabled={!!rerollPerkUsed[team.id] || !isTeamsTurn}
+                      title={
+                        rerollPerkUsed[team.id]
+                          ? 'Reroll already used'
+                          : !isTeamsTurn
+                            ? "You can only reroll on your team's turn"
+                            : 'Change to a random new question'
+                      }
+                      className={`p-1 sm:p-2 rounded-md transition-colors border text-xs sm:text-base ${
+                        rerollPerkUsed[team.id]
+                          ? 'bg-gray-400 text-white border-gray-500'
+                          : 'bg-brown-900 hover:bg-white/30 text-white border-white/30'
+                      } disabled:opacity-50`}
                     >
-                      🔁
+                      <Image src="/icons/arrow-change.svg" alt="refresh icon" width={25} height={25} className="w-5 h-5" />
                     </button>
 
-                    {/* Show Choices */}
+                    {/* Show Choices Button */}
                     <button
-                      onClick={() => onShowChoices(team.id)}
-                      disabled={!isTurn}
-                      title="Show Choices"
-                      className="p-1 rounded border text-sm bg-white/20 border-white/30 hover:bg-white/30 disabled:opacity-50"
+                      onClick={onShowChoices}
+                      disabled={!!rerollPerkUsed[team.id] || !isTeamsTurn}
+                      title={
+                        rerollPerkUsed[team.id]
+                          ? 'Reroll already used'
+                          : !isTeamsTurn
+                            ? "You can only use on your team's turn"
+                            : 'Show answer choices'
+                      }
+                      className={`p-1 sm:p-2 rounded-md transition-colors border text-xs sm:text-base ${
+                        rerollPerkUsed[team.id]
+                          ? 'bg-gray-400 text-white border-gray-500'
+                          : 'bg-brown-900 hover:bg-white/30 text-white border-white/30'
+                      } disabled:opacity-50`}
                     >
-                      💡
+                      <Image src="/icons/clover-48-regular.svg" alt="multiplier icon" width={25} height={25} className="w-5 h-5" />
                     </button>
                   </div>
                 </div>

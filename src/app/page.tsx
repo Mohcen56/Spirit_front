@@ -317,7 +317,7 @@ export default function HomePage() {
             
           </p>
         </div>
-        <div className="text-6xl flex-shrink-0"><Image src="/icons/multiplier-2x-32-filled.svg" alt="multiplier icon" width={25} height={25} className="w-20 h-20" /></div>
+        <div className="text-6xl flex-shrink-0"><Image src="/icons/Untitled design.svg" alt="multiplier icon" width={25} height={25} className="w-20 h-20" /></div>
         <div className="absolute bottom-0 left-0 right-0 bg-[#1f1f2b] text-white text-sm font-medium py-2 rounded-b-3xl">
           Use before answering
         </div>

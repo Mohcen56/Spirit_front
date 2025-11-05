@@ -269,7 +269,7 @@ return (
             <div key={category.id} className="h-full flex flex-col">
             
             {/* Category image + name - Fixed height */}
-            <div className="relative h-24 md:h-40 w-full rounded-xl overflow-hidden border-4 border-white shadow mb-3 flex-shrink-0">
+            <div className="relative h-24 md:h-50  w-full rounded-xl overflow-hidden border-4 border-white shadow mb-3 flex-shrink-0">
               {category.image && !hasImageError(category.name) ? (
                 <Image
                   src={category.image}
@@ -321,12 +321,12 @@ return (
     </main>
 
     {/* Footer / Scoreboard - Fixed height (uses Redux liveTeams) */}
-    <footer className="bg-gradient-to-r from-amber-400 to-orange-400 py-2 md:py-3 flex items-center justify-center gap-3 md:gap-4 border-t-4 border-amber-500 h-16 md:h-20 flex-shrink-0">
+    <footer className="bg-gradient-to-r from-brown-600 to-brown-800 py-2 md:py-4 flex items-center justify-center gap-3 md:gap-4 border-t-4 border-brown-900 h-20 md:h-23 flex-shrink-0">
       {liveTeams && liveTeams.length > 0 ? (
         liveTeams.map((team) => (
-          <div key={team.id} className="flex items-center bg-orange-200/95 rounded-2xl px-3 md:px-4 py-1.5 md:py-1 shadow-md border border-orange-300" dir="ltr">
+          <div key={team.id} className="grid-cols-4 md:flex items-center bg-orange-200/95 rounded-2xl px-3 md:px-4 py-1.5 md:py-1 shadow-md border border-brown-900" dir="ltr">
             {/* Team Avatar */}
-            <div className="w-8 h-8 md:w-15 md:h-15 rounded-full bg-white flex items-center justify-center overflow-hidden mr-2 md:mr-3 border-2 border-orange-300">
+            <div className="w-8 h-8 md:w-15 md:h-15 rounded-full bg-white  items-center justify-center overflow-hidden  mr-2 md:mr-3 border-2 border-brown-400 hidden md:flex">
               <Image 
                 src={`/avatars/${team.avatar}.jpeg`} 
                 alt={team.name} 

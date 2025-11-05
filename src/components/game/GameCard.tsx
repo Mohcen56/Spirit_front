@@ -21,12 +21,12 @@ export default function GameCard({ question, children }: GameCardProps) {
         </div>
 
         {/* Right - Points */}
-        <div className="absolute -top-5 right-12 bg-amber-600 text-white px-6 py-2 rounded-xl text-md font-bold hidden md:inline-block">
+        <div className="absolute -top-5 right-12 bg-brown-800 text-white px-6 py-2 rounded-xl text-md font-bold hidden md:inline-block">
           {question.points} Points
         </div>
 
         {/* Content */}
-        <div className=" h-70  sm:mt-6 sm:h-95">
+        <div className=" h-80  sm:mt-6 sm:h-[28rem]">
           {children}
         </div>
 

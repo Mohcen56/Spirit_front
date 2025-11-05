@@ -38,6 +38,8 @@ export default function EditCategoryPage() {
   const [error, setError] = useState('');
   const [categoryOwnerId, setCategoryOwnerId] = useState<number | null>(null);
   const [isSaved, setIsSaved] = useState(false);
+  const [likesCount, setLikesCount] = useState<number>(0);
+  const [isLiked, setIsLiked] = useState<boolean>(false);
 
   // Determine if current user is the owner
   const isOwner = user?.id === categoryOwnerId;
@@ -69,7 +71,9 @@ export default function EditCategoryPage() {
         setCategoryImage(data.image_url || null);
         setPrivacy(data.privacy || 'public');
         setCategoryOwnerId(data.created_by_id || null);
-        setIsSaved(data.is_saved || false);
+  setIsSaved(data.is_saved || false);
+  setLikesCount(data.likes_count ?? 0);
+  setIsLiked(data.is_liked ?? false);
         
         // Fetch questions for this category using gameAPI
         try {
@@ -230,8 +234,29 @@ export default function EditCategoryPage() {
   };
 
   const handleLike = async () => {
-    // TODO: Implement like functionality
-    notify.info('Coming Soon', 'Like feature will be available soon!');
+    try {
+      const idNum = Number(categoryId);
+      if (!Number.isFinite(idNum)) return;
+      if (isLiked) {
+        const res = await gameAPI.unlikeCategory(idNum);
+        setIsLiked(false);
+        setLikesCount(res?.likes_count ?? Math.max(0, likesCount - 1));
+        notify.success('Unliked', 'You removed your like');
+      } else {
+        const res = await gameAPI.likeCategory(idNum);
+        setIsLiked(true);
+        setLikesCount(res?.likes_count ?? likesCount + 1);
+        notify.success('Liked', 'Thanks for the like!');
+      }
+      // Invalidate any lists showing this category preview
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['allCategoryData'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['categories', 'user'], refetchType: 'active' })
+      ]);
+    } catch (err) {
+      console.error('Error toggling like:', err);
+      notify.error('Failed', 'Could not update like. Please try again.');
+    }
   };
 
   const handleReport = () => {
@@ -340,10 +365,13 @@ export default function EditCategoryPage() {
                 {/* Like Button (for future functionality) */}
                 <button
                   onClick={handleLike}
-                  className="flex items-center gap-2 px-6 py-3 bg-pink-500 hover:bg-pink-600 text-white rounded-xl font-bold transition-all transform hover:scale-105 shadow-lg"
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all transform hover:scale-105 shadow-lg ${
+                    isLiked ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-pink-500 hover:bg-pink-600 text-white'
+                  }`}
                 >
-                  <Heart className="h-5 w-5" />
-                  <span>Like</span>
+                  <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
+                  <span>{isLiked ? 'Liked' : 'Like'}</span>
+                  <span className="ml-1 text-white/90">{likesCount}</span>
                 </button>
                 
                 {/* Report Button */}

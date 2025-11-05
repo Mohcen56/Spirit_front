@@ -21,6 +21,32 @@ export const userCategoriesAPI = {
   },
 
   /**
+   * Like a user category
+   */
+  likeCategory: async (categoryId: number) => {
+    try {
+      const response = await api.post(`/api/content/user-categories/${categoryId}/like/`, {});
+      return response.data as { liked: boolean; likes_count: number };
+    } catch (error) {
+      console.error('Error liking category:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Unlike a user category
+   */
+  unlikeCategory: async (categoryId: number) => {
+    try {
+      const response = await api.post(`/api/content/user-categories/${categoryId}/unlike/`, {});
+      return response.data as { liked: boolean; likes_count: number };
+    } catch (error) {
+      console.error('Error unliking category:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Get all categories created by the current user
    */
   getMyCategories: async () => {

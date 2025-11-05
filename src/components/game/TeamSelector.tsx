@@ -39,12 +39,12 @@ export default function TeamSelector({
       </div>
 
       {/* Team Selection Grid - Responsive Layout */}
-      <div className="grid grid-cols-2  gap-2 md:gap-4  md:mb-8 max-w-2xl mx-auto">
+      <div className="grid grid-cols-2  content-center gap-2  md:gap-4  md:mb-8 max-w-2xl mx-auto min-h-[20rem]">
         {teams.map((team) => (
           <button
             key={team.id}
             onClick={() => handleTeamClick(team.id)}
-            className={`group transition-all duration-200 transform hover:scale-105 relative ${
+            className={`group transition-all duration-200 transform content-center hover:scale-105 relative ${
               clickedTeamId === team.id 
                 ? 'bg-green-500 scale-105' 
                 : 'bg-slate-600 hover:bg-slate-700'

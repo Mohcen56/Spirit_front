@@ -156,15 +156,7 @@ export default function GamePage() {
             </div>
           </div>
 
-          {/* Navigation */}
-          <div className="text-center">
-            <button
-              onClick={() => router.push('/categories')}
-              className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg transition-colors shadow-md"
-            >
-              Create New Game
-            </button>
-          </div>
+        
         </div>
       </div>
     </div>

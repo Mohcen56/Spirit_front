@@ -47,7 +47,7 @@ export default function AnswerDisplay({ question, onShowQuestion, onShowTeamSele
              alt="Answer image"
              width={800}
              height={400}
-             className="w-full h-59 object-contain mx-auto"
+             className="w-full h-75 object-contain mx-auto"
              unoptimized
              onLoadingComplete={() => setAnswerImageStatus('loaded')}
              onError={() => setAnswerImageStatus('error')}
@@ -61,7 +61,7 @@ export default function AnswerDisplay({ question, onShowQuestion, onShowTeamSele
         {/* Back to Question Button */}
         <button
           onClick={onShowQuestion}
-          className=" bg-amber-600 hover:bg-amber-500 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors text-xs md:text-lg font-bold"
+          className=" bg-brown-800 hover:bg-brown-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors text-xs md:text-lg font-bold"
         >
           <RotateCcw className="h-4 w-4" />
           <span>Show Question</span>

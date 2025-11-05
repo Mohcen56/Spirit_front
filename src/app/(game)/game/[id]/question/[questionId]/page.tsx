@@ -9,9 +9,10 @@ import TeamSelector from '@/components/game/TeamSelector';
 import GameCard from '@/components/game/GameCard';
 import GameHeader from '@/components/game/GameHeader';
 import ChoicesDialog from '@/components/game/ChoicesDialog';
+import TeamsSidebar from '@/components/game/TeamsSidebar';
 import { getFullImageUrl } from '@/lib/utils/imageUtils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { switchToNextTeam, awardPoints, activateDoublePerk, clearActivePerk, activateRerollPerk, setGameQuestions, markQuestionPlayed, endGame } from '@/store/gameSlice';
+import { switchToNextTeam, awardPoints, clearActivePerk, setGameQuestions, markQuestionPlayed, endGame } from '@/store/gameSlice';
 import { Loader } from 'lucide-react';
 import { useGameData } from '@/hooks/useGameData';
 import { useSyncTeams } from '@/hooks/useSyncTeams';
@@ -385,7 +386,7 @@ export default function QuestionPage() {
                           alt="Question image"
                           width={800}
                           height={400}
-                          className="w-full h-59 object-contain mx-auto"
+                          className="w-full h-75 object-contain mx-auto"
                           unoptimized
                           onLoadingComplete={() => setQuestionImageStatus('loaded')}
                           onError={() => setQuestionImageStatus('error')}
@@ -398,7 +399,7 @@ export default function QuestionPage() {
                    <div className="absolute -bottom-6 left-26 transform -translate-x-1/2">
                     <button
                       onClick={handleShowAnswer}
-                      className="bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-xl  shadow-lg transition-all duration-200 text-lg"
+                      className="bg-brown-800 hover:bg-brown-700 text-white font-bold py-3 px-8 rounded-xl  shadow-lg transition-all duration-200 text-lg"
                     >
                       Answer
                     </button>
@@ -425,104 +426,19 @@ export default function QuestionPage() {
             ) : null}
           </div>
 
-          {/* Teams - Bottom on mobile, Right sidebar on desktop */}
-          <div className="w-full lg:w-80 px-2 flex justify-center ">
-            <div className="flex  lg:flex-col gap-1 lg:gap-1 justify-center items-stretch max-w-2xl lg:max-w-none w-full">
-              {teams.slice(0, 4).map((team, index) => (
-                <div key={team.id} className=" mt-1 lg:max-w-none lg:mb-0">
-                  <div className="bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl p-2 lg:p-4 flex flex-col lg:flex-row items-center lg:space-x-4 space-y-1 lg:space-y-0">
-                    {/* Team Avatar */}
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-17 lg:h-17 rounded-full bg-white/20 flex items-center justify-center overflow-hidden flex-shrink-0">
-                      {team.avatar ? (
-                        <Image
-                          src={`/avatars/${team.avatar}.jpeg`}
-                          alt={team.name}
-                          width={48}
-                          height={48}
-                          className="w-full h-full object-cover"
-                          unoptimized
-                        />
-                      ) : (
-                        <span className="text-white text-base sm:text-lg font-bold">{index + 1}</span>
-                      )}
-                    </div>
-
-                    {/* Team Info */}
-                    <div className=" flex-col items-center lg:ml-3 lg:items-start">
-                      <div className="font-bold text-base sm:text-lg sm:text-center justify-content-center mb-1">Team {index + 1}</div>
-                    
-
-                    {/* Team Actions */}
-                     <div className="flex flex-row space-x-1 sm:space-x-2 justify-center lg:justify-start">
-                      {/* Double Points Perk */}
-                      <button
-                        onClick={() => dispatch(activateDoublePerk({ teamId: team.id }))}
-                        disabled={!!doublePerkUsed[team.id] || doublePerkActiveTeamId !== null || (teams.findIndex(t => t.id === team.id) !== (currentTeam - 1))}
-                        title={
-                          doublePerkUsed[team.id]
-                            ? 'Perk already used'
-                            : doublePerkActiveTeamId !== null
-                              ? 'Another perk is active'
-                              : (teams.findIndex(t => t.id === team.id) !== (currentTeam - 1))
-                                ? "You can only activate on your team's turn"
-                                : 'Use Double Points once'
-                        }
-                        className={`p-1 sm:p-2 rounded transition-colors border text-xs sm:text-base ${doublePerkActiveTeamId === team.id ? 'bg-green-500 text-white border-green-600' : 'bg-white/20 hover:bg-white/30 text-white border-white/30'} disabled:opacity-50`}
-                      >
-                        <span>📞</span>
-                      </button>
-                      {/* Reroll Question Perk */}
-                      <button
-                        onClick={async () => {
-                          const teamIndex = teams.findIndex(t => t.id === team.id);
-                          const isTeamsTurn = teamIndex === (currentTeam - 1);
-                          if (!isTeamsTurn || rerollPerkUsed[team.id]) return;
-                          // Mark perk as used in Redux
-                          dispatch(activateRerollPerk({ teamId: team.id }));
-                          try {
-                            const pool = questions.filter(
-                              q => q.id !== question?.id && !playedQuestions.includes(q.id)
-                            );
-                            if (pool.length === 0) return;
-                            const random = pool[Math.floor(Math.random() * pool.length)];
-                            router.push(`/game/${gameId}/question/${random.id}`);
-                          } catch (e) {
-                            console.warn('Failed to reroll question:', e);
-                          }
-                        }}
-                        disabled={!!rerollPerkUsed[team.id] || (teams.findIndex(t => t.id === team.id) !== (currentTeam - 1))}
-                        title={
-                          rerollPerkUsed[team.id]
-                            ? 'Reroll already used'
-                            : (teams.findIndex(t => t.id === team.id) !== (currentTeam - 1))
-                              ? "You can only reroll on your team's turn"
-                              : 'Change to a random new question'
-                        }
-                        className={`p-1 sm:p-2 rounded transition-colors border text-xs sm:text-base ${rerollPerkUsed[team.id] ? 'bg-gray-400 text-white border-gray-500' : 'bg-white/20 hover:bg-white/30 text-white border-white/30'} disabled:opacity-50`}
-                      >
-                        <span>📞</span>
-                      </button>
-                      <button
-                        onClick={handleShowChoices}
-                        disabled={!!rerollPerkUsed[team.id] || (teams.findIndex(t => t.id === team.id) !== (currentTeam - 1))}
-                        title={
-                          rerollPerkUsed[team.id]
-                            ? 'Reroll already used'
-                            : (teams.findIndex(t => t.id === team.id) !== (currentTeam - 1))
-                              ? "You can only reroll on your team's turn"
-                              : 'Change to a random new question'
-                        }
-                        className={`p-1 sm:p-2 rounded transition-colors border text-xs sm:text-base ${rerollPerkUsed[team.id] ? 'bg-gray-400 text-white border-gray-500' : 'bg-white/20 hover:bg-white/30 text-white border-white/30'} disabled:opacity-50`}
-                      >
-                        <span>📞</span>
-                      </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* Teams Sidebar */}
+          <TeamsSidebar
+            teams={teams}
+            currentTeam={currentTeam}
+            doublePerkActiveTeamId={doublePerkActiveTeamId}
+            doublePerkUsed={doublePerkUsed}
+            rerollPerkUsed={rerollPerkUsed}
+            gameId={gameId}
+            question={question}
+            questions={questions}
+            playedQuestions={playedQuestions}
+            onShowChoices={handleShowChoices}
+          />
         </div>
       </main>
 
