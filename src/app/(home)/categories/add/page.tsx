@@ -12,8 +12,9 @@ import Usersprofiles from '@/components/User/Usersprofiles';
 import { useAuthGate } from '@/hooks/useAuthGate';
 import { useImageError } from '@/hooks/useImageError';
 import { useCategoriesData } from '@/hooks/useCategoriesData';
+import { VerifyIcon } from '@/components/ui/verify-badge';
 
-import { useHeader } from '../../layout';
+import { useHeader } from '@/contexts/HeaderContext';
 
 export default function AddedCategoriesPage() {
   const [showProfile, setShowProfile] = useState(false);
@@ -67,6 +68,53 @@ export default function AddedCategoriesPage() {
     },
   });
 
+  // Mutation for liking/unliking categories with optimistic updates
+  const likeMutation = useMutation({
+    mutationFn: async ({ categoryId, isLiked }: { categoryId: number; isLiked: boolean }) => {
+      if (isLiked) {
+        return userCategoriesAPI.unlikeCategory(categoryId);
+      } else {
+        return userCategoriesAPI.likeCategory(categoryId);
+      }
+    },
+    onMutate: async ({ categoryId, isLiked }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['categories', 'user'] });
+
+      // Snapshot the previous value
+      const previousCategories = queryClient.getQueryData(['categories', 'user']);
+
+      // Optimistically update to the new value
+      queryClient.setQueryData(['categories', 'user'], (old: Category[] | undefined) => {
+        if (!old) return old;
+        return old.map(cat =>
+          cat.id === categoryId ? { 
+            ...cat, 
+            is_liked: !isLiked,
+            likes_count: isLiked 
+              ? Math.max(0, (cat.likes_count || 0) - 1)
+              : (cat.likes_count || 0) + 1
+          } : cat
+        );
+      });
+
+      return { previousCategories };
+    },
+    onError: (err, variables, context) => {
+      // Rollback on error
+      if (context?.previousCategories) {
+        queryClient.setQueryData(['categories', 'user'], context.previousCategories);
+      }
+      console.error('Error liking/unliking category:', err);
+      setError('Failed to update like. Please try again.');
+    },
+    onSuccess: () => {
+      // Refetch to ensure consistency across pages
+      queryClient.invalidateQueries({ queryKey: ['categories', 'user'] });
+      queryClient.invalidateQueries({ queryKey: ['allCategoryData'] });
+    },
+  });
+
   useEffect(() => {
     setHeader({ title: " Categories Added by Users", backHref: "/categories" });
   }, [setHeader]);
@@ -90,6 +138,16 @@ export default function AddedCategoriesPage() {
     saveMutation.mutate({
       categoryId: category.id,
       isSaved: category.is_saved || false,
+    });
+  };
+
+  const handleLikeCategory = async (e: React.MouseEvent, category: Category) => {
+    e.stopPropagation();
+    
+    // Use the mutation with optimistic updates
+    likeMutation.mutate({
+      categoryId: category.id,
+      isLiked: category.is_liked || false,
     });
   };
 
@@ -136,7 +194,7 @@ export default function AddedCategoriesPage() {
               {/* Add Category Button */}
               <Link
                 href="/categories/create"
-                className="relative w-full aspect-[4/5] rounded-3xl border-2 border-dashed border-eastern-blue-400 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 hover:border-eastern-blue-600 bg-white/50 backdrop-blur-sm flex flex-col items-center justify-center group"
+                className="relative w-full aspect-[3/4] rounded-3xl border-2 border-dashed border-eastern-blue-400 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 hover:border-eastern-blue-600 bg-white/50 backdrop-blur-sm flex flex-col items-center justify-center group"
               >
                 <div className="flex flex-col items-center justify-center space-y-3">
                   <div className="w-20 h-20 bg-gradient-to-br from-eastern-blue-400 to-eastern-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
@@ -167,7 +225,7 @@ export default function AddedCategoriesPage() {
                     <div
                       key={category.id}
                       onClick={() => handleCategoryClick(category)}
-                      className={`relative w-full h-full aspect-[4/5] rounded-xl border-primary-300 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 cursor-pointer ${
+                      className={`relative w-full h-full aspect-[4/5] rounded-3xl border-primary-300 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 cursor-pointer ${
                         isPending ? 'opacity-75 ring-2 ring-orange-400' : ''
                       }`}
                     >
@@ -178,133 +236,152 @@ export default function AddedCategoriesPage() {
                         </div>
                       )}
 
-                      {/* Top Section - Cream Background with User Profile Header */}
-                      <div className=" flex flex-col relative h-[80%]  ">
-                        {/* User Profile Header */}
-                        <div className="absolute top-0 left-0 right-0 bg-gradient-to-br from-eastern-blue-600 to-eastern-blue-800 rounded-t-xl px-3 py-1 flex items-center justify-between z-20">
-                          <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                            {/* LEFT: Avatar + Username */}
-                            <div className="flex items-center space-x-2">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  // Create a User object from category data
-                                  if (category.created_by_id) {
-                                    setSelectedUser({
-                                      id: category.created_by_id,
-                                      username: category.created_by_username || 'Unknown',
-                                      email: '', // We don't have email from category
-                                      avatar: category.created_by_avatar || '/avatars/tanjiro.jpeg'// Default avatar for now
-                                    });
-                                    setShowProfile(true);
-                                  }
-                                }}
-                                className="w-8 h-8 rounded-full flex items-center justify-center hover:scale-105 transition-transform cursor-pointer overflow-hidden shadow-lg bg-white/20"
-                                aria-label="View creator profile"
-                              >
-                                <Image
-                                  src={category.created_by_avatar || '/avatars/tanjiro.jpeg'}
-                                  alt="Creator Profile"
-                                  width={32}
-                                  height={32}
-                                  className="w-full h-full object-cover rounded-full"
-                                  loading="lazy"
-                                  quality={75}
-                                />
-                              </button>
-                              <span className="text-eastern-blue-100 text-[10px] leading-tight">
-                                {category.created_by_username || 'Unknown'}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Category Image with Questions Count Badge */}
-                        <div className= "relative flex-1 flex justify-center items-center overflow-hidden ">
-                          <div className="relative h-full w-full">
-                            {(category.image_url || category.image) && !hasImageError(category.id) ? (
-                              <Image
-                                src={(category.image_url || category.image)!}
-                                alt={category.name}
-                                className="w-full h-full object-contain "
-                                fill
-                                sizes="(max-width: 768px) 80vw, 33vw"
-                                style={{ objectFit: 'contain' }}
-                                loading="lazy"
-                                quality={85}
-                                onError={() => handleImageError(category.id)}
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center rounded-4xl">
-                                <div className="w-18 h-18 bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 rounded-4xl flex items-center justify-center text-white text-2xl font-bold shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
-                                  {category.name.charAt(0).toUpperCase()}
-                                </div>
-                              </div>
+                      {/* Top Section - User Profile Header (10%) */}
+                      <div className="h-[15%] bg-gradient-to-br from-cyan-500 to-cyan-900 rounded-t-xl px-3 py-1 flex items-center justify-between z-10">
+                        <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (category.created_by_id) {
+                                setSelectedUser({
+                                  id: category.created_by_id,
+                                  username: category.created_by_username || 'Unknown',
+                                  email: '',
+                                  avatar: category.created_by_avatar || '/avatars/tanjiro.jpeg',
+                                  is_premium: category.created_by_is_premium
+                                });
+                                setShowProfile(true);
+                              }
+                            }}
+                            className="w-8 h-8 rounded-full flex items-center justify-center hover:scale-105 transition-transform cursor-pointer overflow-hidden shadow-lg bg-white/20"
+                            aria-label="View creator profile"
+                          >
+                            <Image
+                              src={category.created_by_avatar || '/avatars/tanjiro.jpeg'}
+                              alt="Creator Profile"
+                              width={32}
+                              height={32}
+                              className="w-full h-full object-cover rounded-full"
+                              loading="lazy"
+                              quality={75}
+                            />
+                          </button>
+                          <span className="text-eastern-blue-100 text-sm font-semibold leading-tight flex items-center gap-1">
+                            {category.created_by_username || 'Unknown'}
+                            {category.created_by_is_premium && (
+                              <VerifyIcon type="premium" size="xs" />
                             )}
-                            
-                            {/* Questions Count Badge */}
-                            <div className="absolute bottom-2 left-2 bg-black/70 text-white px-3 py-1 rounded-lg text-sm font-bold">
-                              questions: {category.questions_count || 0}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Middle Section - Category Image (60%) */}
+                      <div className="h-[65%] relative flex justify-center items-center overflow-hidden bg-white">
+                        <div className="relative h-full w-full">
+                          {(category.image_url || category.image) && !hasImageError(category.id) ? (
+                            <Image
+                              src={(category.image_url || category.image)!}
+                              alt={category.name}
+                              className="w-full h-full object-cover"
+                              fill
+                              sizes="(max-width: 768px) 80vw, 33vw"
+                              loading="lazy"
+                              quality={85}
+                              onError={() => handleImageError(category.id)}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <div className="w-18 h-18 bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 rounded-4xl flex items-center justify-center text-white text-2xl font-bold shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
+                                {category.name.charAt(0).toUpperCase()}
+                              </div>
                             </div>
+                          )}
+                          
+                          {/* Questions Count Badge */}
+                          <div className="absolute bottom-3 left-3 bg-black/80 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1.5">
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>{category.questions_count || 0}</span>
                           </div>
                         </div>
                       </div>
 
                       {/* Bottom Section - Dark Background with Actions */}
-                      <div className="relative h-[20%] bg-gradient-to-br from-eastern-blue-600 to-eastern-blue-800 flex flex-col items-center justify-center p-2">
-                        {/* Category Name */}
-                           <div className="flex items-center justify-between space-x-3 rtl:space-x-reverse w-full px-2 mb-1 mt-2">
-                        <h3 className="text-white font-bold text-base text-center leading-tight  ">
-                          {category.name}
-                        </h3>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // TODO: Implement like functionality
-                              console.log('Like category:', category.id);
-                            }}
-                            className="flex flex-col  absolute right-0.5 top-0.5 "
-                          >
-                            <svg 
-                              className="w-6 h-6 text-white group-hover:text-red-400 transition-colors" 
-                              fill="none" 
-                              stroke="currentColor" 
-                              viewBox="0 0 24 24"
+                      <div className="relative h-[20%] bg-gradient-to-br from-cyan-500 to-cyan-900  px-3 py-1 flex flex-col justify-between">
+
+                        <div className="flex flex-col gap-1 ">
+                          {/* Category Name */}
+                          <h3 className="text-eastern-blue-100 font-bold text-sm leading-tight  line-clamp-2 flex-grow">
+                            {category.name}
+                          </h3>
+
+                          {/* Actions */}
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={(e) => handleSaveCategory(e, category)}
+                              className={`flex-1 ${
+                                category.is_saved 
+                                  ? 'bg-green-500 hover:bg-green-600' 
+                                  : 'bg-white/20 hover:bg-white/30 backdrop-blur-sm'
+                              } text-white text-xs font-semibold py-2 px-3 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-1.5`}
                             >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                            </svg>
-                            <span className="text-white text-xs">{category.questions_count || 0}</span>
-                          </button>
+                              {category.is_saved ? (
+                                <>
+                                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                  </svg>
+                                  Saved
+                                </>
+                              ) : (
+                                <>
+                                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                  </svg>
+                                  Add
+                                </>
+                              )}
+                            </button>
+                            
+                            <button
+                              onClick={(e) => handleLikeCategory(e, category)}
+                              className={`${
+                                category.is_liked 
+                                  ? 'bg-red-500 hover:bg-red-600' 
+                                  : 'bg-white/20 hover:bg-white/30'
+                              } backdrop-blur-sm px-3 py-2 rounded-lg transition-all shadow-md hover:shadow-lg group flex items-center gap-1.5`}
+                              aria-label={category.is_liked ? 'Unlike category' : 'Like category'}
+                              title={category.is_liked ? 'Unlike this category' : 'Like this category'}
+                            >
+                              {category.is_liked ? (
+                                // Filled heart when liked
+                                <svg 
+                                  className="w-4 h-4 text-white transition-all scale-110" 
+                                  fill="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                              ) : (
+                                // Empty heart when not liked
+                                <svg 
+                                  className="w-4 h-4 text-white group-hover:text-red-300 transition-colors" 
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth={2}
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                              )}
+                              <span className="text-white text-xs font-semibold">
+                                {category.likes_count || 0}
+                              </span>
+                            </button>
                           </div>
-                        {/* Action Buttons Row */}
-                        <div className="flex items-center justify-end space-x-3 rtl:space-x-reverse w-full mb-3  mt-1 px-2.5">
-                          {/* Save/Unsave Button */}
-                          <button
-                            onClick={(e) => handleSaveCategory(e, category)}
-                            className={`flex-1 ${
-                              category.is_saved 
-                                ? 'bg-green-500 hover:bg-green-600' 
-                                : 'bg-eastern-blue-500 hover:bg-eastern-blue-400'
-                            } text-white text-xs font-bold py-1 px-2 rounded-full transition-colors flex items-center justify-center space-x-1 rtl:space-x-reverse`}
-                          >
-                            <span>{category.is_saved ? '✓' : '+'}</span>
-                            <span>{category.is_saved ? 'Saved' : 'add category'}</span>
-                          </button>
                         </div>
 
-                        {/* Premium Indicator (if applicable) */}
-                        {category.is_premium && (
-                          <div className="absolute top-2 right-2">
-                            <Crown className="h-4 w-4 text-yellow-400" />
-                          </div>
-                        )}
-
-                        {/* Private Indicator */}
-                        {category.privacy === 'private' && (
-                          <div className="absolute top-2 left-2 bg-yellow-500/90 px-2 py-0.5 rounded text-xs text-white font-semibold">
-                            Private
-                          </div>
-                        )}
+                      
                       </div>
                     </div>
                   );

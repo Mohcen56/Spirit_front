@@ -2,12 +2,10 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { gameAPI } from '@/lib/api/index';
-import { ArrowLeft, ImagePlus } from 'lucide-react';
+import { ImagePlus } from 'lucide-react';
 import ImageCropModal from '@/components/added_cat/ImageCropModal';
-import Header from '@/components/Header';
-import { useHeader } from '../../layout';
+import { useHeader } from '@/contexts/HeaderContext';
 import { useQueryClient } from '@tanstack/react-query';
 
 
@@ -66,6 +64,9 @@ export default function CreateCategoryPage() {
   };
 
   const handleCreateCategory = async () => {
+    // Prevent multiple submissions
+    if (isSubmitting) return;
+    
     setError('');
 
     // Validation

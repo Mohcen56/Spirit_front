@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { gameAPI } from '@/lib/api/index';
 import {  Play, Plus, Minus, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
-import { useHeader } from '../layout';
+import { useHeader } from '@/contexts/HeaderContext';
 
 interface TeamForm {
   name: string;

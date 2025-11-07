@@ -1,17 +1,8 @@
 "use client";
 
-import { createContext, useState, useContext } from "react";
+import { useState } from "react";
 import Header from "@/components/Header";
-
-const HeaderContext = createContext({
-  title: "",
-  backHref: "/",
-  setHeader: (data: { title: string; backHref: string }) => {},
-});
-
-export function useHeader() {
-  return useContext(HeaderContext);
-}
+import { HeaderContext } from "@/contexts/HeaderContext";
 
 export default function HomeLayout({ children }: { children: React.ReactNode }) {
   const [headerData, setHeaderData] = useState({ title: "", backHref: "/" });

@@ -3,6 +3,7 @@ export interface User {
   username: string;
   email: string;
   avatar: string;
+  is_premium?: boolean;
 }
 
 export interface Membership {
@@ -27,10 +28,14 @@ export interface Category {
   created_by_id?: number; // User ID who created this category
   created_by_username?: string; // Username of creator
   created_by_avatar?: string; // Avatar URL of creator
+  created_by_is_premium?: boolean; // Premium status of creator
   is_approved?: boolean; // True if admin approved
   privacy?: 'public' | 'private';
   questions_count?: number; // Number of questions in this category
   is_saved?: boolean; // True if current user has saved this category
+  saves_count?: number; // Number of times this category has been saved
+  likes_count?: number; // Number of likes
+  is_liked?: boolean; // True if current user has liked this category
 }
 
 export interface Collection {

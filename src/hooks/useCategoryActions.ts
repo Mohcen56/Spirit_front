@@ -1,0 +1,198 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
+import { gameAPI } from '@/lib/api';
+import { useNotification } from '@/hooks/useNotification';
+
+interface UseCategoryActionsProps {
+  categoryId: string;
+  categoryName: string;
+  categoryDescription: string;
+  categoryImageFile: File | null;
+  privacy: 'public' | 'private';
+  setError: (error: string) => void;
+  setIsSaved: (saved: boolean) => void;
+  setSavesCount: (count: number) => void;
+  setIsLiked: (liked: boolean) => void;
+  setLikesCount: (count: number) => void;
+  savesCount: number;
+  likesCount: number;
+  isSaved: boolean;
+  isLiked: boolean;
+}
+
+export function useCategoryActions({
+  categoryId,
+  categoryName,
+  categoryDescription,
+  categoryImageFile,
+  privacy,
+  setError,
+  setIsSaved,
+  setSavesCount,
+  setIsLiked,
+  setLikesCount,
+  savesCount,
+  likesCount,
+  isSaved,
+  isLiked,
+}: UseCategoryActionsProps) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const notify = useNotification();
+
+  const handleSave = async (): Promise<boolean> => {
+    try {
+      setError('');
+
+      if (!categoryName.trim()) {
+        setError('Category name is required');
+        return false;
+      }
+
+      console.log('💾 Saving category...');
+      console.log('💾 categoryImageFile:', categoryImageFile);
+     
+      const formData = new FormData();
+      formData.append('name', categoryName);
+      formData.append('description', categoryDescription);
+      formData.append('privacy', privacy);
+      
+      if (categoryImageFile) {
+        console.log('💾 Appending image to FormData:', categoryImageFile.name, categoryImageFile.size);
+        formData.append('image', categoryImageFile);
+      } else {
+        console.log('⚠️ No categoryImageFile to upload');
+      }
+
+      console.log('💾 Sending update request...');
+      const responseData = await gameAPI.updateUserCategory(categoryId, formData);
+      console.log('✅ Update successful:', responseData);
+     
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['categories', 'user'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['savedCategories'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['allCategoryData'], refetchType: 'active' })
+      ]);
+     
+      notify.success('Success', 'Category updated successfully!');
+      router.push('/categories');
+      return true;
+      
+    } catch (err) {
+      console.error('Error saving category:', err);
+      setError('Failed to save category. Please try again.');
+      return false;
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this category? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await gameAPI.deleteUserCategory(categoryId);
+      
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['categories', 'user'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['savedCategories'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['allCategoryData'], refetchType: 'active' })
+      ]);
+      
+      notify.success('Deleted', 'Category deleted successfully');
+      router.push('/categories');
+    } catch (err) {
+      console.error('Error deleting category:', err);
+      notify.error('Delete Failed', 'Failed to delete category. Please try again.');
+    }
+  };
+
+  const handleToggleSave = async () => {
+    try {
+      if (isSaved) {
+        await gameAPI.unsaveCategory(Number(categoryId));
+        setIsSaved(false);
+        setSavesCount(Math.max(0, savesCount - 1));
+        notify.success('Category Unsaved', 'Category removed from your collection');
+      } else {
+        await gameAPI.saveCategory(Number(categoryId));
+        setIsSaved(true);
+        setSavesCount(savesCount + 1);
+        notify.success('Category Saved', 'Category added to your collection');
+      }
+      
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['allCategoryData'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['categories', 'user'], refetchType: 'active' })
+      ]);
+    } catch (err) {
+      console.error('Error toggling save:', err);
+      notify.error('Failed', 'Could not update category. Please try again.');
+    }
+  };
+
+  const handleLike = async () => {
+    try {
+      const idNum = Number(categoryId);
+      if (!Number.isFinite(idNum)) return;
+      
+      if (isLiked) {
+        const res = await gameAPI.unlikeCategory(idNum);
+        setIsLiked(false);
+        setLikesCount(res?.likes_count ?? Math.max(0, likesCount - 1));
+        notify.success('Unliked', 'You removed your like');
+      } else {
+        const res = await gameAPI.likeCategory(idNum);
+        setIsLiked(true);
+        setLikesCount(res?.likes_count ?? likesCount + 1);
+        notify.success('Liked', 'Thanks for the like!');
+      }
+      
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['allCategoryData'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['categories', 'user'], refetchType: 'active' })
+      ]);
+    } catch (err) {
+      console.error('Error toggling like:', err);
+      notify.error('Failed', 'Could not update like. Please try again.');
+    }
+  };
+
+  const handleReport = () => {
+    notify.info('Report Feature', 'Report functionality will be added soon');
+  };
+
+  const handleDeleteQuestion = async (
+    questionId: number, 
+    setQuestions: React.Dispatch<React.SetStateAction<{ id: number; text: string; answer: string; points: number; image?: string; answer_image?: string }[]>>
+  ) => {
+    if (!confirm('Are you sure you want to delete this question?')) {
+      return;
+    }
+
+    try {
+      await gameAPI.deleteQuestion(questionId);
+      setQuestions(prev => prev.filter(q => q.id !== questionId));
+      notify.success('Question Deleted', 'Question removed successfully');
+    } catch (err) {
+      console.error('Error deleting question:', err);
+      notify.error('Delete Failed', 'Failed to delete question. Please try again.');
+    }
+  };
+
+  const handleEditQuestion = (questionId: number) => {
+    router.push(`/categories/edit/${categoryId}/question/${questionId}/edit`);
+  };
+
+  return {
+    handleSave,
+    handleDelete,
+    handleToggleSave,
+    handleLike,
+    handleReport,
+    handleDeleteQuestion,
+    handleEditQuestion,
+  };
+}

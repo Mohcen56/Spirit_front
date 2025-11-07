@@ -47,7 +47,7 @@ export default function AnswerDisplay({ question, onShowQuestion, onShowTeamSele
              alt="Answer image"
              width={800}
              height={400}
-             className="w-full h-75 object-contain mx-auto"
+             className="w-full h-55 md:h-75 object-contain mx-auto"
              unoptimized
              onLoadingComplete={() => setAnswerImageStatus('loaded')}
              onError={() => setAnswerImageStatus('error')}

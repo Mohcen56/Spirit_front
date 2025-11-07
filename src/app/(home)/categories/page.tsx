@@ -10,7 +10,7 @@ import { Users, Crown, Lock, Eye, Pencil, Info } from 'lucide-react';
 import Image from 'next/image';
 import { useMembership } from '@/hooks/useMembership';
 import { useImageError } from '@/hooks/useImageError';
-import { useHeader } from '../layout';
+import { useHeader } from '@/contexts/HeaderContext';
 
 export default function CategoriesPage() {
   const { membership, currentUserId, error, setError } = useMembership();
@@ -273,7 +273,7 @@ export default function CategoriesPage() {
                       </h3>
                       {/* Premium/Lock Indicator */}
                       {isPremium && (
-                        <div className="absolute top-2 right-2">
+                        <div className="absolute top-1 text-center">
                           {canSelect ? (
                             <Crown className="h-4 w-4 text-yellow-400" />
                           ) : (
@@ -289,9 +289,7 @@ export default function CategoriesPage() {
                       )}
                     </div>
                     {/* Gold Border for Premium */}
-                    {isPremium && canSelect && (
-                      <div className="absolute inset-0 rounded-3xl border-4 border-yellow-400 pointer-events-none"></div>
-                    )}
+                    
                     
                   </button>
                 );

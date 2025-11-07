@@ -18,7 +18,7 @@ export default function Header({ title, backHref }: HeaderProps) {
   
   return (
     <header className="bg-cyan-600 shadow-lg">
-      <div className="container mx-auto px-2 lg:px-2 py-4">
+      <div className="w-full px-4 lg:px-8 py-4">
         <div className="relative flex items-center justify-between">
           {/* Left: Back and Logo */}
           <div className="flex items-center space-x-1 lg:space-x-4">

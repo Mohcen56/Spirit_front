@@ -8,7 +8,7 @@ import { Play, History,  } from 'lucide-react';
 import UserProfile from '@/components/User/UserProfile';
 import { useAuthGate } from '@/hooks/useAuthGate';
 
-import { useHeader } from '../layout';
+import { useHeader } from '@/contexts/HeaderContext';
 export default function HomePage() {
   const [showProfile, setShowProfile] = useState(false);
  const { setHeader } = useHeader();

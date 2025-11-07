@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { useParams } from "next/navigation";
-import { useHeader } from "@/app/(home)/layout";
+import { useHeader } from "@/contexts/HeaderContext";
 import QuestionFormContent from "@/components/added_cat/QuestionFormContent";
 
 export default function AddQuestionPage() {

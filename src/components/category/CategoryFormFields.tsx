@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
-import { ImagePlus, Trash2, Edit3, Lock, Globe } from 'lucide-react';
-import ImageCropModal from './ImageCropModal';
+import { ImagePlus, Edit3, Trash } from 'lucide-react';
+import ImageCropModal from '../added_cat/ImageCropModal';
 import { ProcessingButton } from '@/components/ui/button2';
 import { useNotification } from '@/hooks/useNotification';
+import CategoryDisplay from './CategoryDisplay';
 
 interface CategoryFormFieldsProps {
   categoryName: string;
@@ -17,6 +18,8 @@ interface CategoryFormFieldsProps {
   setPrivacy: (value: 'public' | 'private') => void;
   onSave: () => Promise<boolean>;
   onDelete: () => void;
+  likesCount?: number;
+  savesCount?: number;
 }
 
 export default function CategoryFormFields({
@@ -30,6 +33,8 @@ export default function CategoryFormFields({
   setPrivacy,
   onSave,
   onDelete,
+  likesCount = 0,
+  savesCount = 0,
 }: CategoryFormFieldsProps) {
   const notify = useNotification();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -70,61 +75,35 @@ export default function CategoryFormFields({
 
       {/* ===================== VIEW MODE ===================== */}
       {!isEditing && (
-        <div className="p-6   mx-auto">
-          <div className="flex flex-col sm:flex-row gap-6 items-start">
-            {/* Image */}
-            <div className="w-48 h-48 bg-gray-100 border rounded-xl overflow-hidden flex items-center justify-center">
-              {categoryImage ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={categoryImage}
-                  alt={categoryName}
-                  className="object-cover w-full h-full"
-                />
-              ) : (
-                <ImagePlus className="h-12 w-12 text-gray-400" />
-              )}
-            </div>
-
-            {/* Text info */}
-            <div className="flex-1">
-              <h2 className="text-2xl  text-primary-800 font-bold mb-2">{categoryName || 'Untitled Category'}</h2>
-              <p className="text-primary-700 mb-4">
-                {categoryDescription || 'No description provided.'}
-              </p>
-              <div className="flex items-center gap-2">
-                {privacy === 'private' ? (
-                  <>
-                    <Lock className="text-gray-500" />
-                    <span className="text-gray-700 font-semibold">Private</span>
-                  </>
-                ) : (
-                  <>
-                    <Globe className="text-gray-500" />
-                    <span className="text-gray-700 font-semibold">Public</span>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
+        <div className="p-6 mx-auto">
+          <CategoryDisplay
+            categoryName={categoryName}
+            categoryDescription={categoryDescription}
+            categoryImage={categoryImage}
+            privacy={privacy}
+            likesCount={likesCount}
+            savesCount={savesCount}
+          />
 
           {/* Action buttons */}
           <div className="flex justify-end gap-4 mt-6">
             <button
               type="button"
-              onClick={onDelete}
-              className="flex items-center space-x-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-8 py-4 rounded-xl shadow-lg transition-all transform hover:scale-105 font-semibold"
+              onClick={() => setIsEditing(true)}
+              className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white p-6 rounded-xl shadow-lg transition-all transform hover:scale-105 font-semibold"
+              aria-label="Edit Category"
+              title="Edit Category"
             >
-              <Trash2 className="h-5 w-5" />
-              <span>Delete</span>
+              <Edit3 className="h-5 w-5" />
             </button>
             <button
               type="button"
-              onClick={() => setIsEditing(true)}
-              className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-4 rounded-xl shadow-lg transition-all transform hover:scale-105 font-semibold"
+              onClick={onDelete}
+              className="flex items-center space-x-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white p-6 rounded-xl shadow-lg transition-all transform hover:scale-105 font-semibold"
+              title="Delete Category"
+              aria-label="Delete Category"
             >
-              <Edit3 className="h-5 w-5" />
-              <span>Edit</span>
+              <Trash className="h-5 w-5" />
             </button>
           </div>
         </div>
@@ -209,13 +188,7 @@ export default function CategoryFormFields({
 
           {/* Action buttons */}
           <div className="flex justify-end gap-4 mt-6">
-             <button
-              type="button"
-              onClick={() => setIsEditing(false)}
-              className="flex items-center space-x-2 bg-gray-200 hover:bg-gray-300 text-gray-800 px-8 py-4 rounded-xl shadow-md transition-all transform hover:scale-105 font-semibold"
-            >
-              Cancel
-            </button>
+          
             <ProcessingButton
               onProcess={async () => {
                 const success = await onSave();
@@ -227,15 +200,21 @@ export default function CategoryFormFields({
                 }
                 return success;
               }}
-              className="flex items-center space-x-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-8 py-4 rounded-xl shadow-lg transition-all transform hover:scale-105 font-semibold"
+              className="flex items-center  bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white  py-9 rounded-xl shadow-lg transition-all transform hover:scale-105 font-semibold"
               icon="save"
               processingText="Saving..."
               successText="Saved!"
               errorText="Failed"
             >
-              Save Changes
+              Save 
             </ProcessingButton>
-        
+           <button
+              type="button"
+              onClick={() => setIsEditing(false)}
+              className="flex items-center space-x-2 bg-gray-200 hover:bg-gray-300 text-gray-800 px-8 py-4 rounded-xl shadow-md transition-all transform hover:scale-105 font-semibold"
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}

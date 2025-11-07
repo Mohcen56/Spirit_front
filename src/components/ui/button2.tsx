@@ -118,7 +118,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         className={cn(
           "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border",
-          "h-10 px-4 py-2",
+          "h-10 px-2 py-2",
           className
         )}
         ref={ref}
@@ -150,7 +150,7 @@ const ProcessingButton: React.FC<ProcessingButtonProps> = ({
   onProcess,
   children,
   icon = "save",
-  processingText = "Processing...",
+  processingText = "Processing..",
   successText = "Saved!",
   errorText = "Failed",
   ...props
@@ -283,7 +283,7 @@ export default function CopyButtonView2() {
 
       <div className="flex gap-4">
         <ProcessingButton onProcess={handleSave} icon="save">
-          Save Changes
+          Save 
         </ProcessingButton>
         
         <ProcessingButton onProcess={handleSave} icon="download">

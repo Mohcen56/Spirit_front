@@ -5,12 +5,14 @@ import { ChevronLeft, Camera, Eye, EyeOff, Check } from 'lucide-react';
 import Image from 'next/image';
 import { ProcessingButton } from '@/components/ui/button2';
 import { useNotification } from '@/hooks/useNotification';
+import { VerifyBadge } from '@/components/ui/verify-badge';
 
 interface User {
   id: number;
   username: string;
   email: string;
   avatar: string;
+  is_premium?: boolean;
 }
 
 interface UserProfileProps {
@@ -145,6 +147,12 @@ export default function UserProfile({ user, onBack, onSave }: UserProfileProps) 
               className="hidden"
               aria-label="Upload profile picture"
             />
+          </div>
+          <div className="flex items-center gap-2 mt-4">
+            <h2 className="text-xl font-bold text-gray-800">{user.username}</h2>
+            {user.is_premium && (
+              <VerifyBadge type="premium" size="md" showLabel={false} />
+            )}
           </div>
           <p className="text-sm text-gray-500 mt-2">Click to change profile picture</p>
         </div>

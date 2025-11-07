@@ -3,13 +3,18 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { gameAPI } from '@/lib/api/index';
+import { VerifyBadge } from '@/components/ui/verify-badge';
+import { AnimatedBadge } from '@/components/ui/animatedbadge';
+import { useCreatorBadge } from '@/hooks/useCreatorBadge';
 
 interface User {
   id: number;
   username: string;
   email: string;
   avatar: string;
+  is_premium?: boolean;
 }
 
 interface Category {
@@ -21,6 +26,8 @@ interface Category {
   questions_count?: number;
   privacy?: 'public' | 'private';
   created_by_id?: number;
+  created_by_username?: string;
+  created_by_is_premium?: boolean;
   is_approved?: boolean;
 }
 
@@ -30,6 +37,7 @@ interface UserProfileProps {
 }
 
 export default function UserProfile({ user, onBack }: UserProfileProps) {
+  const router = useRouter();
   const [formData] = useState({
     username: user.username,
     avatar: user.avatar,
@@ -45,10 +53,9 @@ export default function UserProfile({ user, onBack }: UserProfileProps) {
       try {
         setIsLoadingCategories(true);
         const allCategories = await gameAPI.getUserCategories();
-        const categories = Array.isArray(allCategories) ? allCategories : (allCategories?.results || []);
         
         // Filter to only show categories created by this user
-        const filtered = categories.filter((cat: Category) => cat.created_by_id === user.id);
+        const filtered = allCategories.filter((cat: Category) => cat.created_by_id === user.id);
         setUserCategories(filtered);
       } catch (error) {
         console.error('Error fetching user categories:', error);
@@ -59,6 +66,10 @@ export default function UserProfile({ user, onBack }: UserProfileProps) {
 
     fetchUserCategories();
   }, [user.id]);
+  
+  // Calculate approved categories count and use the creator badge hook
+  const approvedCategoriesCount = userCategories.filter(cat => cat.is_approved).length;
+  const creatorBadge = useCreatorBadge(approvedCategoriesCount);
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4">
@@ -103,28 +114,32 @@ export default function UserProfile({ user, onBack }: UserProfileProps) {
                 />
               )}
             </div>
-           
-            
           </div>
-         
+          
+          {/* Username */}
+          <h2 className="text-2xl font-bold text-gray-800 mt-4">
+            {formData.username}
+          </h2>
+          <div className="flex items-center space-x-2">
+          {/* Premium Badge */}
+          {user.is_premium && (
+            <div className="mt-2">
+              <VerifyBadge type="premium" size="md" showLabel={true} />
             </div>
+          )}
 
-        {/* Basic Info */}
-        <div className="space-y-6 mb-8">
-          <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-              Username
-            </label>
-            <input
-              id="username"
-              name="username"
-              type="text"
-              value={formData.username}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              readOnly
-            />
-          </div>
-        </div>
+            {/* Creator Level - Animated Badge based on approved categories */}
+            {approvedCategoriesCount > 0 && (
+              <div className="mt-2 flex">
+                <AnimatedBadge
+                  text={`${creatorBadge.level} · ${creatorBadge.count}`}
+                  icon={creatorBadge.icon}
+                  borderColor={creatorBadge.borderColor}
+                  shadowColor={creatorBadge.shadowColor}
+                />
+              </div>
+            )}
+        </div></div>
 
         {/* Categories Created by User */}
         <div className="border-t pt-6">
@@ -141,22 +156,23 @@ export default function UserProfile({ user, onBack }: UserProfileProps) {
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {userCategories.map((category) => (
-                <div
+                <button
                   key={category.id}
-                  className="relative aspect-[4/5] rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+                  onClick={() => router.push(`/categories/edit/${category.id}`)}
+                  className="relative aspect-[4/5] rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] cursor-pointer group"
                 >
                   {/* Category Image */}
-                  <div className="h-3/4 relative">
+                  <div className="h-4/5 relative">
                     {category.image_url || category.image ? (
                       <Image
                         src={(category.image_url || category.image)!}
                         alt={category.name}
                         fill
-                        className="object-cover"
+                        className="object-cover group-hover:brightness-110 transition-all"
                         sizes="(max-width: 768px) 50vw, 33vw"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center">
+                      <div className="w-full h-full bg-gradient-to-br from-eastern-blue-500 to-eastern-blue-700 flex items-center justify-center group-hover:from-eastern-blue-600 group-hover:to-eastern-blue-800 transition-all">
                         <span className="text-white text-4xl font-bold">
                           {category.name.charAt(0).toUpperCase()}
                         </span>
@@ -184,12 +200,12 @@ export default function UserProfile({ user, onBack }: UserProfileProps) {
                   </div>
 
                   {/* Category Name */}
-                  <div className="h-1/4 bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center px-2">
+                  <div className="h-1/5 bg-gradient-to-br from-eastern-blue-500 to-eastern-blue-700 flex items-center justify-center px-2 group-hover:from-eastern-blue-600 group-hover:to-eastern-blue-800 transition-all">
                     <h4 className="text-white font-bold text-sm text-center line-clamp-2">
                       {category.name}
                     </h4>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           )}

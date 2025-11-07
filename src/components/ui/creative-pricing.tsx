@@ -7,6 +7,7 @@ interface PricingTier {
     name: string;
     icon: React.ReactNode;
     price: number;
+    originalPrice?: number;
     description: string;
     features: string[];
     popular?: boolean;
@@ -26,7 +27,7 @@ function CreativePricing({
     tiers: PricingTier[];
 }) {
     return (
-        <div className="w-full max-w-6xl mx-auto px-4">
+        <div className="w-full max-w-7xl mx-auto px-4">
             <div className="text-center space-y-6 mb-16">
                
                 <div className="relative">
@@ -49,16 +50,24 @@ function CreativePricing({
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className={cn(
+                "grid gap-20 justify-center",
+                tiers.length === 2 
+                    ? "grid-cols-1 md:grid-cols-2 max-w-5xl mx-auto" 
+                    : "grid-cols-1 md:grid-cols-3"
+            )}>
                 {tiers.map((tier, index) => (
                     <div
                         key={tier.name}
                         className={cn(
                             "relative group",
                             "transition-all duration-300",
-                            index === 0 && "rotate-[-1deg]",
-                            index === 1 && "rotate-[1deg]",
-                            index === 2 && "rotate-[-2deg]"
+                            tiers.length === 2 ? (
+                                index === 0 ? "md:rotate-[-2deg]" : "md:rotate-[2deg]"
+                            ) : (
+                                index === 0 ? "rotate-[-1deg]" :
+                                index === 1 ? "rotate-[1deg]" : "rotate-[-2deg]"
+                            )
                         )}
                     >
                         <div
@@ -73,20 +82,22 @@ function CreativePricing({
                             )}
                         />
 
-                        <div className="relative p-6">
-                            {tier.popular && (
-                                <div
-                                    className="absolute -top-2 -right-2 bg-amber-400 text-zinc-900 
-                                    font-handwritten px-3 py-1 rounded-full rotate-12 text-sm border-2 border-zinc-900"
-                                >
-                                    Popular!
+                        <div className="relative p-6 flex flex-col min-h-[500px]">
+                            {tier.originalPrice && tier.popular && (
+                                <div className="absolute -top-2 -right-2 flex flex-col gap-1">
+                                    <div className="bg-red-500 text-white px-3 py-1 rounded-md text-sm font-bold rotate-[8deg] border-2 border-zinc-900 shadow-md">
+                                        {Math.round(((tier.originalPrice - tier.price) / tier.originalPrice) * 100)}% OFF
+                                    </div>
+                                    <div className="bg-amber-400 text-zinc-900 font-handwritten px-2 py-1 rounded-full rotate-[-6deg] text-xs border-2 border-zinc-900 shadow-md whitespace-nowrap">
+                                        Limited Time!
+                                    </div>
                                 </div>
                             )}
 
-                            <div className="mb-6">
+                            <div className=" flex mb-6">
                                 <div
                                     className={cn(
-                                        "w-12 h-12 rounded-full mb-4",
+                                        "w-12 h-12 rounded-full ",
                                         "flex items-center justify-center",
                                         "border-2 border-zinc-900 dark:border-white",
                                         `text-${tier.color}-500`
@@ -94,25 +105,54 @@ function CreativePricing({
                                 >
                                     {tier.icon}
                                 </div>
-                                <h3 className="font-handwritten text-2xl text-zinc-900 dark:text-white">
+                                <h3 className="font-handwritten text-2xl text-zinc-900 px-2 dark:text-white">
                                     {tier.name}
                                 </h3>
+                                </div>
+                                
+
+                            {/* Price */}
+                            <div className="font-handwritten mb-2">
+                                {tier.originalPrice ? (
+                                    <div className="flex items-center gap-3 flex-wrap">
+                                        <div className="flex items-baseline">
+                                             <span className="text-4xl font-bold text-zinc-900 dark:text-white">
+                                                ${tier.price}
+                                            </span>
+                                           
+                                           
+                                        </div>
+                                        <div className="flex items-baseline">
+                                            <span className="text-2xl font-bold text-zinc-400 dark:text-zinc-600 line-through">
+                                                ${tier.originalPrice}
+                                            </span>
+                                            
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-baseline">
+                                        <span className="text-4xl font-bold text-zinc-900 dark:text-white">
+                                            ${tier.price}
+                                        </span>
+                                    </div>
+                                )}
+                                {tier.price > 0 && (
+                                    <div className="mt-2 inline-flex items-center gap-2">
+                                        <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                                            One-time payment
+                                        </span>
+                                        <span className="bg-gradient-to-r from-amber-400 to-yellow-400 text-zinc-900 px-2 py-0.5 rounded text-xs font-bold border border-zinc-900">
+                                            ✨ LIFETIME
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="mb-4">
                                 <p className="font-handwritten text-zinc-600 dark:text-zinc-400">
                                     {tier.description}
                                 </p>
                             </div>
-
-                            {/* Price */}
-                            <div className="mb-6 font-handwritten">
-                                <span className="text-4xl font-bold text-zinc-900 dark:text-white">
-                                    ${tier.price}
-                                </span>
-                                <span className="text-zinc-600 dark:text-zinc-400">
-                                    /Year
-                                </span>
-                            </div>
-
-                            <div className="space-y-3 mb-6">
+                            <div className="space-y-3 mb-auto">
                                 {tier.features.map((feature) => (
                                     <div
                                         key={feature}
@@ -131,6 +171,7 @@ function CreativePricing({
                                 ))}
                             </div>
 
+                            <div className="mt-8">
                                                         {tier.href ? (
                                                             <Button
                                                                 asChild
@@ -187,6 +228,7 @@ function CreativePricing({
                                 Get Started
                                                             </Button>
                                                         )}
+                            </div>
                         </div>
                     </div>
                 ))}

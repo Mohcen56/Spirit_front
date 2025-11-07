@@ -83,4 +83,17 @@ export const gamesAPI = {
       throw error;
     }
   },
+
+  /**
+   * Get last 3 games with their categories
+   */
+  getRecentGames: async () => {
+    try {
+      const response = await api.get('/api/gameplay/recent/');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching recent games:', error);
+      throw error;
+    }
+  },
 };

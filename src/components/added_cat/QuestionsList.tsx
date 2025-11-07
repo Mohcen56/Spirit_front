@@ -113,6 +113,16 @@ export default function QuestionsList({
 
   // Show questions list
   return (
+    <>
+      <style>
+        {`
+          @keyframes move-bg {
+            to {
+              background-position: 400% 0;
+            }
+          }
+        `}
+      </style>
     <div className="rounded-xl shadow-xl p-6 w-full  bg-white mb-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
@@ -151,7 +161,7 @@ export default function QuestionsList({
           className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-colors ${
             sortBy === 'oldest' 
               ? 'bg-blue-600 text-white' 
-              : 'bg-slate-600 text-white hover:bg-slate-500'
+              : 'bg-cyan-600 text-white hover:bg-cyan-900'
           }`}
         >
           Oldest
@@ -161,7 +171,7 @@ export default function QuestionsList({
           className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-colors ${
             sortBy === 'points-high' 
               ? 'bg-blue-600 text-white' 
-              : 'bg-slate-600 text-white hover:bg-slate-500'
+              : 'bg-cyan-600 text-white hover:bg-cyan-900'
           }`}
         >
           Points (High to Low)
@@ -171,7 +181,7 @@ export default function QuestionsList({
           className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-colors ${
             sortBy === 'points-low' 
               ? 'bg-blue-600 text-white' 
-              : 'bg-slate-600 text-white hover:bg-slate-500'
+              : 'bg-cyan-600 text-white hover:bg-cyan-900'
           }`}
         >
           Points (Low to High)
@@ -181,7 +191,7 @@ export default function QuestionsList({
           className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-colors ${
             sortBy === 'newest' 
               ? 'bg-blue-600 text-white' 
-              : 'bg-slate-600 text-white hover:bg-slate-500'
+              : 'bg-cyan-600 text-white hover:bg-cyan-900'
           }`}
         >
           Newest
@@ -210,55 +220,61 @@ export default function QuestionsList({
         {filteredAndSortedQuestions.map((question) => (
           <div
             key={question.id}
-            className="rounded-xl p-4 border border-primary-600 hover:border-slate-500 transition-colors"
+            className="relative rounded-2xl p-5 bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 hover:border-blue-400 hover:shadow-xl transition-all duration-300 mb-6 group"
           >
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start justify-between gap-4">
               {/* Points Badge */}
-              <div className=" absolute -mt-8 flex-shrink-0 bg-slate-900 text-white px-3 py-1 rounded-lg font-bold text-sm">
+              <div className="absolute -top-3 -left-3 flex-shrink-0 bg-gradient-to-br from-cyan-500 to-cyan-600 text-white px-4 py-2 rounded-xl font-bold text-base shadow-lg">
                 {question.points}
               </div>
 
               {/* Question Content */}
-              <div className="flex-1">
-                <div className="flex">
-                <div className=" text-black text-lg mb-2 font-semibold">
-                  Question: 
-                </div>
-                <div className="flex text-black text-base leading-relaxed">
-                  {question.text}
-                </div>
-                </div>
-                   <div className="flex">
-                <div className=" text-black text-lg mb-2 font-semibold">
-                  answer: 
-                </div>
-                <div className="flex text-black text-base leading-relaxed">
-                  {question.answer}
-                </div>
+              <div className="flex-1 mt-2">
+                <div className="mb-3">
+                  <span className="text-gray-600 text-sm font-semibold uppercase tracking-wide">Question</span>
+                  <p className="text-gray-900 text-lg font-medium mt-1 leading-relaxed">
+                    {question.text}
+                  </p>
                 </div>
 
                 {/* Images indicators */}
-                <div className="mt-2 flex gap-2">
+                <div className="mt-3 flex gap-2 flex-wrap">
                   {question.image && (
-                    <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded">
-                      📷 Question Image
-                    </span>
+                    <div
+                      className="rounded-full p-[1px] bg-gradient-to-r from-transparent via-blue-500 to-transparent [background-size:400%_100%]"
+                      style={{ animation: "move-bg 8s linear infinite" }}
+                    >
+                      <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs text-blue-600 border border-blue-200 shadow-sm">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                        </svg>
+                        <span className="font-semibold">Question Image</span>
+                      </div>
+                    </div>
                   )}
                   {question.answer_image && (
-                    <span className="text-xs bg-green-500/20 text-green-300 px-2 py-1 rounded">
-                      📷 Answer Image
-                    </span>
+                    <div
+                      className="rounded-full p-[1px] bg-gradient-to-r from-transparent via-green-500 to-transparent [background-size:400%_100%]"
+                      style={{ animation: "move-bg 8s linear infinite" }}
+                    >
+                      <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs text-green-600 border border-green-200 shadow-sm">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                        </svg>
+                        <span className="font-semibold">Answer Image</span>
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
 
-              {/* Arrow Icon */}
-              <div className="flex-shrink-0 flex items-center gap-2">
+              {/* Action Buttons */}
+              <div className="flex-shrink-0 flex items-center gap-2 mt-2">
                 {onEditQuestion && (
                   <button
                     type="button"
                     onClick={() => onEditQuestion(question.id)}
-                    className="text-blue-400 hover:text-blue-300 transition-colors p-2"
+                    className="text-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-all p-2.5 rounded-lg group-hover:scale-110 duration-200"
                     title="Edit question"
                   >
                     <Edit className="h-5 w-5" />
@@ -272,18 +288,18 @@ export default function QuestionsList({
                         onDeleteQuestion(question.id);
                       }
                     }}
-                    className="text-red-400 hover:text-red-300 transition-colors p-2"
+                    className="text-red-500 hover:text-red-600 hover:bg-red-50 transition-all p-2.5 rounded-lg group-hover:scale-110 duration-200"
                     title="Delete question"
                   >
                     <Trash2 className="h-5 w-5" />
                   </button>
                 )}
-                <ChevronRight className="h-6 w-6 text-slate-400" />
               </div>
             </div>
           </div>
         ))}
       </div>
     </div>
+    </>
   );
 }

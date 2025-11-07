@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import { CreativePricing } from "@/components/ui/creative-pricing";
 import type { PricingTier } from "@/components/ui/creative-pricing";
-import { Pencil, Star, Sparkles } from "lucide-react"
+import { Pencil, Star } from "lucide-react"
 import { useHeader } from "@/contexts/HeaderContext";
 
  
@@ -25,31 +25,33 @@ const sampleTiers: PricingTier[] = [
     ],
   },
   {
-    name: "Pro",
+    name: "Full Access",
     icon: <Star className="w-6 h-6" />,
     price: 20,
-    description: "Ad-free + Weekly new categories",
+    originalPrice: 35,
+    description: "Unlock ALL content now and ALL future updates",
     color: "blue",
     features: [
-      "ads free experience",
-      "Unlock 10+ categories",
-      "Weekly new category drops",
+      "No ads",
+      "All current categories unlocked",
+      "All future categories and game updates included",
       "Access all community categories",
+      "Early Supporter Badge",
     ],
     popular: true,
   },
-  {
-    name: "Plus",
-    icon: <Sparkles className="w-6 h-6" />,
-    price: 15,
-    description: "A step above Free, but With ads",
-    color: "purple",
-    features: [
-      "Unlock 10+ categories",
-      "Weekly new category drops",
-      "Access all community categories",
-    ],
-  },
+  // {
+  //   name: "Plus",
+  //   icon: <Sparkles className="w-6 h-6" />,
+  //   price: 15,
+  //   description: "A step above Free, but With ads",
+  //   color: "purple",
+  //   features: [
+  //     "Unlock 10+ categories",
+  //     "Weekly new category drops",
+  //     "Access all community categories",
+  //   ],
+  // },
 ];
 
 export default function PlansPage() {

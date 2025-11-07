@@ -1,10 +1,10 @@
 "use client";
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthGate } from "@/hooks/useAuthGate";
 import { useMembership } from "@/hooks/useMembership"; // ✅ import your hook
+import { VerifyIcon } from "@/components/ui/verify-badge";
 
 const Icon = {
   User: (p: React.SVGProps<SVGSVGElement>) => (
@@ -61,8 +61,6 @@ export default function UserDropdown({ align = "left" } ) {
 
   
 
-  // ✅ derive plan from membership hook
-  const derivedPlan = membership?.is_premium ? "Premium Plan" : "Free Plan";
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -82,6 +80,8 @@ export default function UserDropdown({ align = "left" } ) {
       <button
         onClick={() => setOpen((v) => !v)}
         className="flex w-12 h-12 rounded-full overflow-hidden hover:ring-2 hover:ring-offset-2 hover:ring-primary transition-all"
+        aria-label="Toggle user profile menu"
+        title="Profile menu"
       >
         <Image
           src={avatarSrc}
@@ -106,7 +106,7 @@ export default function UserDropdown({ align = "left" } ) {
           {/* Header */}
           {user && (
             <div className="px-1 border-b border-zinc-200 dark:border-zinc-700">
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 mb-2">
                 <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold">
                   <Image
                     src={avatarSrc}
@@ -121,17 +121,17 @@ export default function UserDropdown({ align = "left" } ) {
                   />
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                  <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
                     {user.username}
+                    {membership?.is_premium && (
+                      <VerifyIcon type="premium" size="xs" />
+                    )}
                   </div>
                   <div className="text-xs text-zinc-500 dark:text-zinc-400">
                     {user.email}
                   </div>
-                  {derivedPlan && (
-                    <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-                      {derivedPlan}
-                    </div>
-                  )}
+                 
+                 
                 </div>
               </div>
             </div>
