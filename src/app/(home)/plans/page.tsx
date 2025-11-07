@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import { CreativePricing } from "@/components/ui/creative-pricing";
 import type { PricingTier } from "@/components/ui/creative-pricing";
 import { Pencil, Star, Sparkles } from "lucide-react"
-import { useHeader } from "../layout";
+import { useHeader } from "@/contexts/HeaderContext";
 
  
 
