@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { gameAPI } from '@/lib/api';
 import { useNotification } from '@/hooks/useNotification';
+import { useMembership } from '@/hooks/useMembership';
+import { useAuthGate } from '@/hooks/useAuthGate';
 
 interface UseCategoryActionsProps {
   categoryId: string;
@@ -20,6 +22,7 @@ interface UseCategoryActionsProps {
   likesCount: number;
   isSaved: boolean;
   isLiked: boolean;
+  categoryOwnerId: number | null;
 }
 
 export function useCategoryActions({
@@ -37,10 +40,13 @@ export function useCategoryActions({
   likesCount,
   isSaved,
   isLiked,
+  categoryOwnerId,
 }: UseCategoryActionsProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const notify = useNotification();
+  const { membership } = useMembership();
+  const { user } = useAuthGate();
 
   const handleSave = async (): Promise<boolean> => {
     try {
@@ -111,6 +117,15 @@ export function useCategoryActions({
 
   const handleToggleSave = async () => {
     try {
+      // Check if user is premium or owns the category
+      const isOwner = user && categoryOwnerId && user.id === categoryOwnerId;
+      const isPremium = membership?.is_premium;
+      
+      if (!isSaved && !isOwner && !isPremium) {
+        notify.error('Premium Required', 'Saving categories is a premium feature. Upgrade to save categories created by others!');
+        return;
+      }
+      
       if (isSaved) {
         await gameAPI.unsaveCategory(Number(categoryId));
         setIsSaved(false);

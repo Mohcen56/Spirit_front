@@ -22,8 +22,8 @@ export default function HomePage() {
   }, [isLoading, user]);
 
   const avatarSrc = useMemo(() => {
-    if (!user?.avatar || user.avatar === "/avatars/tanjiro.jpeg") {
-      return "/avatars/tanjiro.jpeg";
+    if (!user?.avatar || user.avatar === "/avatars/thumbs.svg") {
+      return "/avatars/thumbs.svg";
     }
     return user.avatar;
   }, [user?.avatar]);
@@ -94,7 +94,7 @@ export default function HomePage() {
                   className="object-cover w-full h-full"
                   onError={(e) => {
                     console.log("Avatar failed to load:", avatarSrc);
-                    (e.target as HTMLImageElement).src = "/avatars/tanjiro.jpeg";
+                    (e.target as HTMLImageElement).src = "/avatars/thumbs.svg";
                   }}
                 />
               </button>

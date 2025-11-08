@@ -95,7 +95,7 @@ export default function TeamsSidebar({
                 <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-17 lg:h-17 rounded-full bg-white/20 flex items-center justify-center overflow-hidden flex-shrink-0">
                   {team.avatar ? (
                     <Image
-                      src={`/avatars/${team.avatar}.jpeg`}
+                      src={`/avatars/${team.avatar}.png`}
                       alt={team.name}
                       width={48}
                       height={48}

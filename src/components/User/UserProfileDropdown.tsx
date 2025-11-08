@@ -54,8 +54,8 @@ export default function UserDropdown({ align = "left" } ) {
   const router = useRouter();
 
   const avatarSrc = useMemo(() => {
-    if (!user?.avatar || user.avatar === "/avatars/tanjiro.jpeg")
-      return "/avatars/tanjiro.jpeg";
+    if (!user?.avatar || user.avatar === "/avatars/thumbs.svg")
+      return "/avatars/thumbs.svg";
     return user.avatar;
   }, [user?.avatar]);
 
@@ -90,7 +90,7 @@ export default function UserDropdown({ align = "left" } ) {
           height={80}
           className="object-cover w-full h-full"
           onError={(e) =>
-            ((e.target as HTMLImageElement).src = "/avatars/tanjiro.jpeg")
+            ((e.target as HTMLImageElement).src = "/avatars/thumbs.svg")
           }
         />
       </button>
@@ -116,7 +116,7 @@ export default function UserDropdown({ align = "left" } ) {
                     className="object-cover w-full h-full rounded-full"
                     onError={(e) =>
                       ((e.target as HTMLImageElement).src =
-                        "/avatars/tanjiro.jpeg")
+                        "/avatars/thumbs.svg")
                     }
                   />
                 </div>

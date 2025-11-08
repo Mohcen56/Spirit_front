@@ -54,7 +54,7 @@ export default function TeamSelector({
               <div className="w-10 h-10 md:w-15 md:h-15 rounded-full flex items-center justify-center overflow-hidden shadow-md">
                 {team.avatar ? (
                   <Image
-                    src={`/avatars/${team.avatar}.jpeg`}
+                    src={`/avatars/${team.avatar}.png`}
                     alt={team.name}
                     width={64}
                     height={64}

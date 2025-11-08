@@ -14,11 +14,21 @@ interface TeamForm {
 
 // Available avatar images - stored in public/avatars/
 const AVAILABLE_AVATARS = [
-  { id: 'inosuke', src: '/avatars/inosuke.jpeg', alt: 'Inosuke', fallback: '🐗' },
-  { id: 'kanao', src: '/avatars/kanao.jpeg', alt: 'Kanao', fallback: '🦋' },
-  { id: 'tanjiro', src: '/avatars/tanjiro.jpeg', alt: 'Tanjiro', fallback: '⚔️' },
-  { id: 'zenitsu', src: '/avatars/zenitsu.jpeg', alt: 'Zenitsu', fallback: '⚡' },
-  { id: 'obanai', src: '/avatars/obanai.jpeg', alt: 'Obanai', fallback: '🐍' },
+  { id: 'cat', src: '/avatars/1.png', alt: 'Cat', fallback: '🐱' },
+  { id: 'taro', src: '/avatars/13.png', alt: 'taro', fallback: '🔴' },
+  { id: 'Luffy', src: '/avatars/11.png', alt: 'Luffy', fallback: '🏴‍☠️' },
+  { id: 'Nightwing', src: '/avatars/5.png', alt: 'Nightwing', fallback: '⚔️' },
+  { id: 'Nika', src: '/avatars/3.png', alt: 'Nika', fallback: '�️' },
+  { id: 'Ang', src: '/avatars/2.png', alt: 'Ang', fallback: '😇' },
+  { id: 'Spider', src: '/avatars/6.png', alt: 'Spider', fallback: '🦇' },
+  { id: 'Ninja', src: '/avatars/7.png', alt: 'Ninja', fallback: '⚡' },
+  { id: 'Ghost', src: '/avatars/8.png', alt: 'Ghost', fallback: '👻' },
+  { id: 'Jiraya', src: '/avatars/9.png', alt: 'Jiraya', fallback: '🍥' },
+  { id: 'Mugiwara', src: '/avatars/12.png', alt: 'Mugiwara', fallback: '�' },
+  { id: 'Titan', src: '/avatars/14.png', alt: 'Titan', fallback: '⚔️' },
+  { id: 'Warrior', src: '/avatars/15.png', alt: 'Warrior', fallback: '⚔️' },
+  { id: 'Mage', src: '/avatars/16.png', alt: 'Mage', fallback: '🔮' },
+  { id: 'Knight', src: '/avatars/17.png', alt: 'Knight', fallback: '⚔️' },
 ];
 
 export default function TeamsPage() {
@@ -142,7 +152,7 @@ export default function TeamsPage() {
       
       const teamsData = teams.map((team, index) => ({
         name: team.name.trim() || `Team ${index + 1}`, // Use default name if empty
-        avatar: team.avatar
+        avatar: getAvatarById(team.avatar).src.replace('/avatars/', '').replace(/\.(png|jpeg|jpg|svg)$/, '') // Store filename without path and extension
       }));
       
       const game = await gameAPI.startGame(selectedCategories, teamsData);
@@ -285,6 +295,7 @@ export default function TeamsPage() {
                                 src={getAvatarById(team.avatar).src}
                                 alt={getAvatarById(team.avatar).alt}
                                 fill
+                                sizes="96px"
                                 className="object-cover object-center scale-110"
                                 style={{ 
                                   filter: 'brightness(1.1) contrast(1.1) saturate(1.2)',
@@ -321,6 +332,7 @@ export default function TeamsPage() {
                               src={getAvatarById(team.avatar).src}
                               alt={getAvatarById(team.avatar).alt}
                               fill
+                              sizes="32px"
                               className="object-cover object-center scale-110"
                               style={{ 
                                 filter: 'brightness(1.1) contrast(1.1) saturate(1.2)',

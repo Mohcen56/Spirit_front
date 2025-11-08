@@ -3,17 +3,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { gameAPI } from '@/lib/api/index';
-import { ImagePlus } from 'lucide-react';
+import { ImagePlus, Lock } from 'lucide-react';
 import ImageCropModal from '@/components/added_cat/ImageCropModal';
 import { useHeader } from '@/contexts/HeaderContext';
 import { useQueryClient } from '@tanstack/react-query';
+import { useMembership } from '@/hooks/useMembership';
 
 
 export default function CreateCategoryPage() {
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-   const { setHeader } = useHeader();
+  const { setHeader } = useHeader();
+  const { membership } = useMembership();
+  const isPremium = membership?.is_premium;
   
   // Form state
   const [categoryName, setCategoryName] = useState('');
@@ -206,15 +209,27 @@ export default function CreateCategoryPage() {
         <div className="flex w-full mb-6 gap-2">
           <button
             type="button"
-            className={`flex-1 py-3 rounded-l-lg font-bold text-lg ${privacy === 'private' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-900'} transition-all`}
-            onClick={() => setPrivacy('private')}
+            disabled={!isPremium}
+            className={`flex-1 py-3 rounded-l-lg font-bold text-lg relative ${
+              privacy === 'private' 
+                ? 'bg-blue-600 text-white' 
+                : isPremium 
+                ? 'bg-gray-200 text-gray-900' 
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            } transition-all ${!isPremium ? 'opacity-60' : ''}`}
+            onClick={() => isPremium && setPrivacy('private')}
+            title={!isPremium ? 'Premium feature' : 'Only you can see and play'}
           >
-            🔒 Private
+            {!isPremium && (
+              <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2" />
+            )}
+            🔒 Private {!isPremium && '(Premium)'}
           </button>
           <button
             type="button"
             className={`flex-1 py-3 rounded-r-lg font-bold text-lg ${privacy === 'public' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-900'} transition-all`}
             onClick={() => setPrivacy('public')}
+            title="Everyone can see and play"
           >
             🌍 Public
           </button>

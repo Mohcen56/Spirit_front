@@ -328,7 +328,7 @@ return (
             {/* Team Avatar */}
             <div className="w-8 h-8 md:w-15 md:h-15 rounded-full bg-white  items-center justify-center overflow-hidden  mr-2 md:mr-3 border-2 border-brown-400 hidden md:flex">
               <Image 
-                src={`/avatars/${team.avatar}.jpeg`} 
+                src={`/avatars/${team.avatar}.png`} 
                 alt={team.name} 
                 width={40} 
                 height={40} 

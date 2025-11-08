@@ -34,7 +34,7 @@ export default function UserProfile({ user, onBack, onSave }: UserProfileProps) 
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [avatarPreview, setAvatarPreview] = useState(user.avatar || '/avatars/tanjiro.jpeg');
+  const [avatarPreview, setAvatarPreview] = useState(user.avatar || '/avatars/thumbs.svg');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -115,7 +115,7 @@ export default function UserProfile({ user, onBack, onSave }: UserProfileProps) 
         <div className="flex flex-col items-center mb-8">
           <div className="relative group">
             <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200 border-4 border-white shadow-lg">
-              {avatarPreview && avatarPreview !== '/avatars/tanjiro.jpeg' ? (
+              {avatarPreview && avatarPreview !== '/avatars/thumbs.svg' ? (
                 <Image
                   src={avatarPreview}
                   alt="Profile Avatar"
@@ -123,12 +123,12 @@ export default function UserProfile({ user, onBack, onSave }: UserProfileProps) 
                   height={128}
                   className="w-full h-full object-cover"
                   onError={() => {
-                    setAvatarPreview('/avatars/tanjiro.jpeg');
+                    setAvatarPreview('/avatars/thumbs.svg');
                   }}
                 />
               ) : (
                 <Image
-                  src="/avatars/tanjiro.jpeg"
+                  src="/avatars/thumbs.svg"
                   alt="Default Avatar"
                   width={128}
                   height={128}

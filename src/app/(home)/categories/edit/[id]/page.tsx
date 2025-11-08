@@ -67,6 +67,7 @@ export default function EditCategoryPage() {
     likesCount,
     isSaved,
     isLiked,
+    categoryOwnerId,
   });
 
   const isOwner = user?.id === categoryOwnerId;

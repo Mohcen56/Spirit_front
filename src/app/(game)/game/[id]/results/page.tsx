@@ -142,9 +142,9 @@ export default function GameResultsPage() {
                     <div className="w-16 h-16 rounded-full border-4 border-white shadow-md overflow-hidden bg-white">
                       {team.avatar ? (
                         <Image
-                          src={`/avatars/${team.avatar}.jpeg`}
+                          src={`/avatars/${team.avatar}.png`}
                           alt={`${team.name} avatar`}
-                          width={64}
+                          width={80}
                           height={64}
                           className="w-full h-full object-cover"
                           unoptimized
