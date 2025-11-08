@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { gameAPI } from '@/lib/api';
 import {  Question as QuestionType } from '@/types/game';
@@ -12,7 +12,7 @@ import ChoicesDialog from '@/components/game/ChoicesDialog';
 import TeamsSidebar from '@/components/game/TeamsSidebar';
 import { getFullImageUrl } from '@/lib/utils/imageUtils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { switchToNextTeam, awardPoints, clearActivePerk, setGameQuestions, markQuestionPlayed, endGame } from '@/store/gameSlice';
+import { switchToNextTeam, awardPoints, clearActivePerk, setGameQuestions, markQuestionPlayed, endGame, activateChoicesPerk, lockPerks, unlockPerks, setRerollBuffer } from '@/store/gameSlice';
 import { Loader } from 'lucide-react';
 import { useGameData } from '@/hooks/useGameData';
 import { useSyncTeams } from '@/hooks/useSyncTeams';
@@ -28,7 +28,10 @@ export default function QuestionPage() {
     currentTeam,
     doublePerkActiveTeamId,
     doublePerkUsed,
-    rerollPerkUsed,
+  rerollPerkUsed,
+  choicesPerkUsed,
+  perksLocked,
+  rerollBuffer,
     questions,
     playedQuestions,
     teams: liveTeams,
@@ -86,7 +89,7 @@ export default function QuestionPage() {
     }
   }, [question?.id, question?.image]);
 
-  const teams = liveTeams.length > 0 ? liveTeams : (game?.teams || []);
+  const teams = useMemo(() => (liveTeams.length > 0 ? liveTeams : (game?.teams || [])), [liveTeams, game?.teams]);
 
 
   // Enhanced turn tracking - save turn history and team turn data during game
@@ -162,10 +165,7 @@ export default function QuestionPage() {
   };
 
   const handleShowTeamSelector = () => {
-    console.log('handleShowTeamSelector called');
-    console.log('Before - currentView:', currentView);
     setCurrentView('teamSelector');
-    console.log('After - Setting currentView to teamSelector');
   };
 
   const handleBackToAnswer = () => {
@@ -295,6 +295,11 @@ export default function QuestionPage() {
     if (question) {
       setSelectedQuestionForChoices(question);
       setIsChoicesDialogOpen(true);
+      // Mark choices perk as used for current team (single-use)
+      const teamObj = teams[currentTeam - 1];
+      if (teamObj) {
+        dispatch(activateChoicesPerk({ teamId: teamObj.id }));
+      }
     }
   };
 
@@ -302,6 +307,38 @@ export default function QuestionPage() {
     setIsChoicesDialogOpen(false);
     setSelectedQuestionForChoices(null);
   };
+
+  // Lock / unlock perks when view changes (perks disabled on answer & teamSelector)
+  useEffect(() => {
+    if (currentView === 'question') {
+      if (perksLocked) dispatch(unlockPerks());
+    } else {
+      if (!perksLocked) dispatch(lockPerks());
+    }
+  }, [currentView, dispatch, perksLocked]);
+
+  // Populate reroll buffer (one queued question per team) after questions load
+  useEffect(() => {
+    if (!questions.length || !teams.length) return;
+    const entries: Array<{ teamId: number; questionId: number | null }> = [];
+    const playableIds = questions
+      .filter(q => !playedQuestions.includes(q.id) && q.id !== questionId)
+      .map(q => q.id);
+    if (!playableIds.length) return;
+    for (const t of teams) {
+      if (rerollBuffer[t.id] == null) {
+        // pick a random question id from remaining pool
+        const remaining = playableIds.filter(id => id !== rerollBuffer[t.id]);
+        if (remaining.length) {
+          const picked = remaining[Math.floor(Math.random() * remaining.length)];
+          entries.push({ teamId: t.id, questionId: picked });
+        }
+      }
+    }
+    if (entries.length) {
+      dispatch(setRerollBuffer({ entries }));
+    }
+  }, [questions, teams, playedQuestions, rerollBuffer, questionId, dispatch]);
 
   if (isLoading) {
     return (
@@ -379,14 +416,14 @@ export default function QuestionPage() {
 
                   {/* Question Image */}
                   {showQuestionImage && (
-                    <div className="mb-8">
-                      <div className="relative max-w-2xl mx-auto rounded-xl overflow-hidden">
+                    <div className="">
+                      <div className=" items-center justify-center relative max-w-2xl mx-auto rounded-xl overflow-hidden">
                         <Image
                           src={getFullImageUrl(question.image) || ''}
                           alt="Question image"
                           width={800}
                           height={400}
-                          className="w-full h-55 md:h-75 object-contain mx-auto"
+                          className="w-full max-h-40 md:max-h-75 object-contain mx-auto"
                           unoptimized
                           onLoadingComplete={() => setQuestionImageStatus('loaded')}
                           onError={() => setQuestionImageStatus('error')}
@@ -433,6 +470,9 @@ export default function QuestionPage() {
             doublePerkActiveTeamId={doublePerkActiveTeamId}
             doublePerkUsed={doublePerkUsed}
             rerollPerkUsed={rerollPerkUsed}
+            choicesPerkUsed={choicesPerkUsed}
+            perksLocked={perksLocked}
+            rerollBuffer={rerollBuffer}
             gameId={gameId}
             question={question}
             questions={questions}

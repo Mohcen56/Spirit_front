@@ -96,4 +96,19 @@ export const gamesAPI = {
       throw error;
     }
   },
+
+  /**
+   * Reroll current question: backend selects a new question and marks current as played
+   */
+  rerollQuestion: async (gameId: number, currentQuestionId: number) => {
+    try {
+      const response = await api.post(`/api/gameplay/games/${gameId}/reroll_question/`, {
+        current_question_id: currentQuestionId,
+      });
+      return response.data; // returns new question or error
+    } catch (error) {
+      console.error('Error rerolling question:', error);
+      throw error;
+    }
+  },
 };

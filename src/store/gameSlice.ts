@@ -10,6 +10,9 @@ interface GameState {
   doublePerkActiveTeamId: number | null;
   doublePerkUsed: Record<number, boolean>;
   rerollPerkUsed: Record<number, boolean>;
+  choicesPerkUsed: Record<number, boolean>;
+  perksLocked: boolean;
+  rerollBuffer: Record<number, number | null>; // teamId -> queued question id
   questions: Question[];
   playedQuestions: number[];
   loading: boolean;
@@ -25,6 +28,9 @@ const initialState: GameState = {
   doublePerkActiveTeamId: null,
   doublePerkUsed: {},
   rerollPerkUsed: {},
+  choicesPerkUsed: {},
+  perksLocked: false,
+  rerollBuffer: {},
   questions: [],
   playedQuestions: [],
   loading: false,
@@ -67,6 +73,12 @@ const gameSlice = createSlice({
         }
         if (state.rerollPerkUsed[team.id] === undefined) {
           state.rerollPerkUsed[team.id] = false;
+        }
+        if (state.choicesPerkUsed[team.id] === undefined) {
+          state.choicesPerkUsed[team.id] = false;
+        }
+        if (state.rerollBuffer[team.id] === undefined) {
+          state.rerollBuffer[team.id] = null;
         }
       }
     },
@@ -118,13 +130,41 @@ const gameSlice = createSlice({
       const currentIndex = Math.max(0, state.currentTeam - 1);
       const currentTurnTeamId = state.teams[currentIndex]?.id;
       const isTeamsTurn = currentTurnTeamId === teamId;
-      if (isTeamsTurn && !state.rerollPerkUsed[teamId]) {
+      if (!state.perksLocked && isTeamsTurn && !state.rerollPerkUsed[teamId]) {
         state.rerollPerkUsed[teamId] = true;
       }
+    },
+    activateChoicesPerk: (state, action: PayloadAction<{ teamId: number }>) => {
+      const { teamId } = action.payload;
+      const currentIndex = Math.max(0, state.currentTeam - 1);
+      const currentTurnTeamId = state.teams[currentIndex]?.id;
+      const isTeamsTurn = currentTurnTeamId === teamId;
+      if (!state.perksLocked && isTeamsTurn && !state.choicesPerkUsed[teamId]) {
+        state.choicesPerkUsed[teamId] = true;
+      }
+    },
+    lockPerks: (state) => {
+      state.perksLocked = true;
+    },
+    unlockPerks: (state) => {
+      state.perksLocked = false;
     },
     setGameQuestions: (state, action: PayloadAction<Question[]>) => {
       state.questions = action.payload;
       state.playedQuestions = [];
+      // clear buffers when new question set received
+      for (const teamId of Object.keys(state.rerollBuffer)) {
+        state.rerollBuffer[Number(teamId)] = null;
+      }
+    },
+    setRerollBuffer: (state, action: PayloadAction<{ entries: Array<{ teamId: number; questionId: number | null }> }>) => {
+      for (const { teamId, questionId } of action.payload.entries) {
+        state.rerollBuffer[teamId] = questionId;
+      }
+    },
+    consumeRerollBuffer: (state, action: PayloadAction<{ teamId: number }>) => {
+      const { teamId } = action.payload;
+      state.rerollBuffer[teamId] = null;
     },
     markQuestionPlayed: (state, action: PayloadAction<number>) => {
       const questionId = action.payload;
@@ -141,8 +181,11 @@ const gameSlice = createSlice({
       state.doublePerkActiveTeamId = null;
       state.doublePerkUsed = {};
       state.rerollPerkUsed = {};
+      state.choicesPerkUsed = {};
+      state.perksLocked = false;
       state.questions = [];
       state.playedQuestions = [];
+      state.rerollBuffer = {};
     },
   },
 });
@@ -160,6 +203,11 @@ export const {
   clearActivePerk,
   resetPerks,
   activateRerollPerk,
+  activateChoicesPerk,
+  lockPerks,
+  unlockPerks,
+  setRerollBuffer,
+  consumeRerollBuffer,
   setGameQuestions,
   markQuestionPlayed,
   resetGame,

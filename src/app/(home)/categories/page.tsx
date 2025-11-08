@@ -167,12 +167,12 @@ export default function CategoriesPage() {
                 </div>
                 
                 {/* Categories in this collection */}
-                <div className="grid grid-cols-3 md:grid-cols-3   lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
                   {/* Add Category Button - Only show in "Added Categories" collection */}
                   {collection.name.toLowerCase() === "added categories" && (
                     <Link
                       href="/categories/add"
-                      className="relative w-full aspect-[4/5] rounded-3xl border-2 border-dashed border-eastern-blue-400 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 hover:border-eastern-blue-600 bg-white/50 backdrop-blur-sm flex flex-col items-center justify-center group"
+                      className="relative w-full aspect-[3/4] min-h-[180px] sm:min-h-[220px] rounded-3xl border-2 border-dashed border-eastern-blue-400 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 hover:border-eastern-blue-600 bg-white/50 backdrop-blur-sm flex flex-col items-center justify-center group"
                     >
                       <div className="flex flex-col items-center justify-center space-y-3">
                         <div className="w-15 h-15 lg:w-20 lg:h-20 bg-gradient-to-br from-eastern-blue-400 to-eastern-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
@@ -198,14 +198,14 @@ export default function CategoriesPage() {
                     key={category.id}
                     onClick={() => handleCategoryToggle(category.id, isPremium)}
                     disabled={!canSelect || isLocked}
-                    className={`relative w-full aspect-[4/5]   overflow-hidden border-5  rounded-4xl transition-all duration-200 transform hover:scale-105 ${
+                    className={`relative w-full aspect-[3/4] min-h-[180px] sm:min-h-[220px] overflow-hidden border-5 rounded-4xl transition-all duration-200 transform hover:scale-105 ${
                       isSelected
                               ? 'border-amber-600' // Selected border color
                               : 'border-eastern-blue-500' // Default border color
                     } ${(!canSelect || isLocked) ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {/* Top Section - Cream Background */}
-                    <div className="relative h-[80%]  ">
+                    <div className="relative h-[75%]  ">
                       {/* Info/Edit/View Icon Button */}
                       <span
                         role="button"
@@ -267,7 +267,7 @@ export default function CategoriesPage() {
                       </div>
                     </div>
                     {/* Bottom Section - Dark Background */}
-                    <div className="relative h-[21%] bg-gradient-to-br from-eastern-blue-500 to-eastern-blue-700 flex items-center justify-center p-4">
+                    <div className="relative h-[25%] bg-gradient-to-br from-eastern-blue-500 to-eastern-blue-700 flex items-center justify-center p-4">
                       <h3 className="text-white  items-center font-bold text-sm lg:text-lg text-center leading-tight">
                         {category.name}
                       </h3>

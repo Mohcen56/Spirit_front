@@ -23,8 +23,12 @@ export default function GameResultsPage() {
   const playedCount = useMemo(() => playedQuestions.length, [playedQuestions]);
 
   const handleBackHome = () => {
-    dispatch(resetGame());
+    // Navigate first to avoid flash of error state
     router.push('/dashboard');
+    // Reset game state after navigation starts
+    setTimeout(() => {
+      dispatch(resetGame());
+    }, 100);
   };
 
   const getRankIcon = (position: number) => {

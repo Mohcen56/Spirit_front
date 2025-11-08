@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { userCategoriesAPI } from '@/lib/api';
 import { User, Category } from '@/types/game';
-import {  Crown } from 'lucide-react';
+import { Search, ArrowDownUp } from 'lucide-react';
 import Image from 'next/image';
 import Usersprofiles from '@/components/User/Usersprofiles';
 import { useAuthGate } from '@/hooks/useAuthGate';
@@ -19,6 +19,9 @@ import { useHeader } from '@/contexts/HeaderContext';
 export default function AddedCategoriesPage() {
   const [showProfile, setShowProfile] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [search, setSearch] = useState('');
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [sortMode, setSortMode] = useState<'default' | 'likes' | 'saves' | 'newest'>('default');
   const router = useRouter();
   const { setHeader } = useHeader();
   const { user, isLoading: authLoading } = useAuthGate();
@@ -159,6 +162,34 @@ export default function AddedCategoriesPage() {
     );
   }
 
+  const list = categories || [];
+  const filteredCategories = list
+    .filter((cat) => {
+      const q = search.trim().toLowerCase();
+      if (!q) return true;
+      const name = cat.name?.toLowerCase() || '';
+      const creator = (cat.created_by_username || '').toLowerCase();
+      return name.includes(q) || creator.includes(q);
+    })
+    // Sorting: show all, but reorder so chosen metric appears first
+    .slice() // clone before sort
+    .sort((a, b) => {
+      if (sortMode === 'likes') {
+        const la = a.likes_count ?? 0;
+        const lb = b.likes_count ?? 0;
+        if (lb !== la) return lb - la; // desc
+      } else if (sortMode === 'saves') {
+        const sa = a.saves_count ?? 0;
+        const sb = b.saves_count ?? 0;
+        if (sb !== sa) return sb - sa; // desc
+      } else if (sortMode === 'newest') {
+        // Assuming higher id == newer as created_at not present
+        if (b.id !== a.id) return b.id - a.id; // desc
+      }
+      // default fallback: by name asc
+      return (a.name || '').localeCompare(b.name || '');
+    });
+
   return (
     <>
       {showProfile && selectedUser ? (
@@ -176,48 +207,103 @@ export default function AddedCategoriesPage() {
               <p className="text-primary-800 text-center">{error}</p>
             </div>
           )}
+              {/* Search + Filters */}
+              <div className="flex flex-col gap-3 justify-center mb-6 md:flex-row md:items-center md:gap-4">
+                {/* Search input */}
+                <div className="relative flex-1 max-w-xl">
+                  <Search className="w-4 h-4 text-primary-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search by name or creator…"
+                    className="w-full pl-9 pr-3 py-2 rounded-xl border border-primary-200 bg-white/80 outline-none focus:ring-2 focus:ring-eastern-blue-400 text-sm text-primary-800 placeholder:text-primary-400"
+                    aria-label="Search categories"
+                  />
+                </div>
 
+                {/* Sort button */}
+                <div className="relative">
+                  <button
+                    onClick={() => setFiltersOpen((v) => !v)}
+                    className="inline-flex items-center gap-2 bg-white/70 hover:bg-white/90 px-3 py-2 rounded-xl border border-primary-200 shadow-sm text-sm text-primary-800"
+                    aria-haspopup="true"
+                    aria-expanded={filtersOpen ? 'true' : 'false'}
+                  >
+                    <ArrowDownUp className="w-4 h-4" />
+                    Sort
+                    {sortMode !== 'default' && (
+                      <span className="ml-1 inline-flex items-center justify-center text-xs bg-eastern-blue-600 text-white rounded-full px-1.5 py-0.5">
+                        1
+                      </span>
+                    )}
+                  </button>
+
+                  {filtersOpen && (
+                    <div className="absolute right-0 mt-2 w-56 bg-white border border-primary-200 shadow-lg rounded-xl p-2 z-30">
+                      <ul className="text-sm text-primary-800">
+                        <li>
+                          <button onClick={() => { setSortMode('default'); setFiltersOpen(false); }} className={`w-full text-left px-3 py-2 rounded-lg hover:bg-primary-50 ${sortMode==='default' ? 'bg-primary-50 font-semibold' : ''}`}>Default (A–Z)</button>
+                        </li>
+                        <li>
+                          <button onClick={() => { setSortMode('likes'); setFiltersOpen(false); }} className={`w-full text-left px-3 py-2 rounded-lg hover:bg-primary-50 ${sortMode==='likes' ? 'bg-primary-50 font-semibold' : ''}`}>Most liked</button>
+                        </li>
+                        <li>
+                          <button onClick={() => { setSortMode('saves'); setFiltersOpen(false); }} className={`w-full text-left px-3 py-2 rounded-lg hover:bg-primary-50 ${sortMode==='saves' ? 'bg-primary-50 font-semibold' : ''}`}>Most saved</button>
+                        </li>
+                        <li>
+                          <button onClick={() => { setSortMode('newest'); setFiltersOpen(false); }} className={`w-full text-left px-3 py-2 rounded-lg hover:bg-primary-50 ${sortMode==='newest' ? 'bg-primary-50 font-semibold' : ''}`}>Newest</button>
+                        </li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           {/* Categories Section */}
           <div className="bg-eastern-blue-100 backdrop-blur-md rounded-2xl p-6 mb-8 border border-primary-200 shadow-lg">
             {/* Section Header */}
-            <div className="relative flex justify-center -mt-11 mb-4">
-              <div className="bg-eastern-blue-700 text-white px-6 py-2 rounded-full shadow-md">
-                <h3 className="text-xl font-bold text-center">Added Categories</h3>
+            <div className="relative flex flex-col gap-4 -mt-11 mb-4">
+              <div className="flex items-center justify-between">
+                <div className="bg-eastern-blue-700 text-white px-6 py-2 rounded-full shadow-md">
+                  <h3 className=" text-sm md:text-xl font-bold text-center">Added Categories</h3>
+                </div>
+                <div className="text-primary-600 text-sm bg-primary-50 px-3 py-1 rounded-full">
+                  {filteredCategories.length} of {list.length} categories
+                </div>
               </div>
-              <div className="absolute right-0 top-1/2 transform -translate-y-1/2 text-primary-600 text-sm bg-primary-50 px-3 py-1 rounded-full">
-                {categories.length} categories
-              </div>
-            </div>
+
+            
 
             {/* Categories Grid */}
-            <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
               {/* Add Category Button */}
               <Link
                 href="/categories/create"
-                className="relative w-full aspect-[3/4] rounded-3xl border-2 border-dashed border-eastern-blue-400 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 hover:border-eastern-blue-600 bg-white/50 backdrop-blur-sm flex flex-col items-center justify-center group"
+                className="relative w-full aspect-[3/4] min-h-[220px] sm:min-h-[220px] rounded-3xl border-2 border-dashed border-eastern-blue-400 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 hover:border-eastern-blue-600 bg-white/50 backdrop-blur-sm flex flex-col items-center justify-center group"
               >
                 <div className="flex flex-col items-center justify-center space-y-3">
-                  <div className="w-20 h-20 bg-gradient-to-br from-eastern-blue-400 to-eastern-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <div className="w-15 h-15 md:w-20 md:h-20 bg-gradient-to-br from-eastern-blue-400 to-eastern-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
                     <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
                     </svg>
                   </div>
-                  <div className="text-sm font-normal text-eastern-blue-600 mt-1">Add your own Category</div>
+                  <div className=" text-center text-xs font-normal text-eastern-blue-600 mt-1">Add your own Category</div>
                 </div>
               </Link>
 
               {/* Existing Categories */}
-              {categories.length === 0 ? (
+              {filteredCategories.length === 0 ? (
                 <div className="col-span-full text-center py-12">
                   <div className="text-primary-600 text-xl mb-4">
-                  there is no categories here yet   
+                  No categories match your search or filters.  
                   </div>
                   <p className="text-primary-400">
-                    Be the first to add a category!
+                    Try adjusting your search or clearing filters.
                   </p>
                 </div>
               ) : (
-                categories.map((category) => {
+                filteredCategories.map((category) => {
                   const isOwner = user && category.created_by_id === user.id;
                   const isPending = isOwner && !category.is_approved;
 
@@ -225,7 +311,7 @@ export default function AddedCategoriesPage() {
                     <div
                       key={category.id}
                       onClick={() => handleCategoryClick(category)}
-                      className={`relative w-full h-full aspect-[4/5] rounded-3xl border-primary-300 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 cursor-pointer ${
+                      className={`relative w-full h-full aspect-[3/4] min-h-[220px] rounded-3xl border-primary-300 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 cursor-pointer ${
                         isPending ? 'opacity-75 ring-2 ring-orange-400' : ''
                       }`}
                     >

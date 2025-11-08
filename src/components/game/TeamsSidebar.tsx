@@ -4,7 +4,8 @@ import React from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch } from '@/store/hooks';
-import { activateDoublePerk, activateRerollPerk } from '@/store/gameSlice';
+import { activateDoublePerk, activateRerollPerk, markQuestionPlayed, consumeRerollBuffer } from '@/store/gameSlice';
+import { gamesAPI } from '@/lib/api';
 import { Question as QuestionType, Team } from '@/types/game';
 
 interface TeamsSidebarProps {
@@ -13,6 +14,9 @@ interface TeamsSidebarProps {
   doublePerkActiveTeamId: number | null;
   doublePerkUsed: Record<number, boolean>;
   rerollPerkUsed: Record<number, boolean>;
+  choicesPerkUsed?: Record<number, boolean>;
+  perksLocked?: boolean;
+  rerollBuffer?: Record<number, number | null>;
   gameId: string;
   question: QuestionType | null;
   questions: QuestionType[];
@@ -26,6 +30,9 @@ export default function TeamsSidebar({
   doublePerkActiveTeamId,
   doublePerkUsed,
   rerollPerkUsed,
+  choicesPerkUsed,
+  perksLocked,
+  rerollBuffer,
   gameId,
   question,
   questions,
@@ -34,6 +41,13 @@ export default function TeamsSidebar({
 }: TeamsSidebarProps) {
   const dispatch = useAppDispatch();
   const router = useRouter();
+  // prevent unused warnings for optional legacy props
+  void questions; void playedQuestions;
+
+  const isPerkDisabled = (teamId: number, extra?: boolean) => {
+    const isTeamsTurn = teams.findIndex(t => t.id === teamId) === (currentTeam - 1);
+    return !!(perksLocked || !isTeamsTurn || extra);
+  };
 
   const handleReroll = async (teamId: number) => {
     const teamIndex = teams.findIndex(t => t.id === teamId);
@@ -43,16 +57,27 @@ export default function TeamsSidebar({
     
     // Mark perk as used in Redux
     dispatch(activateRerollPerk({ teamId }));
-    
+    // 1. Try buffered reroll first
+    if (rerollBuffer && rerollBuffer[teamId]) {
+      const bufferedId = rerollBuffer[teamId];
+      if (bufferedId && question) {
+        dispatch(markQuestionPlayed(question.id));
+        dispatch(consumeRerollBuffer({ teamId }));
+        router.push(`/game/${gameId}/question/${bufferedId}`);
+        return;
+      }
+    }
+
+    // 2. Fallback to backend reroll
     try {
-      const pool = questions.filter(
-        q => q.id !== question?.id && !playedQuestions.includes(q.id)
-      );
-      
-      if (pool.length === 0) return;
-      
-      const random = pool[Math.floor(Math.random() * pool.length)];
-      router.push(`/game/${gameId}/question/${random.id}`);
+      if (!question) return;
+      // Mark current as played locally for UI responsiveness
+      dispatch(markQuestionPlayed(question.id));
+      // Ask backend for a new question and navigate
+      const newQ = await gamesAPI.rerollQuestion(Number(gameId), question.id);
+      if (newQ && newQ.id) {
+        router.push(`/game/${gameId}/question/${newQ.id}`);
+      }
     } catch (e) {
       console.warn('Failed to reroll question:', e);
     }
@@ -63,7 +88,6 @@ export default function TeamsSidebar({
       <div className="flex lg:flex-col gap-1 lg:gap-1 justify-center items-stretch max-w-2xl lg:max-w-none w-full">
         {teams.slice(0, 4).map((team, index) => {
           const isTeamsTurn = teams.findIndex(t => t.id === team.id) === (currentTeam - 1);
-          
           return (
             <div key={team.id} className="mt-1 lg:max-w-none lg:mb-0">
               <div className="bg-brown-800  border-brown-900 text-white rounded-xl p-2 lg:p-4 flex flex-col lg:flex-row items-center lg:space-x-4 space-y-1 lg:space-y-0">
@@ -99,7 +123,7 @@ export default function TeamsSidebar({
                       disabled={
                         !!doublePerkUsed[team.id] ||
                         doublePerkActiveTeamId !== null ||
-                        !isTeamsTurn
+                        isPerkDisabled(team.id)
                       }
                       title={
                         doublePerkUsed[team.id]
@@ -122,7 +146,7 @@ export default function TeamsSidebar({
                     {/* Reroll Question Perk */}
                     <button
                       onClick={() => handleReroll(team.id)}
-                      disabled={!!rerollPerkUsed[team.id] || !isTeamsTurn}
+                      disabled={!!rerollPerkUsed[team.id] || isPerkDisabled(team.id)}
                       title={
                         rerollPerkUsed[team.id]
                           ? 'Reroll already used'
@@ -142,7 +166,7 @@ export default function TeamsSidebar({
                     {/* Show Choices Button */}
                     <button
                       onClick={onShowChoices}
-                      disabled={!!rerollPerkUsed[team.id] || !isTeamsTurn}
+                      disabled={(choicesPerkUsed?.[team.id] ?? false) || isPerkDisabled(team.id)}
                       title={
                         rerollPerkUsed[team.id]
                           ? 'Reroll already used'

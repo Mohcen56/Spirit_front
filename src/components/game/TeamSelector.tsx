@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Team, Question } from '@/types/game';
-import { Users, CheckCircle,  RotateCcw } from 'lucide-react';
+import { Users,  RotateCcw } from 'lucide-react';
 import Image from 'next/image';
 import GameCard from './GameCard';
 
@@ -20,8 +20,7 @@ export default function TeamSelector({
   teams, 
   onAwardPoints, 
   onBackToAnswer,
-  awardError, 
-  awardSuccess 
+ 
 }: TeamSelectorProps) {
   const [clickedTeamId, setClickedTeamId] = useState<number | null | 'none'>(null);
 
@@ -33,7 +32,7 @@ export default function TeamSelector({
   return (
     <GameCard question={question}>
       {/* Header */}
-      <div className="text-center mb-8">
+      <div className="text-center mb-2 md:mb-8">
         <h2 className="text-gray-800 text-2xl md:text-3xl font-bold mb-2">Who answered the question?</h2>
    
       </div>
@@ -75,12 +74,7 @@ export default function TeamSelector({
               </h3>
             </div>
 
-            {/* Success indicator */}
-            {clickedTeamId === team.id && (
-              <div className="absolute inset-0 bg-green-500/20 rounded-2xl flex items-center justify-center">
-                <CheckCircle className="h-8 w-8 text-white" />
-              </div>
-            )}
+       
           </button>
         ))}
 
@@ -107,31 +101,12 @@ export default function TeamSelector({
             </h3>
           </div>
 
-          {/* Success indicator */}
-          {clickedTeamId === 'none' && (
-            <div className="absolute inset-0 bg-green-500/20 rounded-2xl flex items-center justify-center">
-              <CheckCircle className="h-8 w-8 text-white" />
-            </div>
-          )}
+        
+         
         </button>
       </div>
 
-        {/* Status Messages */}
-        {(awardError || awardSuccess) && (
-          <div className="text-center">
-            {awardError && (
-              <div className="bg-red-500/20 border border-red-400 rounded-xl p-4 mb-2">
-                <p className="text-red-600 text-lg">{awardError}</p>
-              </div>
-            )}
-            {awardSuccess && (
-              <div className="bg-green-500/20 border border-green-400 rounded-xl p-4 mb-0 flex items-center justify-center space-x-2">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-                <p className="text-green-600 text-lg">{awardSuccess}</p>
-              </div>
-            )}
-          </div>
-        )}
+     
 
         {/* Back to Answer Button */}
         {onBackToAnswer && (

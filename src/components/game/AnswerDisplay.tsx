@@ -31,7 +31,7 @@ export default function AnswerDisplay({ question, onShowQuestion, onShowTeamSele
     <GameCard question={question}>
       {/* Answer Text */}
       <div
-        className={`text-center md:-mt-4 md:mb-6 ${shouldCenterAnswerText ? 'flex min-h-[18rem] items-center justify-center' : ''}`}
+        className={`text-center md:-mt-4  mb-8  ${shouldCenterAnswerText ? 'flex min-h-[18rem] items-center justify-center' : ''}`}
       >
         <h1 className="select-none text-gray-800 text-2xl md:text-3xl font-bold leading-relaxed">
           {question.answer_ar || question.answer}
@@ -40,19 +40,19 @@ export default function AnswerDisplay({ question, onShowQuestion, onShowTeamSele
       
       {/* Answer Image if available */}
       {showAnswerImage && (
-        <div className="mb-8">
-          <div className="relative max-w-lg mx-auto rounded-xl overflow-hidden">
+        
+          <div className="relative items-center justify-center max-w-2xl mx-auto rounded-xl overflow-hidden">
            <Image
               src={getFullImageUrl(question.answer_image) || ''}
              alt="Answer image"
              width={800}
              height={400}
-             className="w-full h-55 md:h-75 object-contain mx-auto"
+             className="w-full max-h-50 md:max-h-75 object-contain mx-auto"
              unoptimized
              onLoadingComplete={() => setAnswerImageStatus('loaded')}
              onError={() => setAnswerImageStatus('error')}
            />
-          </div>
+         
         </div>
       )}
 
