@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { gamesAPI } from '@/lib/api';
 import { useAuthGate } from '@/hooks/useAuthGate';
+import { logger } from '@/lib/utils/logger';
 import { useHeader } from '@/contexts/HeaderContext';
 import { Clock, Play } from 'lucide-react';
 import Image from 'next/image';
@@ -44,7 +45,7 @@ export default function HistoryPage() {
         const data = await gamesAPI.getRecentGames();
         setGames(data);
       } catch (err) {
-        console.error('Error fetching game history:', err);
+          logger.exception(err, { where: 'history.fetchGameHistory' });
         setError('Failed to load game history');
       } finally {
         setLoading(false);
@@ -109,11 +110,7 @@ export default function HistoryPage() {
           ) : (
             <div className="space-y-6">
               <div className="flex justify-center">
-                <div className="bg-eastern-blue-400 text-white px-8 py-2 mb-4 rounded-full shadow-lg">
-                  <h2 className="lg:text-2xl font-bold text-center">
-                    Your Recent Games
-                  </h2>
-                </div>
+  
               </div>
 
               {games.map((game) => (
@@ -129,6 +126,15 @@ export default function HistoryPage() {
                         {formatDate(game.date_played)}
                       </h3>
                     </div>
+                       <div className="text-center">
+                    <button
+                      onClick={() => handlePlayAgain(game.categories)}
+                      className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-bold py-3 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 flex items-center space-x-3 mx-auto"
+                    >
+                      <Play className="h-5 w-5" />
+                      <span>Play Again with Same Categories</span>
+                    </button>
+                  </div>
                     <div className="text-primary-600 text-sm bg-primary-50 px-3 py-1 rounded-full">
                       {game.categories.length} categories
                     </div>
@@ -178,15 +184,7 @@ export default function HistoryPage() {
                   </div>
 
                   {/* Play Again Button */}
-                  <div className="text-center">
-                    <button
-                      onClick={() => handlePlayAgain(game.categories)}
-                      className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-bold py-3 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 flex items-center space-x-3 mx-auto"
-                    >
-                      <Play className="h-5 w-5" />
-                      <span>Play Again with Same Categories</span>
-                    </button>
-                  </div>
+               
                 </div>
               ))}
             </div>

@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect, useMemo } from 'react';
+import { logger } from '@/lib/utils/logger';
 import { useParams, useRouter } from 'next/navigation';
 import { gameAPI } from '@/lib/api';
 import {  Question as QuestionType } from '@/types/game';
@@ -65,7 +66,7 @@ export default function QuestionPage() {
           dispatch(setGameQuestions(data));
         }
       } catch (err) {
-        console.error("Failed to load available questions:", err);
+        logger.exception(err, { where: 'game.[id].question.[questionId].loadAvailable' });
       }
     };
 
@@ -120,7 +121,7 @@ export default function QuestionPage() {
         setTeamTurnData(JSON.parse(savedTeamData));
       }
     } catch (e) {
-      console.warn('Failed to load turn data from localStorage:', e);
+      logger.warn('Failed to load turn data from localStorage:', e);
     }
   }, [gameId]);
   
@@ -129,7 +130,7 @@ export default function QuestionPage() {
     try {
       localStorage.setItem(`game-${gameId}-turn-history`, JSON.stringify(turnHistory));
     } catch (e) {
-      console.warn('Failed to save turn history to localStorage:', e);
+      logger.warn('Failed to save turn history to localStorage:', e);
     }
   }, [turnHistory, gameId]);
   
@@ -138,7 +139,7 @@ export default function QuestionPage() {
     try {
       localStorage.setItem(`game-${gameId}-team-turn-data`, JSON.stringify(teamTurnData));
     } catch (e) {
-      console.warn('Failed to save team turn data to localStorage:', e);
+      logger.warn('Failed to save team turn data to localStorage:', e);
     }
   }, [teamTurnData, gameId]);
 
@@ -169,7 +170,7 @@ export default function QuestionPage() {
   };
 
   const handleBackToAnswer = () => {
-    console.log('handleBackToAnswer called');
+    logger.log('handleBackToAnswer called');
     setCurrentView('answer');
   };
 
@@ -265,7 +266,7 @@ export default function QuestionPage() {
       
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An error occurred while awarding points';
-      console.error('Award error:', errorMessage);
+      logger.exception(errorMessage, { where: 'game.[id].question.[questionId].award' });
       setAwardError(errorMessage);
     }
   };
@@ -281,7 +282,7 @@ export default function QuestionPage() {
         await gameAPI.finishRound(numericGameId, playedQuestions);
       }
     } catch (error) {
-      console.error('Failed to finish round:', error);
+      logger.exception(error, { where: 'game.[id].question.[questionId].finishRound' });
       setAwardError('Failed to sync played questions, please try again.');
       return;
     }

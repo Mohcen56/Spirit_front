@@ -9,6 +9,7 @@ import UserProfile from '@/components/User/UserProfile';
 import { useAuthGate } from '@/hooks/useAuthGate';
 
 import { useHeader } from '@/contexts/HeaderContext';
+import { logger } from '@/lib/utils/logger';
 export default function HomePage() {
   const [showProfile, setShowProfile] = useState(false);
  const { setHeader } = useHeader();
@@ -20,7 +21,7 @@ const { user, setUser, isLoading,  } = useAuthGate({ redirectIfGuest: '/login' }
 
       // Update basic profile information
       if (data.username !== user?.username || data.email !== user?.email) {
-        console.log('Updating profile info...');
+        logger.log('Updating profile info...');
         const profileResult = await authAPI.updateProfile({
           username: data.username,
           email: data.email,
@@ -34,23 +35,23 @@ const { user, setUser, isLoading,  } = useAuthGate({ redirectIfGuest: '/login' }
 
       // Update profile picture if a new file was selected
       if (data.avatarFile) {
-        console.log('Updating profile picture...');
+        logger.log('Updating profile picture...');
         const avatarResult = await authAPI.updateProfilePicture(data.avatarFile);
         
-        console.log('Avatar update result:', avatarResult);
+        logger.log('Avatar update result:', avatarResult);
         
         if (!avatarResult.success) {
           throw new Error(avatarResult.error || 'Failed to update profile picture');
         }
         if (updatedUser) {
-          console.log('Updating user avatar from:', updatedUser.avatar, 'to:', avatarResult.avatar_url);
+          logger.log('Updating user avatar from:', updatedUser.avatar, 'to:', avatarResult.avatar_url);
           updatedUser = { ...updatedUser, avatar: avatarResult.avatar_url };
         }
       }
 
       // Change password if provided
       if (data.password && data.currentPassword) {
-        console.log('Changing password...');
+        logger.log('Changing password...');
         const passwordResult = await authAPI.changePassword(data.currentPassword, data.password);
         
         if (!passwordResult.success) {
@@ -59,15 +60,15 @@ const { user, setUser, isLoading,  } = useAuthGate({ redirectIfGuest: '/login' }
       }
 
       // Update user state with new data
-      console.log('Setting user state to:', updatedUser);
+      logger.log('Setting user state to:', updatedUser);
       setUser(updatedUser);
       
       // Close profile view
       setShowProfile(false);
       
-      console.log('Profile updated successfully');
+      logger.log('Profile updated successfully');
     } catch (error) {
-      console.error('Profile save error:', error);
+      logger.exception(error, { where: 'dashboard.handleProfileSave' });
       // You might want to show an error message to the user here
       alert(error instanceof Error ? error.message : 'Failed to update profile');
     }

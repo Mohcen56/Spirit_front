@@ -3,8 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { gameAPI } from '@/lib/api/index';
+import { logger } from '@/lib/utils/logger';
 import { Game, Category, Team } from '@/types/game';
 import Header from '@/components/Header';
+import Image from 'next/image';
 
 export default function GamePage() {
   const { id } = useParams();
@@ -19,13 +21,13 @@ export default function GamePage() {
       
       try {
         setIsLoading(true);
-        console.log('Loading game with ID:', id);
+        logger.log('Loading game with ID:', id);
         
         const gameData = await gameAPI.getGame(Number(id));
-        console.log('Game loaded:', gameData);
+        logger.log('Game loaded:', gameData);
         setGame(gameData);
       } catch (error) {
-        console.error('Error loading game:', error);
+        logger.exception(error, { where: 'game.[id].loadGame' });
         setError('Failed to load game');
       } finally {
         setIsLoading(false);
@@ -95,45 +97,77 @@ export default function GamePage() {
          />
 
       <div className="container mx-auto px-4 py-8">
-        {/* Game ID */}
-        <div className="text-center mb-8">
-          <p className="text-primary-600">Game #{game.id}</p>
-        </div>
+     
 
         {/* Game Info */}
         <div className="max-w-4xl mx-auto">
           <div className="bg-eastern-blue-100 backdrop-blur-md rounded-2xl p-8 shadow-lg border border-primary-200 mb-8">
             <h2 className="text-2xl font-bold text-primary-800 mb-6 text-center">Game Information</h2>
             
-            {/* Categories */}
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-primary-800 mb-3">Categories:</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {game.categories.map((category: Category) => (
-                  <div
-                    key={category.id}
-                    className="bg-white/80 backdrop-blur-sm rounded-lg p-3 text-center border border-primary-200 shadow-md"
-                  >
-                    <span className="text-primary-800 font-medium">{category.name}</span>
+                {/* Categories */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-primary-800 mb-3">Categories:</h3>
+                  <div className="flex flex-wrap gap-3">
+                    {game.categories.map((category: Category) => (
+                      <div
+                        key={category.id}
+                        className="flex items-center gap-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-2 border border-primary-200 shadow-sm"
+                      >
+                        {category.image_url || category.image ? (
+                          <div className="w-10 h-10 relative rounded-full overflow-hidden flex-shrink-0">
+                            <Image
+                              src={(category.image_url || category.image) as string}
+                              alt={category.name}
+                              fill
+                              sizes="40px"
+                              className="object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+                            {category.name.charAt(0)}
+                          </div>
+                        )}
+                        <span className="text-primary-800 font-medium text-sm">{category.name}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
+                </div>
 
             {/* Teams */}
             {game.teams && game.teams.length > 0 && (
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-primary-800 mb-3">Teams:</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {game.teams.map((team: Team) => (
-                    <div
-                      key={team.id}
-                      className="bg-white/80 backdrop-blur-sm rounded-lg p-3 flex justify-between items-center border border-primary-200 shadow-md"
-                    >
-                      <span className="text-primary-800 font-medium">{team.name}</span>
-                      <span className="text-amber-600 font-bold">{team.score || 0} points</span>
-                    </div>
-                  ))}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {game.teams.map((team: Team) => {
+                    // Use the same avatar pattern as the question page footer
+                    const avatarSrc = team.avatar ? `/avatars/${team.avatar}.png` : '/avatars/thumbs.svg';
+
+                    return (
+                      <div
+                        key={team.id}
+                        className="bg-white/90 backdrop-blur-sm rounded-2xl p-3 flex items-center justify-between border border-primary-200 shadow-md"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-full overflow-hidden bg-white/20 flex-shrink-0">
+                            <Image
+                              src={avatarSrc}
+                              alt={team.name}
+                              width={48}
+                              height={48}
+                              className="object-cover"
+                              unoptimized
+                            />
+                          </div>
+                          <div>
+                            <div className="text-primary-800 font-semibold">{team.name}</div>
+                          </div>
+                        </div>
+
+                        <div className="text-amber-600 font-bold bg-amber-50 px-3 py-1 rounded-full">{team.score || 0} points</div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}

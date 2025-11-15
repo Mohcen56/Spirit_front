@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { logger } from '@/lib/utils/logger';
 import { useParams, useRouter } from 'next/navigation';
 import { gameAPI } from '@/lib/api';
 import { Question } from '@/types/game';
@@ -53,7 +54,7 @@ export default function GameBoardPage() {
           dispatch(setGameQuestions(data));
         }
       } catch (err) {
-        console.error('Failed to load available questions:', err);
+        logger.exception(err, { where: 'game.[id].question.loadAvailable' });
       }
     };
 
@@ -93,7 +94,7 @@ export default function GameBoardPage() {
         await gameAPI.finishRound(numericGameId, playedQuestions);
       }
     } catch (error) {
-      console.error('Failed to finish round:', error);
+      logger.exception(error, { where: 'game.[id].question.finishRound' });
     }
 
     dispatch(endGame());
@@ -136,18 +137,18 @@ export default function GameBoardPage() {
   // Create question grid for a category using only backend-returned questions
   const createQuestionGrid = (categoryId: number): QuestionSlot[] => {
     const categoryQuestions = organizeQuestionsByCategory[categoryId] || [];
-    console.log(`Category ${categoryId} questions:`, categoryQuestions);
-    console.log(`Category ${categoryId} question count: ${categoryQuestions.length}`);
+    logger.log(`Category ${categoryId} questions:`, categoryQuestions);
+    logger.log(`Category ${categoryId} question count: ${categoryQuestions.length}`);
     
     // Backend should already limit to 6 questions, but add safety check
     if (categoryQuestions.length > 6) {
-      console.warn(`Category ${categoryId} has more than 6 questions (${categoryQuestions.length}), this should not happen!`);
+      logger.warn(`Category ${categoryId} has more than 6 questions (${categoryQuestions.length}), this should not happen!`);
     }
     
     // Sort by points descending (harder questions first)
     const sortedQuestions = [...categoryQuestions].sort((a: Question, b: Question) => b.points - a.points);
     
-    console.log(`Category ${categoryId} after sorting:`, sortedQuestions.length, 'questions');
+    logger.log(`Category ${categoryId} after sorting:`, sortedQuestions.length, 'questions');
     
     return sortedQuestions.map((question: Question, index: number): QuestionSlot => ({
       points: question.points,

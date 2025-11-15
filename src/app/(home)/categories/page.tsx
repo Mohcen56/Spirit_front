@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { categoriesAPI } from '@/lib/api';
 import { Category, Collection } from '@/types/game';
-import { Users, Crown, Lock, Eye, Pencil, Info } from 'lucide-react';
+import { logger } from '@/lib/utils/logger';
+import { Users, Crown, Lock, Eye, Pencil, Info, Search } from 'lucide-react';
 import Image from 'next/image';
 import { useMembership } from '@/hooks/useMembership';
 import { useImageError } from '@/hooks/useImageError';
@@ -19,6 +20,9 @@ export default function CategoriesPage() {
   const { setHeader } = useHeader();
   const router = useRouter();
   const { handleError: handleImageError, hasError: hasImageError } = useImageError<string>();
+  // Search & filter state
+  const [search, setSearch] = useState('');
+  const [selectedCollectionId, setSelectedCollectionId] = useState<number | 'all'>('all');
   
   // Fetch all category data using React Query
   const { data, isLoading, error: queryError } = useQuery({
@@ -41,6 +45,33 @@ export default function CategoriesPage() {
     return [addedCollection, ...(data.collections || [])];
   }, [data]);
 
+  // Filtered collections based on search and selected collection
+  const filteredCollections = useMemo(() => {
+    const lower = search.trim().toLowerCase();
+
+    // Start from collections array
+    let base = collections.slice();
+
+    // If a specific collection is selected, filter to that collection
+    if (selectedCollectionId !== 'all') {
+      base = base.filter((c) => c.id === selectedCollectionId);
+    }
+
+    // For each collection, filter its categories by search string
+    base = base.map((col) => ({
+      ...col,
+      categories: (col.categories || []).filter((cat: Category) => {
+        if (!lower) return true;
+        const name = (cat.name || '').toString().toLowerCase();
+  const creator = (cat.created_by_username || '').toString().toLowerCase();
+        return name.includes(lower) || creator.includes(lower);
+      }),
+    }));
+
+    // Remove empty collections (optional)
+    return base.filter((c) => (c.categories || []).length > 0);
+  }, [collections, search, selectedCollectionId]);
+
   useEffect(() => {
     setHeader({ title: "Categories", backHref: "/dashboard" });
   }, [setHeader]);
@@ -48,14 +79,14 @@ export default function CategoriesPage() {
   // Handle query errors
   useEffect(() => {
     if (queryError) {
-      console.error('Error loading all category data:', queryError);
+      logger.exception(queryError, { where: 'categories.page.loadAll' });
       setError('Failed to load categories');
     }
   }, [queryError, setError]);
 
   // Function to get played percentage for a category (user-specific)
   const getPlayedPercentage = (category: Category) => {
-    console.log('Category data for user percentage calculation:', {
+      logger.log('Category data for user percentage calculation:', {
       name: category.name,
       total_questions: category.total_questions,
       user_played_questions: category.user_played_questions
@@ -67,10 +98,10 @@ export default function CategoriesPage() {
       category.total_questions > 0
     ) {
       const percentage = Math.min(100, Math.round((category.user_played_questions / category.total_questions) * 100));
-      console.log(`Calculated user percentage for ${category.name}: ${percentage}%`);
+    logger.log(`Calculated user percentage for ${category.name}: ${percentage}%`);
       return percentage;
     }
-    console.log(`No valid user data for ${category.name}, returning 0%`);
+    logger.log(`No valid user data for ${category.name}, returning 0%`);
     return 0;
   };
 
@@ -145,20 +176,47 @@ export default function CategoriesPage() {
 
           {/* Categories Selection */}
           <div className="space-y-6">
-            <div className="flex justify-center">
-              <div className="bg-eastern-blue-400 text-white px-8 py-2 mb-4 rounded-full shadow-lg">
-                <h2 className="lg:text-2xl font-bold text-center">
-                  Choose Categories (2-6 categories)
-                </h2>
+            <div className="flex flex-col gap-3 justify-center mb-6 md:flex-row md:items-center md:gap-4">
+              {/* Search input */}
+              <div className="relative flex-1 max-w-xl">
+                <Search className="w-4 h-4 text-primary-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search by name or creator…"
+                  className="w-full pl-9 pr-3 py-2 rounded-xl border border-primary-200 bg-white/80 outline-none focus:ring-2 focus:ring-eastern-blue-400 text-sm text-primary-800 placeholder:text-primary-400"
+                  aria-label="Search categories"
+                />
               </div>
+
+              {/* Collection filter select */}
+              <div className="relative">
+                <select
+                  value={selectedCollectionId}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setSelectedCollectionId(v === 'all' ? 'all' : Number(v));
+                  }}
+                  className="inline-flex items-center gap-2 bg-white/70 px-3 py-2 rounded-xl border border-primary-200 shadow-sm text-sm text-primary-800"
+                  aria-label="Filter by collection"
+                >
+                  <option value="all">All collections</option>
+                  {collections.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name} ({(c.categories || []).length})</option>
+                  ))}
+                </select>
+              </div>
+
+             
             </div>
             
             {/* Collections Display */}
-            {collections.map((collection) => (
-              <div key={collection.id} className="bg-eastern-blue-100 backdrop-blur-md rounded-2xl p-6  mb-8 border border-primary-200 shadow-lg">
+            {filteredCollections.map((collection) => (
+              <div key={collection.id} className="bg-cyan-50 backdrop-blur-md rounded-2xl p-6  mb-8 border border-primary-200 shadow-lg">
                 {/* Collection Header */}
                 <div className="relative flex justify-center  -mt-11 mb-4">
-                  <div className="bg-eastern-blue-700 text-white px-6 py-2   rounded-full shadow-md">
+                  <div className="bg-cyan-700 text-white px-6 py-2   rounded-full shadow-md">
                     <h3 className="lg:text-xl font-bold text-center">{collection.name}</h3>
                   </div>
                   <div className="absolute -right-3 lg:right-0 top-1/2 transform -translate-y-1/2 text-primary-600 text-sm bg-primary-50 px-3 py-1 rounded-full">
@@ -198,14 +256,14 @@ export default function CategoriesPage() {
                     key={category.id}
                     onClick={() => handleCategoryToggle(category.id, isPremium)}
                     disabled={!canSelect || isLocked}
-                    className={`relative w-full aspect-[3/4] min-h-[180px] sm:min-h-[220px] overflow-hidden border-5 rounded-4xl transition-all duration-200 transform hover:scale-105 ${
+                    className={`relative w-full aspect-[3/4] min-h-[180px] sm:min-h-[220px] overflow-hidden border-4 rounded-4xl transition-all duration-200 transform hover:scale-105 ${
                       isSelected
                               ? 'border-amber-600' // Selected border color
-                              : 'border-eastern-blue-500' // Default border color
+                              : 'border-cyan-700' // Default border color
                     } ${(!canSelect || isLocked) ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {/* Top Section - Cream Background */}
-                    <div className="relative h-[75%]  ">
+                    <div className="relative h-[80%]   ">
                       {/* Info/Edit/View Icon Button */}
                       <span
                         role="button"
@@ -220,7 +278,7 @@ export default function CategoriesPage() {
                             setInfoModal({ open: true, category });
                           }
                         }}
-                        className="absolute top-2 right-2 bg-eastern-blue-500 text-white w-7 h-7 rounded-full flex items-center justify-center text-base font-bold hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400 z-10 cursor-pointer"
+                        className="absolute top-2 right-2  bg-gradient-to-br from-cyan-700 to-cyan-800 text-white w-7 h-7 rounded-full flex items-center justify-center text-base font-bold hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400 z-10 cursor-pointer"
                       >
                         {category.is_custom && category.created_by_id === currentUserId ? (
                           <Pencil className="h-4 w-4" />
@@ -232,11 +290,11 @@ export default function CategoriesPage() {
                         )}
                       </span>
                       {/* Percentage Badge */}
-                      <div className="absolute top-2   bg-eastern-blue-500 text-white text-xs lg:text-sm font-bold px-2 lg:px-3 py-1  lg:min-w-[45px] text-center z-20">
+                      <div className="absolute top-2   bg-gradient-to-br from-cyan-700 to-cyan-800 text-white text-xs lg:text-sm font-bold px-2 lg:px-3 py-1  lg:min-w-[45px] text-center z-20">
                         {playedPercent}%
                       </div>
                       {/* Category Illustration */}
-                      <div className={`h-full w-full ${(!canSelect ? 'grayscale' : '')}`}>
+                      <div className={`h-full w-full bg-gradient-to-br from-cyan-700 to-cyan-800 ${(!canSelect ? 'grayscale' : '')}`}>
                         {((category.image_url || category.image || getLocalIllustration(category.name))) && !hasImageError(category.name) ? (
                           <Image
                             src={(category.image_url || category.image || getLocalIllustration(category.name))!}
@@ -252,7 +310,7 @@ export default function CategoriesPage() {
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <div className="w-20 h-20 bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
+                            <div className="w-20 h-20  bg-gradient-to-br from-cyan-700 to-cyan-800 flex items-center justify-center text-white text-2xl font-bold shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
                               {category.name.charAt(0)}
                             </div>
                           </div>
@@ -267,7 +325,7 @@ export default function CategoriesPage() {
                       </div>
                     </div>
                     {/* Bottom Section - Dark Background */}
-                    <div className="relative h-[25%] bg-gradient-to-br from-eastern-blue-500 to-eastern-blue-700 flex items-center justify-center p-4">
+                    <div className="relative h-[21%] bg-gradient-to-br from-cyan-700 to-cyan-800 flex items-center justify-center z-50 p-4">
                       <h3 className="text-white  items-center font-bold text-sm lg:text-lg text-center leading-tight">
                         {category.name}
                       </h3>

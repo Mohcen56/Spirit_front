@@ -4,9 +4,9 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuthGate } from "@/hooks/useAuthGate";
+import { logger } from "@/lib/utils/logger";
 
 import Link from "next/link";
-import { MorphingText } from "@/components/ui/morphing-text";
 
 export default function HomePage() {
   const [showWelcome, setShowWelcome] = useState(false);
@@ -56,27 +56,19 @@ export default function HomePage() {
       </div>
     );
   }
-  const texts = [
-    "Hello " + (user?.username ?? "Guest"),
-    "welcome BACK!",
-    "to",
-    "Trivia Spirit",
-  ];
+  
   return (
     <>
-      <div className="bg-eastern-blue-800">
+      <div className="bg-gradient-to-b from-cyan-900 to-cyan-800">
         {/* Header */}
-        <header className="relative z-20 backdrop-blur-md">
-          <div className="container relative mx-auto flex w-full items-center justify-center px-4 py-4">
-            <div className="hidden w-full max-w-2xl justify-center md:flex">
-              <MorphingText
-  className="text-white flex-row whitespace-nowrap overflow-hidden text-ellipsis"
-  texts={texts}
-/>
+        <header className="relative z-10 backdrop-blur-md">
+          <div className="container relative mx-auto flex w-full items-center justify-center px-4 py-3">
+            
+       
 
-            </div>
+            
             <div
-              className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center space-x-4"
+              className="absolute left-1 top-12 flex -translate-y-1/2 items-center space-x-4"
               ref={menuRef}
             >
               {/* Avatar Button (always clickable) */}
@@ -93,7 +85,7 @@ export default function HomePage() {
                   height={80}
                   className="object-cover w-full h-full"
                   onError={(e) => {
-                    console.log("Avatar failed to load:", avatarSrc);
+                    logger.warn("Avatar failed to load:", avatarSrc);
                     (e.target as HTMLImageElement).src = "/avatars/thumbs.svg";
                   }}
                 />
@@ -101,9 +93,9 @@ export default function HomePage() {
 
               {/* Dropdown Menu */}
               {menuOpen && (
-                <div className="absolute right-7 top-22 w-40 bg-white rounded-xl shadow-xl py-2 border border-gray-200 z-50 animate-fadeIn">
+                <div className="absolute left-7 top-22 w-40 bg-white rounded-xl shadow-xl py-2 border border-gray-200 z-20 animate-fadeIn">
                   {/* Little arrow */}
-                  <div className="absolute top-[-6px] right-4 w-3 h-3 bg-white border-t border-l border-gray-200 rotate-45"></div>
+                  <div className="absolute top-[-6px] left-4 w-3 h-3 bg-white border-t border-l border-gray-200 rotate-45"></div>
 
                   {user ? (
                     <>
@@ -143,7 +135,7 @@ export default function HomePage() {
    
       
       
-        <div className="relative isolate px-6 pt-0 lg:px-8">
+        <div className="relative px-6 pt-0   lg:px-8">
         <div
           aria-hidden="true"
           className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
@@ -156,22 +148,22 @@ export default function HomePage() {
             className="relative left-[calc(50%-11rem)] aspect-1155/678 w-144.5 -translate-x-1/2 rotate-30 bg-linear-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%-30rem)] sm:w-288.75"
           />
         </div>
-        <div className="mx-auto max-w-2xl -mt-20 pt-4 pb-32 sm:pt-10 sm:pb-40 lg:pt-0 lg:pb-12">
+        <div className="mx-auto max-w-2xl relative z-10 -mt-30 pt-4 pb-32 sm:pt-10 sm:pb-40 lg:pt-0 lg:pb-12">
   <div className="text-center">
     {/* Logo */}
-    <div className="flex justify-center mb-1">
+    <div className="flex justify-center mb-12 relative z-50">
       <Image
         src="logo/logo3.svg"
         alt="Trivia Logo"
-        width={700}
-        height={700}
-        className="mx-auto"
+        width={650}
+        height={650}
+        className="mx-auto relative z-50"
       />
     </div>
 
     {/* Paragraphs */}
-    <p className="lg:text-3xl  -mt-20 font-bold lg:-mt-30 text-white mb-4">
-      The best trivia game for families and friends
+    <p className="lg:text-3xl  -mt-20 font-bold lg:-mt-40 text-cyan-100 mb-4">
+      The Best Trivia game for families and friends
     </p>
     <p className="text-sm lg:text-lg text-gray-300 max-w-lg mx-auto leading-relaxed mb-6 lg:mb-10">
       Enjoy your time with Trivia — the knowledge and challenge game that brings everyone together.
@@ -356,8 +348,8 @@ export default function HomePage() {
     </div>
   </div>
 </section>
-<footer className="bg-[#2B3A67] text-gray-200 pt-10 pb-8">
-  <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-10  justify-center items-center lg:items-start">
+<footer className="bg-gradient-to-b from-cyan-900 to-cyan-800 text-gray-200 pt-10 pb-4">
+  <div className="container mx-auto px-6 grid grid-cols-1 mb-3 md:grid-cols-3 gap-10  justify-center items-center lg:items-start">
 
     {/* Logo + Description (LEFT in English) */}
     <div className="  text-center lg:text-left space-y-3">
@@ -434,7 +426,7 @@ export default function HomePage() {
   </div>
 
   {/* Divider + Copyright */}
-  <div className="mt-10 border-t border-gray-500/40 pt-6 text-center text-sm text-gray-400">
+  <div className=" border-t border-gray-500/40 pt-3 text-center text-sm text-gray-400">
     © {new Date().getFullYear()} Trivia Spirit. All rights reserved.
   </div>
 </footer>

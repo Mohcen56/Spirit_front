@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { logger } from '@/lib/utils/logger';
 import { gameAPI } from '@/lib/api';
 
 interface Question {
@@ -55,16 +56,16 @@ export function useCategoryData(categoryId: string): UseCategoryDataReturn {
   const [isLiked, setIsLiked] = useState<boolean>(false);
 
   useEffect(() => {
-    console.log('🖼️ categoryImage changed:', categoryImage ? `${categoryImage.substring(0, 50)}...` : 'null');
+    logger.log('🖼️ categoryImage changed:', categoryImage ? `${categoryImage.substring(0, 50)}...` : 'null');
   }, [categoryImage]);
 
   useEffect(() => {
     const loadCategory = async () => {
       try {
-        console.log('🔍 Loading category:', categoryId);
+        logger.log('🔍 Loading category:', categoryId);
         
         const data = await gameAPI.getUserCategory(categoryId);
-        console.log('✅ Category loaded:', data);
+        logger.log('✅ Category loaded:', data);
         
         setCategoryName(data.name);
         setCategoryDescription(data.description || '');
@@ -77,20 +78,20 @@ export function useCategoryData(categoryId: string): UseCategoryDataReturn {
         setIsLiked(data.is_liked ?? false);
         
         try {
-          console.log('🔍 Loading questions for category:', categoryId);
+          logger.log('🔍 Loading questions for category:', categoryId);
           const questionsData = await gameAPI.getQuestionsByCategory(categoryId);
-          console.log('✅ Questions loaded:', questionsData);
-          console.log('📊 Questions count:', questionsData.length);
-          console.log('📋 Questions array check:', Array.isArray(questionsData));
+          logger.log('✅ Questions loaded:', questionsData);
+          logger.log('📊 Questions count:', questionsData.length);
+          logger.log('📋 Questions array check:', Array.isArray(questionsData));
           setQuestions(questionsData);
         } catch (err) {
-          console.error('❌ Error loading questions:', err);
+          logger.exception(err, { where: 'useCategoryData.loadQuestions', categoryId });
           setQuestions([]);
         }
         
         setIsLoading(false);
       } catch (err) {
-        console.error('❌ Error loading category:', err);
+        logger.exception(err, { where: 'useCategoryData.loadCategory', categoryId });
         setError('Failed to load category');
         setIsLoading(false);
       }

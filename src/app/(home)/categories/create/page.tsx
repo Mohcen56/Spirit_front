@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { logger } from '@/lib/utils/logger';
 import { useRouter } from 'next/navigation';
 import { gameAPI } from '@/lib/api/index';
 import { ImagePlus, Lock } from 'lucide-react';
@@ -113,7 +114,7 @@ export default function CreateCategoryPage() {
       // Redirect to edit page to add questions
       router.push(`/categories/edit/${category.id}`);
     } catch (err) {
-      console.error('Error creating category:', err);
+      logger.exception(err, { where: 'categories.create.handleCreateCategory' });
       const errorObj = err as { message?: string; detail?: string };
       setError(errorObj?.message || errorObj?.detail || 'Failed to create category. Please try again.');
     } finally {

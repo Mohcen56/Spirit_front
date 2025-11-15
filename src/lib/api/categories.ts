@@ -1,6 +1,7 @@
 import { api } from './base';
 import { Category, Collection } from '@/types/game';
 import { normalizeApiResponse } from '@/lib/utils/utils';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * Category API - Official and user-created categories
@@ -24,7 +25,7 @@ export const categoriesAPI = {
 
       return response.data;
     } catch (error) {
-      console.error('Error fetching all category data:', error);
+        logger.exception(error, { where: 'categories.getAllCategoryData' });
       throw error;
     }
   },
@@ -37,7 +38,7 @@ export const categoriesAPI = {
       const response = await api.get('/api/content/categories/');
       return normalizeApiResponse<Category>(response.data);
     } catch (error) {
-      console.error('Error fetching categories:', error);
+        logger.exception(error, { where: 'categories.getCategories' });
       throw error;
     }
   },
@@ -50,7 +51,7 @@ export const categoriesAPI = {
       const response = await api.get('/api/content/collections/with_categories/');
       return response.data;
     } catch (error) {
-      console.error('Error fetching collections with categories:', error);
+        logger.exception(error, { where: 'categories.getCollectionsWithCategories' });
       throw error;
     }
   },

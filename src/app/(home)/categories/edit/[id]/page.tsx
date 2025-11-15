@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import { logger } from '@/lib/utils/logger';
 import { useRouter, useParams } from 'next/navigation';
 import QuestionsList from '@/components/added_cat/QuestionsList';
 import CategoryFormFields from '@/components/category/CategoryFormFields';
@@ -81,16 +82,16 @@ export default function EditCategoryPage() {
   }, [setHeader, isOwner, categoryName]);
 
   const handleImageChange = (file: File) => {
-    console.log('📸 Edit page received file:', file.name, file.size, 'bytes');
+    logger.log('📸 Edit page received file:', file.name, file.size, 'bytes');
     setCategoryImageFile(file);
     const reader = new FileReader();
     reader.onload = (ev) => {
       const result = ev.target?.result as string;
-      console.log('📸 Setting preview, length:', result.length);
+      logger.log('📸 Setting preview, length:', result.length);
       setCategoryImage(result);
     };
     reader.onerror = (err) => {
-      console.error('❌ FileReader error:', err);
+      logger.exception(err, { where: 'categories.edit.fileReader' });
     };
     reader.readAsDataURL(file);
   };

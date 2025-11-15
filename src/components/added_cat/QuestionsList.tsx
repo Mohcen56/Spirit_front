@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { PlusCircle, ChevronRight, Trash2, Edit } from 'lucide-react';
+import { logger } from '@/lib/utils/logger';
+import { PlusCircle, Trash2, Edit } from 'lucide-react';
 
 interface Question {
   id: number;
@@ -32,16 +33,16 @@ export default function QuestionsList({
   const [searchQuery, setSearchQuery] = useState('');
   
   // Debug: Log what we received
-  console.log('📦 QuestionsList received questions:', questions);
-  console.log('📦 QuestionsList questions type:', typeof questions);
-  console.log('📦 QuestionsList is array?:', Array.isArray(questions));
+  logger.log('📦 QuestionsList received questions:', questions);
+  logger.log('📦 QuestionsList questions type:', typeof questions);
+  logger.log('📦 QuestionsList is array?:', Array.isArray(questions));
   
   // Ensure questions is an array (wrapped in useMemo to avoid dependency issues)
   const questionsArray = useMemo(() => {
     return Array.isArray(questions) ? questions : [];
   }, [questions]);
   
-  console.log('📦 QuestionsList questionsArray length:', questionsArray.length);
+  logger.log('📦 QuestionsList questionsArray length:', questionsArray.length);
   
   // Filter and sort questions
   const filteredAndSortedQuestions = useMemo(() => {

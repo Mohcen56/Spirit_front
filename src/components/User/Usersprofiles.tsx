@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { logger } from '@/lib/utils/logger';
 import { ChevronLeft } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { gameAPI } from '@/lib/api/index';
 import { VerifyBadge } from '@/components/ui/verify-badge';
 import { AnimatedBadge } from '@/components/ui/animatedbadge';
-import { useCreatorBadge } from '@/hooks/useCreatorBadge';
+import { useCreatorBadge } from '@/components/useCreatorBadge';
 
 interface User {
   id: number;
@@ -58,7 +59,7 @@ export default function UserProfile({ user, onBack }: UserProfileProps) {
         const filtered = allCategories.filter((cat: Category) => cat.created_by_id === user.id);
         setUserCategories(filtered);
       } catch (error) {
-        console.error('Error fetching user categories:', error);
+        logger.exception(error, { where: 'Usersprofiles.fetchUserCategories' });
       } finally {
         setIsLoadingCategories(false);
       }

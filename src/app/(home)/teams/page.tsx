@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { logger } from '@/lib/utils/logger';
 import { useRouter } from 'next/navigation';
 import { gameAPI } from '@/lib/api/index';
 import {  Play, Plus, Minus, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -147,8 +148,8 @@ export default function TeamsPage() {
     setError('');
 
     try {
-      console.log('Starting game with categories:', selectedCategories);
-      console.log('Teams:', teams);
+      logger.log('Starting game with categories:', selectedCategories);
+      logger.log('Teams:', teams);
       
       const teamsData = teams.map((team, index) => ({
         name: team.name.trim() || `Team ${index + 1}`, // Use default name if empty
@@ -157,7 +158,7 @@ export default function TeamsPage() {
       
       const game = await gameAPI.startGame(selectedCategories, teamsData);
       
-      console.log('Game created successfully:', game);
+      logger.log('Game created successfully:', game);
       
       if (!game.id) {
         throw new Error('Game was created but no ID was returned');
@@ -169,7 +170,7 @@ export default function TeamsPage() {
       // Navigate to game board
       router.push(`/game/${game.id}`);
     } catch (error) {
-      console.error('Error starting game:', error);
+      logger.exception(error, { where: 'teams.startGame' });
       setError('An error occurred while starting the game');
     } finally {
       setIsStarting(false);
@@ -272,7 +273,7 @@ export default function TeamsPage() {
                   {/* Avatar Selection */}
                   <div className="w-full">
                     <label className="block text-primary-700 text-sm mb-3 text-center w-full font-medium">
-                      Choose Character
+                      Choose Your  Avatar
                     </label>
                     
                     {/* Avatar Carousel */}
@@ -345,7 +346,7 @@ export default function TeamsPage() {
                         )}
                       </div>
                     </div>
-                    <span className="text-primary-800 font-medium text-center text-sm flex-1" dir="ltr">
+                    <span className="text-primary-800 font-medium   text-sm flex-1" dir="ltr">
                       {team.name || `Team ${index + 1}`}
                     </span>
                   </div>

@@ -15,6 +15,7 @@ import { useCategoriesData } from '@/hooks/useCategoriesData';
 import { VerifyIcon } from '@/components/ui/verify-badge';
 import { useMembership } from '@/hooks/useMembership';
 import { useHeader } from '@/contexts/HeaderContext';
+import { logger } from '@/lib/utils/logger';
 
 export default function AddedCategoriesPage() {
   const [showProfile, setShowProfile] = useState(false);
@@ -62,7 +63,7 @@ export default function AddedCategoriesPage() {
       if (context?.previousCategories) {
         queryClient.setQueryData(['categories', 'user'], context.previousCategories);
       }
-      console.error('Error saving/unsaving category:', err);
+      logger.exception(err, { where: 'categories.add.saveMutation' });
       setError('Failed to update category. Please try again.');
     },
     onSuccess: () => {
@@ -109,7 +110,7 @@ export default function AddedCategoriesPage() {
       if (context?.previousCategories) {
         queryClient.setQueryData(['categories', 'user'], context.previousCategories);
       }
-      console.error('Error liking/unliking category:', err);
+      logger.exception(err, { where: 'categories.add.likeMutation' });
       setError('Failed to update like. Please try again.');
     },
     onSuccess: () => {

@@ -1,4 +1,5 @@
 import { api } from './base';
+import { logger } from '@/lib/utils/logger';
 import { Game } from '@/types/game';
 import { normalizeApiResponse } from '@/lib/utils/utils';
 
@@ -22,7 +23,7 @@ export const gamesAPI = {
       });
       return response.data;
     } catch (error) {
-      console.error('Error starting game:', error);
+      logger.exception(error, { where: 'games.startGame' });
       throw error;
     }
   },
@@ -35,7 +36,7 @@ export const gamesAPI = {
       const response = await api.get('/api/gameplay/games/');
       return normalizeApiResponse<Game>(response.data);
     } catch (error) {
-      console.error('Error fetching games:', error);
+      logger.exception(error, { where: 'games.getGames' });
       throw error;
     }
   },
@@ -51,7 +52,7 @@ export const gamesAPI = {
       const response = await api.get(`/api/gameplay/games/${gameId}/`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching game:', error);
+      logger.exception(error, { where: 'games.getGame' });
       throw error;
     }
   },
@@ -66,7 +67,7 @@ export const gamesAPI = {
       });
       return response.data;
     } catch (error) {
-      console.error('Error finishing round:', error);
+      logger.exception(error, { where: 'games.finishRound' });
       throw error;
     }
   },
@@ -79,7 +80,7 @@ export const gamesAPI = {
       const response = await api.get('/api/gameplay/stats/');
       return response.data;
     } catch (error) {
-      console.error('Error fetching stats:', error);
+      logger.exception(error, { where: 'games.getStats' });
       throw error;
     }
   },
@@ -92,7 +93,7 @@ export const gamesAPI = {
       const response = await api.get('/api/gameplay/recent/');
       return response.data;
     } catch (error) {
-      console.error('Error fetching recent games:', error);
+      logger.exception(error, { where: 'games.getRecentGames' });
       throw error;
     }
   },
@@ -107,7 +108,7 @@ export const gamesAPI = {
       });
       return response.data; // returns new question or error
     } catch (error) {
-      console.error('Error rerolling question:', error);
+      logger.exception(error, { where: 'games.rerollQuestion' });
       throw error;
     }
   },

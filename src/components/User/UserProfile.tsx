@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { logger } from '@/lib/utils/logger';
 import { ChevronLeft, Camera, Eye, EyeOff, Check } from 'lucide-react';
 import Image from 'next/image';
 import { ProcessingButton } from '@/components/ui/button2';
@@ -84,7 +85,7 @@ export default function UserProfile({ user, onBack, onSave }: UserProfileProps) 
       notify.profileUpdated();
       return true;
     } catch (error) {
-      console.error("Save failed:", error);
+      logger.exception(error, { where: 'UserProfile.save' });
       notify.error('Save Failed', 'Unable to update profile. Please try again.');
       return false;
     }

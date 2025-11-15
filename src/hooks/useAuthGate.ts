@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authAPI } from '@/lib/api/auth';
 import type { User } from '@/types/game';
+import { logger } from '@/lib/utils/logger';
 
 export function useAuthGate({ redirectIfGuest }: { redirectIfGuest?: string } = {}) {
   const router = useRouter();
@@ -16,7 +17,7 @@ export function useAuthGate({ redirectIfGuest }: { redirectIfGuest?: string } = 
 
       // 🔹 Short-circuit safely (don't call API if no token)
       if (!token) {
-        console.log('No token, skipping getCurrentUser');
+        logger.log('No token, skipping getCurrentUser');
         setLoading(false); // ✅ stop loading
         if (redirectIfGuest) router.replace(redirectIfGuest);
         return;

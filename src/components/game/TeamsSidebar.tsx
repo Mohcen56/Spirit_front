@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { logger } from '@/lib/utils/logger';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch } from '@/store/hooks';
@@ -79,7 +80,7 @@ export default function TeamsSidebar({
         router.push(`/game/${gameId}/question/${newQ.id}`);
       }
     } catch (e) {
-      console.warn('Failed to reroll question:', e);
+      logger.warn('Failed to reroll question:', e);
     }
   };
 

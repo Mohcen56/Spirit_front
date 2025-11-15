@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { logger } from "@/lib/utils/logger";
 import Image from "next/image";
 
 export default function ForgotPassword() {
@@ -27,7 +28,7 @@ export default function ForgotPassword() {
       const data = await res.json();
       setMessage(data.detail || "Check your inbox for a reset link.");
     } catch (err) {
-      console.error(err);
+      logger.exception(err, { where: 'auth.forgotPassword.submit' });
       setMessage("Something went wrong. Please try again.");
     } finally {
       setLoading(false);

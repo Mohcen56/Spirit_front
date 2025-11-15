@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { gameAPI } from "@/lib/api";
+import { logger } from '@/lib/utils/logger';
 import { Mic, Video, Image as ImageIcon, Lock, X } from "lucide-react";
 import ImageCropModal from "@/components/added_cat/ImageCropModal";
 
@@ -134,7 +135,7 @@ export default function QuestionFormContent({ categoryId, questionId, mode }: Qu
           }
         })
         .catch((err) => {
-          console.error("Error loading question:", err);
+          logger.exception(err, { where: 'QuestionFormContent.loadQuestion' });
           setError("Failed to load question data");
         })
         .finally(() => {
@@ -189,7 +190,7 @@ export default function QuestionFormContent({ categoryId, questionId, mode }: Qu
       // Go back to category edit page
       router.push(`/categories/edit/${categoryId}`);
     } catch (err) {
-      console.error(`Error ${isEditMode ? 'updating' : 'adding'} question:`, err);
+      logger.exception(err, { where: 'QuestionFormContent.saveQuestion', isEditMode });
       const errorObj = err as { detail?: string; message?: string; error?: string; errors?: unknown };
       setError(errorObj?.error || errorObj?.detail || errorObj?.message || `There was an error ${isEditMode ? 'updating' : 'adding'} the question`);
     } finally {

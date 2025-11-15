@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
+import { logger } from '@/lib/utils/logger';
 import Cropper from 'react-easy-crop';
 import { X, ZoomIn, ZoomOut } from 'lucide-react';
 import { ProcessingButton } from '@/components/ui/button2';
@@ -103,19 +104,19 @@ export default function ImageCropModal({ imageSrc, onCropComplete, onCancel }: I
 
   const handleSave = async (): Promise<boolean> => {
     if (!croppedAreaPixels) {
-      console.error('❌ No cropped area available');
+      logger.exception('❌ No cropped area available', { where: 'ImageCropModal.handleSave' });
       return false;
     }
 
-    console.log('🎨 Starting crop with area:', croppedAreaPixels);
+    logger.log('🎨 Starting crop with area:', croppedAreaPixels);
 
     try {
       const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels);
-      console.log('🎨 Crop successful! File:', croppedImage.name, croppedImage.size, 'bytes');
+      logger.log('🎨 Crop successful! File:', croppedImage.name, croppedImage.size, 'bytes');
       onCropComplete(croppedImage);
       return true;
     } catch (e) {
-      console.error('❌ Error cropping image:', e);
+      logger.exception(e, { where: 'ImageCropModal.handleSave' });
       return false;
     }
   };

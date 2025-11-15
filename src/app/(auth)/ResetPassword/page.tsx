@@ -1,5 +1,6 @@
 "use client";
 import React, { useState} from "react";
+import { logger } from "@/lib/utils/logger";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -48,7 +49,7 @@ const ResetPassword = () => {
         setTimeout(() => router.push("/login"), 3000);
       }
     } catch (err) {
-      console.error(err);
+      logger.exception(err, { where: 'auth.resetPassword.submit' });
       setMessage("Something went wrong. Please try again.");
     } finally {
       setLoading(false);

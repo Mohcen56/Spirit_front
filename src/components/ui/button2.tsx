@@ -6,6 +6,7 @@ import React, {
   ButtonHTMLAttributes,
   ReactNode,
 } from "react";
+import { logger } from '@/lib/utils/logger';
 
 // Utility function to merge Tailwind CSS classes conditionally.
 const cn = (
@@ -167,7 +168,7 @@ const ProcessingButton: React.FC<ProcessingButtonProps> = ({
       const success = await onProcess();
       setState(success ? "success" : "error");
     } catch (error) {
-      console.error("An error occurred during the process:", error);
+      logger.exception(error, { where: 'ProcessingButton.handleClick' });
       setState("error");
     }
 
@@ -245,15 +246,15 @@ export { ProcessingButton };
 export default function CopyButtonView2() {
   // EXAMPLE: Define the asynchronous task you want the button to perform.
   const handleSave = async (): Promise<boolean> => {
-    console.log("Starting save process...");
+    logger.log("Starting save process...");
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     const isSuccess = Math.random() > 0.5;
     if (isSuccess) {
-      console.log("Save successful!");
+      logger.log("Save successful!");
       return true;
     } else {
-      console.log("Save failed.");
+      logger.log("Save failed.");
       return false;
     }
   };

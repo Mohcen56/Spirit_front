@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { gameAPI } from '@/lib/api';
 import { useNotification } from '@/hooks/useNotification';
+import { logger } from '@/lib/utils/logger';
 import { useMembership } from '@/hooks/useMembership';
 import { useAuthGate } from '@/hooks/useAuthGate';
 
@@ -57,8 +58,8 @@ export function useCategoryActions({
         return false;
       }
 
-      console.log('💾 Saving category...');
-      console.log('💾 categoryImageFile:', categoryImageFile);
+        logger.log('💾 Saving category...');
+        logger.log('💾 categoryImageFile:', categoryImageFile);
      
       const formData = new FormData();
       formData.append('name', categoryName);
@@ -66,15 +67,15 @@ export function useCategoryActions({
       formData.append('privacy', privacy);
       
       if (categoryImageFile) {
-        console.log('💾 Appending image to FormData:', categoryImageFile.name, categoryImageFile.size);
+          logger.log('💾 Appending image to FormData:', categoryImageFile.name, categoryImageFile.size);
         formData.append('image', categoryImageFile);
       } else {
-        console.log('⚠️ No categoryImageFile to upload');
+          logger.log('⚠️ No categoryImageFile to upload');
       }
 
-      console.log('💾 Sending update request...');
+        logger.log('💾 Sending update request...');
       const responseData = await gameAPI.updateUserCategory(categoryId, formData);
-      console.log('✅ Update successful:', responseData);
+        logger.log('✅ Update successful:', responseData);
      
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['categories', 'user'], refetchType: 'active' }),
@@ -87,7 +88,7 @@ export function useCategoryActions({
       return true;
       
     } catch (err) {
-      console.error('Error saving category:', err);
+       logger.exception(err, { where: 'useCategoryActions.saveCategory' });
       setError('Failed to save category. Please try again.');
       return false;
     }
@@ -110,7 +111,7 @@ export function useCategoryActions({
       notify.success('Deleted', 'Category deleted successfully');
       router.push('/categories');
     } catch (err) {
-      console.error('Error deleting category:', err);
+        logger.exception(err, { where: 'useCategoryActions.deleteCategory' });
       notify.error('Delete Failed', 'Failed to delete category. Please try again.');
     }
   };
@@ -143,7 +144,7 @@ export function useCategoryActions({
         queryClient.invalidateQueries({ queryKey: ['categories', 'user'], refetchType: 'active' })
       ]);
     } catch (err) {
-      console.error('Error toggling save:', err);
+       logger.exception(err, { where: 'useCategoryActions.toggleSave' });
       notify.error('Failed', 'Could not update category. Please try again.');
     }
   };
@@ -170,7 +171,7 @@ export function useCategoryActions({
         queryClient.invalidateQueries({ queryKey: ['categories', 'user'], refetchType: 'active' })
       ]);
     } catch (err) {
-      console.error('Error toggling like:', err);
+       logger.exception(err, { where: 'useCategoryActions.toggleLike' });
       notify.error('Failed', 'Could not update like. Please try again.');
     }
   };
@@ -192,7 +193,7 @@ export function useCategoryActions({
       setQuestions(prev => prev.filter(q => q.id !== questionId));
       notify.success('Question Deleted', 'Question removed successfully');
     } catch (err) {
-      console.error('Error deleting question:', err);
+       logger.exception(err, { where: 'useCategoryActions.deleteQuestion' });
       notify.error('Delete Failed', 'Failed to delete question. Please try again.');
     }
   };

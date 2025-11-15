@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import UserProfile from "@/components/User/UserProfile";
 import { useAuthGate } from "@/hooks/useAuthGate";
 import { authAPI } from "@/lib/api/auth";
+import { logger } from '@/lib/utils/logger';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -44,10 +45,10 @@ export default function ProfilePage() {
       }
 
       // Optional: show a toast/snackbar here
-      console.log("Profile saved successfully");
+        logger.log("Profile saved successfully");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to save profile";
-      console.error(message);
+        logger.exception(message, { where: 'profile.saveProfile' });
       // Optional: show error toast
     }
   };
