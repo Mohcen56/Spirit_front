@@ -235,7 +235,7 @@ export default function AddedCategoriesPage() {
 
                 {/* Sort button */}
                 <div className="relative">
-                  <button
+                  <button 
                     onClick={() => setFiltersOpen((v) => !v)}
                     className="inline-flex items-center gap-2 bg-white/70 hover:bg-white/90 px-3 py-2 rounded-xl border border-primary-200 shadow-sm text-sm text-primary-800"
                     aria-haspopup="true"

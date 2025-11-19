@@ -13,10 +13,11 @@ import ChoicesDialog from '@/components/game/ChoicesDialog';
 import TeamsSidebar from '@/components/game/TeamsSidebar';
 import { getFullImageUrl } from '@/lib/utils/imageUtils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { switchToNextTeam, awardPoints, clearActivePerk, setGameQuestions, markQuestionPlayed, endGame, activateChoicesPerk, lockPerks, unlockPerks, setRerollBuffer } from '@/store/gameSlice';
+import { switchToNextTeam, awardPoints, clearActivePerk, setGameQuestions, setBackupQuestions, markQuestionPlayed, endGame, activateChoicesPerk, lockPerks, unlockPerks, setRerollBuffer } from '@/store/gameSlice';
 import { Loader } from 'lucide-react';
 import { useGameData } from '@/hooks/useGameData';
 import { useSyncTeams } from '@/hooks/useSyncTeams';
+import { consumeBackupQuestion } from '@/store/gameSlice';
 
 export default function QuestionPage() {
   const params = useParams();
@@ -64,6 +65,13 @@ export default function QuestionPage() {
         const data = await gameAPI.getAvailableQuestions(numericGameId);
         if (!cancelled) {
           dispatch(setGameQuestions(data));
+          // Prefetch extra outside-board questions for fast reroll
+          const extras = await gameAPI.prefetchOutsideBoard(numericGameId, 4);
+          if (Array.isArray(extras) && extras.length) {
+            const existingIds = new Set(data.map((q: any) => q.id));
+            const filtered = extras.filter((q: any) => q && typeof q.id === 'number' && !existingIds.has(q.id));
+            dispatch(setBackupQuestions(filtered));
+          }
         }
       } catch (err) {
         logger.exception(err, { where: 'game.[id].question.[questionId].loadAvailable' });
@@ -80,7 +88,9 @@ export default function QuestionPage() {
 
 
   // 🧩 Get the selected question
-  const question = questions.find((q) => q.id === questionId);
+  // Allow resolving rerolled (backup) questions not on board
+  const backupQuestions = useAppSelector(s => s.game.backupQuestions);
+  const question = questions.find((q) => q.id === questionId) || backupQuestions.find(q => q.id === questionId);
 
   useEffect(() => {
     if (question?.image) {
@@ -219,6 +229,11 @@ export default function QuestionPage() {
       if (!playedQuestions.includes(question.id)) {
         dispatch(markQuestionPlayed(question.id));
       }
+      // If this was a backup (outside-board) question sitting at front, consume it now
+      const backupHead = backupQuestions[0];
+      if (backupHead && backupHead.id === question.id) {
+        dispatch(consumeBackupQuestion());
+      }
       
       const currentTeamData = teams.find(t => t.id === currentTeam) || teams[currentTeam - 1];
       const timestamp = Date.now();
@@ -303,6 +318,24 @@ export default function QuestionPage() {
       }
     }
   };
+
+  // Randomize choices so correct answer isn't always first
+  const shuffledChoices = React.useMemo(() => {
+    if (!selectedQuestionForChoices) return [];
+    const choices = [
+      selectedQuestionForChoices.answer,
+      selectedQuestionForChoices.choice_2 || '',
+      selectedQuestionForChoices.choice_3 || '',
+      selectedQuestionForChoices.choice_4 || ''
+    ].filter(c => c.trim());
+    // Fisher-Yates shuffle
+    const shuffled = [...choices];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }, [selectedQuestionForChoices]);
 
   const handleCloseChoicesDialog = () => {
     setIsChoicesDialogOpen(false);
@@ -488,13 +521,7 @@ export default function QuestionPage() {
         <ChoicesDialog
           open={isChoicesDialogOpen}
           onClose={handleCloseChoicesDialog}
-         
-          choices={[
-            selectedQuestionForChoices.answer,
-            selectedQuestionForChoices.choice_2 || '',
-            selectedQuestionForChoices.choice_3 || '',
-            selectedQuestionForChoices.choice_4 || ''
-          ]}
+          choices={shuffledChoices}
         />
       )}
     </div>

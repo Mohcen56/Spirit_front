@@ -4,9 +4,9 @@ import React from 'react';
 import { logger } from '@/lib/utils/logger';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useAppDispatch } from '@/store/hooks';
-import { activateDoublePerk, activateRerollPerk, markQuestionPlayed, consumeRerollBuffer } from '@/store/gameSlice';
-import { gamesAPI } from '@/lib/api';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { activateDoublePerk, consumeRerollBuffer } from '@/store/gameSlice';
+import { useReroll } from '@/hooks/useReroll';
 import { Question as QuestionType, Team } from '@/types/game';
 
 interface TeamsSidebarProps {
@@ -41,6 +41,8 @@ export default function TeamsSidebar({
   onShowChoices,
 }: TeamsSidebarProps) {
   const dispatch = useAppDispatch();
+  const backupQuestions = useAppSelector((state) => state.game.backupQuestions);
+  const { reroll } = useReroll(Number(gameId), question);
   const router = useRouter();
   // prevent unused warnings for optional legacy props
   void questions; void playedQuestions;
@@ -51,36 +53,16 @@ export default function TeamsSidebar({
   };
 
   const handleReroll = async (teamId: number) => {
-    const teamIndex = teams.findIndex(t => t.id === teamId);
-    const isTeamsTurn = teamIndex === (currentTeam - 1);
-    
-    if (!isTeamsTurn || rerollPerkUsed[teamId]) return;
-    
-    // Mark perk as used in Redux
-    dispatch(activateRerollPerk({ teamId }));
-    // 1. Try buffered reroll first
-    if (rerollBuffer && rerollBuffer[teamId]) {
-      const bufferedId = rerollBuffer[teamId];
-      if (bufferedId && question) {
-        dispatch(markQuestionPlayed(question.id));
+    try {
+      // Prefer backup list via hook; if it cannot reroll, fallback to buffer
+      await reroll(teamId);
+    } catch (e) {
+      logger.warn('useReroll failed, attempting buffer fallback:', e);
+      if (rerollBuffer && rerollBuffer[teamId] && question) {
+        const bufferedId = rerollBuffer[teamId];
         dispatch(consumeRerollBuffer({ teamId }));
         router.push(`/game/${gameId}/question/${bufferedId}`);
-        return;
       }
-    }
-
-    // 2. Fallback to backend reroll
-    try {
-      if (!question) return;
-      // Mark current as played locally for UI responsiveness
-      dispatch(markQuestionPlayed(question.id));
-      // Ask backend for a new question and navigate
-      const newQ = await gamesAPI.rerollQuestion(Number(gameId), question.id);
-      if (newQ && newQ.id) {
-        router.push(`/game/${gameId}/question/${newQ.id}`);
-      }
-    } catch (e) {
-      logger.warn('Failed to reroll question:', e);
     }
   };
 

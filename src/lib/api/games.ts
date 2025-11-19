@@ -98,18 +98,36 @@ export const gamesAPI = {
     }
   },
 
+
+  
+ 
+
   /**
-   * Reroll current question: backend selects a new question and marks current as played
+   * Prefetch a batch of outside-board questions for fast rerolls.
    */
-  rerollQuestion: async (gameId: number, currentQuestionId: number) => {
+  prefetchOutsideBoard: async (gameId: number, count = 4) => {
     try {
-      const response = await api.post(`/api/gameplay/games/${gameId}/reroll_question/`, {
-        current_question_id: currentQuestionId,
-      });
-      return response.data; // returns new question or error
+      const response = await api.get(`/api/gameplay/games/${gameId}/prefetch_outside_board/?count=${count}`);
+      return response.data; // Question[]
     } catch (error) {
-      logger.exception(error, { where: 'games.rerollQuestion' });
-      throw error;
+      logger.exception(error, { where: 'games.prefetchOutsideBoard' });
+      return [];
     }
+  },
+
+  /**
+   * Alias: getBackupQuestions — semantically identical to prefetchOutsideBoard
+   * Used by reroll hook to keep intent clear.
+   */
+  getBackupQuestions: async (gameId: number, count = 4) => {
+    return await (async () => {
+      try {
+        const response = await api.get(`/api/gameplay/games/${gameId}/prefetch_outside_board/?count=${count}`);
+        return response.data; // Question[]
+      } catch (error) {
+        logger.exception(error, { where: 'games.getBackupQuestions' });
+        return [];
+      }
+    })();
   },
 };

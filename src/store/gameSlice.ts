@@ -13,6 +13,7 @@ interface GameState {
   choicesPerkUsed: Record<number, boolean>;
   perksLocked: boolean;
   rerollBuffer: Record<number, number | null>; // teamId -> queued question id
+  backupQuestions: Question[];
   questions: Question[];
   playedQuestions: number[];
   loading: boolean;
@@ -31,6 +32,7 @@ const initialState: GameState = {
   choicesPerkUsed: {},
   perksLocked: false,
   rerollBuffer: {},
+  backupQuestions: [],
   questions: [],
   playedQuestions: [],
   loading: false,
@@ -157,6 +159,18 @@ const gameSlice = createSlice({
         state.rerollBuffer[Number(teamId)] = null;
       }
     },
+    // New: backup questions buffer explicitly for reroll perk
+    setBackupQuestions: (state, action: PayloadAction<Question[]>) => {
+      state.backupQuestions = action.payload;
+    },
+    pushBackupQuestions: (state, action: PayloadAction<Question[]>) => {
+      state.backupQuestions = [...state.backupQuestions, ...action.payload];
+    },
+    consumeBackupQuestion: (state) => {
+      if (state.backupQuestions.length > 0) {
+        state.backupQuestions.shift();
+      }
+    },
     setRerollBuffer: (state, action: PayloadAction<{ entries: Array<{ teamId: number; questionId: number | null }> }>) => {
       for (const { teamId, questionId } of action.payload.entries) {
         state.rerollBuffer[teamId] = questionId;
@@ -186,6 +200,7 @@ const gameSlice = createSlice({
       state.questions = [];
       state.playedQuestions = [];
       state.rerollBuffer = {};
+      state.backupQuestions = [];
     },
   },
 });
@@ -209,6 +224,9 @@ export const {
   setRerollBuffer,
   consumeRerollBuffer,
   setGameQuestions,
+  setBackupQuestions,
+  pushBackupQuestions,
+  consumeBackupQuestion,
   markQuestionPlayed,
   resetGame,
 } = gameSlice.actions;
