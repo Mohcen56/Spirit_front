@@ -5,6 +5,7 @@ import { logger } from '@/lib/utils/logger';
 import { useRouter } from 'next/navigation';
 import { gameAPI } from '@/lib/api/index';
 import {  Play, Plus, Minus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ProcessingButton } from '@/components/ui/button2';
 import Image from 'next/image';
 import { useHeader } from '@/contexts/HeaderContext';
 
@@ -138,13 +139,12 @@ export default function TeamsPage() {
     return selectedCategories.length >= 2;
   };
 
-  const handleStartGame = async () => {
+  const handleStartGame = async (): Promise<boolean> => {
     if (!isValidToStart()) {
       setError('Please select at least 2 categories');
-      return;
+      return false;
     }
 
-    setIsStarting(true);
     setError('');
 
     try {
@@ -169,11 +169,11 @@ export default function TeamsPage() {
       
       // Navigate to game board
       router.push(`/game/${game.id}`);
+      return true;
     } catch (error) {
       logger.exception(error, { where: 'teams.startGame' });
       setError('An error occurred while starting the game');
-    } finally {
-      setIsStarting(false);
+      return false;
     }
   };
 
@@ -219,12 +219,12 @@ export default function TeamsPage() {
                   onClick={decrementTeams}
                   disabled={numberOfTeams <= 2}
                   aria-label="Decrease number of teams"
-                  className="w-12 h-12 bg-primary-500 hover:bg-primary-600 disabled:bg-gray-400 disabled:opacity-50 rounded-xl flex items-center justify-center text-white text-xl font-bold transition-all shadow-md"
+                  className="w-12 h-12 bg-cyan-700 hover:bg-cyan-800 disabled:bg-gray-400 disabled:opacity-50 rounded-xl flex items-center justify-center text-white text-xl font-bold transition-all shadow-md"
                 >
                   <Minus className="w-6 h-6" />
                 </button>
                 
-                <div className="w-16 h-12 bg-eastern-blue-600 rounded-xl flex items-center justify-center shadow-md">
+                <div className="w-16 h-12 bg-cyan-600 rounded-xl flex items-center justify-center shadow-md">
                   <span className="text-white text-2xl font-bold">{numberOfTeams}</span>
                 </div>
                 
@@ -232,7 +232,7 @@ export default function TeamsPage() {
                   onClick={incrementTeams}
                   disabled={numberOfTeams >= 4}
                   aria-label="Increase number of teams"
-                  className="w-12 h-12 bg-primary-500 hover:bg-primary-600 disabled:bg-gray-400 disabled:opacity-50 rounded-xl flex items-center justify-center text-white text-xl font-bold transition-all shadow-md"
+                  className="w-12 h-12 bg-cyan-700 hover:bg-cyan-800 disabled:bg-gray-400 disabled:opacity-50 rounded-xl flex items-center justify-center text-white text-xl font-bold transition-all shadow-md"
                 >
                   <Plus className="w-6 h-6" />
                 </button>
@@ -243,7 +243,7 @@ export default function TeamsPage() {
           {/* Team Setup */}
           <div className="bg-eastern-blue-100 backdrop-blur-md rounded-2xl p-6 border border-primary-200 shadow-lg">
             <div className="relative flex justify-center -mt-11 mb-6">
-              <div className="bg-eastern-blue-700 text-white px-6 py-2 rounded-full shadow-md">
+              <div className="bg-cyan-700 text-white px-6 py-2 rounded-full shadow-md">
                 <h2 className="text-xl font-bold text-center">Team Setup</h2>
               </div>
             </div>
@@ -281,7 +281,7 @@ export default function TeamsPage() {
                       <button
                         onClick={() => navigateAvatar(index, 'prev')}
                         aria-label="Previous avatar"
-                        className="w-8 h-8 bg-primary-500 hover:bg-primary-600 rounded-full flex items-center justify-center text-white transition-all flex-shrink-0 shadow-md"
+                        className="w-8 h-8 bg-cyan-700 hover:bg-cyan-800 rounded-full flex items-center justify-center text-white transition-all flex-shrink-0 shadow-md"
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </button>
@@ -314,7 +314,7 @@ export default function TeamsPage() {
                       <button
                         onClick={() => navigateAvatar(index, 'next')}
                         aria-label="Next avatar"
-                        className="w-8 h-8 bg-primary-500 hover:bg-primary-600 rounded-full flex items-center justify-center text-white transition-all flex-shrink-0 shadow-md"
+                        className="w-8 h-8 bg-cyan-700 hover:bg-cyan-700 rounded-full flex items-center justify-center text-white transition-all flex-shrink-0 shadow-md"
                       >
                         <ChevronRight className="w-4 h-4" />
                       </button>
@@ -363,17 +363,23 @@ export default function TeamsPage() {
           )}
 
           {/* Start Game Button */}
-          <div className="text-center">
-            <button
-              onClick={handleStartGame}
-              disabled={!isValidToStart() || isStarting}
-              className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed flex items-center space-x-3 mx-auto shadow-lg"
-            >
-              <Play className="h-6 w-6" />
-              <span className="text-lg">
-                {isStarting ? 'Starting Game...' : 'Start Game'}
-              </span>
-            </button>
+                      <div className="text-center ">
+                        <div className="inline-block group/button relative overflow-hidden rounded-xl">
+                          <ProcessingButton
+                            onProcess={handleStartGame}
+                            disabled={!isValidToStart()}
+                           icon="check"
+              processingText="Confirming..."
+              successText=""
+              errorText="Failed to confirm teams"
+                            className="relative bg-cyan-600 hover:bg-cyan-700 hover:shadow-lg hover:shadow-red-500/30 disabled:bg-gray-600 text-white font-bold py-8 px-10 transition-all duration-300 ease-in-out hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
+                          >
+                            <span className="relative z-10">Confirm Teams</span>
+                          </ProcessingButton>
+                          <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-13deg)_translateX(-100%)] group-hover/button:duration-1000 group-hover/button:[transform:skew(-13deg)_translateX(100%)] pointer-events-none">
+                            <div className="relative h-full w-16 bg-white/30" />
+                          </div>
+                        </div>
             
             {!isValidToStart() && (
               <p className="text-primary-600 text-sm mt-3">

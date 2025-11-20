@@ -7,7 +7,9 @@ import { useQuery } from '@tanstack/react-query';
 import { categoriesAPI } from '@/lib/api';
 import { Category, Collection } from '@/types/game';
 import { logger } from '@/lib/utils/logger';
-import { Users, Crown, Lock, Eye, Pencil, Info, Search } from 'lucide-react';
+import { Crown, Lock, Eye, Pencil, Info, Search } from 'lucide-react';
+import { ProcessingButton } from '@/components/ui/button2';
+import { useNotification } from '@/hooks/useNotification';
 import Image from 'next/image';
 import { useMembership } from '@/hooks/useMembership';
 import { useImageError } from '@/hooks/useImageError';
@@ -15,6 +17,7 @@ import { useHeader } from '@/contexts/HeaderContext';
 
 export default function CategoriesPage() {
   const { membership, currentUserId, error, setError } = useMembership();
+  const notify = useNotification();
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   const [infoModal, setInfoModal] = useState<{ open: boolean; category: Category | null }>({ open: false, category: null });
   const { setHeader } = useHeader();
@@ -145,15 +148,16 @@ export default function CategoriesPage() {
     return selectedCategories.length >= 2;
   };
 
-  const handleProceedToTeams = () => {
+  const handleProceedToTeams = async (): Promise<boolean> => {
     if (!isValidToStart()) {
       setError('You must select at least two categories');
-      return;
+      notify.error('Selection Invalid', 'Select at least two categories');
+      return false;
     }
-
-    // Store selected categories in localStorage and navigate to teams page
     localStorage.setItem('selectedCategories', JSON.stringify(selectedCategories));
-    router.push('/teams');
+    notify.success('Categories Locked In', 'Proceeding to team setup...', 2500);
+    setTimeout(() => router.push('/teams'), 300);
+    return true;
   };
 
   if (isLoading) {
@@ -386,17 +390,23 @@ export default function CategoriesPage() {
           )}
 
           {/* Proceed to Teams Button */}
-          <div className="text-center">
-            <button
-              onClick={handleProceedToTeams}
-              disabled={!isValidToStart()}
-              className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed flex items-center space-x-3 space-x-reverse mx-auto"
-            >
-              <Users className="h-6 w-6" />
-              <span className="text-lg">
-                Continue to Team Setup
-              </span>
-            </button>
+          <div className="text-center ">
+            <div className="inline-block group/button relative overflow-hidden rounded-xl">
+              <ProcessingButton
+                onProcess={handleProceedToTeams}
+                disabled={!isValidToStart()}
+                icon="users"
+                processingText="just a sec..."
+                successText=""
+                errorText="Needs 2+"
+                className="relative bg-cyan-500 hover:bg-cyan-600 hover:shadow-lg hover:shadow-red-500/30 disabled:bg-gray-600 text-white font-bold py-8 px-10 transition-all duration-300 ease-in-out hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
+              >
+                <span className="relative z-10">Continue to Team Setup</span>
+              </ProcessingButton>
+              <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-13deg)_translateX(-100%)] group-hover/button:duration-1000 group-hover/button:[transform:skew(-13deg)_translateX(100%)] pointer-events-none">
+                <div className="relative h-full w-16 bg-white/30" />
+              </div>
+            </div>
             
             {!isValidToStart() && (
               <p className="text-gray-600 text-sm mt-3">

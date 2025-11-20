@@ -9,11 +9,11 @@ import ImageCropModal from '@/components/added_cat/ImageCropModal';
 import { useHeader } from '@/contexts/HeaderContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMembership } from '@/hooks/useMembership';
+import { ProcessingButton } from '@/components/ui/button2';
 
 
 export default function CreateCategoryPage() {
   const queryClient = useQueryClient();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const { setHeader } = useHeader();
   const { membership } = useMembership();
@@ -67,24 +67,19 @@ export default function CreateCategoryPage() {
     }
   };
 
-  const handleCreateCategory = async () => {
-    // Prevent multiple submissions
-    if (isSubmitting) return;
-    
+  const handleCreateCategory = async (): Promise<boolean> => {
     setError('');
 
     // Validation
     if (!categoryName.trim()) {
       setError('Category name is required');
-      return;
+      return false;
     }
 
     if (!categoryImageFile) {
       setError('Category image is required');
-      return;
+      return false;
     }
-
-    setIsSubmitting(true);
 
     try {
       // Create FormData
@@ -113,12 +108,12 @@ export default function CreateCategoryPage() {
 
       // Redirect to edit page to add questions
       router.push(`/categories/edit/${category.id}`);
+      return true;
     } catch (err) {
       logger.exception(err, { where: 'categories.create.handleCreateCategory' });
       const errorObj = err as { message?: string; detail?: string };
       setError(errorObj?.message || errorObj?.detail || 'Failed to create category. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+      return false;
     }
   };
    useEffect(() => {
@@ -240,13 +235,17 @@ export default function CreateCategoryPage() {
 
             {/* Create Button */}
             <div className="flex justify-center mt-8">
-              <button
-                onClick={handleCreateCategory}
-                disabled={isSubmitting || !categoryName.trim() || !categoryImageFile }
-                className="px-10 py-5 rounded-xl bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold text-xl shadow-lg transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              <ProcessingButton
+                onProcess={handleCreateCategory}
+                disabled={!categoryName.trim() || !categoryImageFile}
+                className="px-10 py-8 rounded-xl bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold text-xl shadow-lg"
+                icon="save"
+                processingText="Creating..."
+                successText="Category Created!"
+                errorText="Failed to Create"
               >
-                {isSubmitting ? 'Creating...' : 'Create Category 🚀'}
-              </button>
+                Create Category
+              </ProcessingButton>
             </div>
           </div>
 

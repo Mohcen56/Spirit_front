@@ -1,17 +1,17 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Trophy, Medal, Award, Home } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { resetGame } from '@/store/gameSlice';
 
 export default function GameResultsPage() {
-  const params = useParams();
+
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const gameId = params.id as string;
+  
 
   const { teams, playedQuestions, loading, error } = useAppSelector((state) => state.game);
 
@@ -65,19 +65,6 @@ export default function GameResultsPage() {
   };
 
   // Handle no game or missing teams
-  if (!gameId || !teams?.length) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-yellow-100 via-orange-100 to-pink-100">
-        <div className="text-red-600 text-xl mb-4">No saved results for this game.</div>
-        <button
-          onClick={handleBackHome}
-          className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg"
-        >
-          Back to Home
-        </button>
-      </div>
-    );
-  }
 
   if (loading) {
     return (

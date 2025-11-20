@@ -51,7 +51,7 @@ export default function TeamSelector({
           >
             {/* Team Avatar - Circular */}
             <div className="flex-shrink-0">
-              <div className="w-10 h-10 md:w-15 md:h-15 rounded-full flex items-center justify-center overflow-hidden shadow-md">
+              <div className="w-10 h-10 md:w-15 md:h-15 rounded-full flex items-center justify-center  border-3 border-amber-500 overflow-hidden shadow-md">
                 {team.avatar ? (
                   <Image
                     src={`/avatars/${team.avatar}.png`}
@@ -89,7 +89,7 @@ export default function TeamSelector({
         >
           {/* No Answer Icon - Circular with sad face */}
           <div className="flex-shrink-0 mr-4">
-            <div className="md:w-15 md:h-15 rounded-full bg-white/90  flex items-center justify-center border-3 border-white shadow-md">
+            <div className="md:w-15 md:h-15 rounded-full bg-white/90  flex items-center justify-center border-3 border-amber-500 shadow-md">
               <span className="text-2xl ">😞</span>
             </div>
           </div>

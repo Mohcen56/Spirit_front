@@ -322,44 +322,48 @@ return (
     </main>
 
     {/* Footer / Scoreboard - Fixed height (uses Redux liveTeams) */}
-    <footer className="bg-gradient-to-r from-brown-600 to-brown-800 py-2 md:py-4 flex items-center justify-center gap-3 md:gap-4 border-t-4 border-brown-900 h-20 md:h-23 flex-shrink-0">
+    <footer className="bg-gradient-to-r from-brown-600 to-brown-800 py-2 md:py-4 flex items-center justify-center gap-3 md:gap-4 border-t-4 border-2 border-amber-500 h-20 md:h-23 flex-shrink-0">
       {liveTeams && liveTeams.length > 0 ? (
         liveTeams.map((team) => (
-          <div key={team.id} className="grid-cols-4 md:flex items-center bg-orange-200/95 rounded-2xl px-3 md:px-4 py-1.5 md:py-1 shadow-md border border-brown-900" dir="ltr">
-            {/* Team Avatar */}
-            <div className="w-8 h-8 md:w-15 md:h-15 rounded-full bg-white  items-center justify-center overflow-hidden  mr-2 md:mr-3 border-2 border-brown-400 hidden md:flex">
-              <Image 
-                src={`/avatars/${team.avatar}.png`} 
-                alt={team.name} 
-                width={40} 
-                height={40} 
-                className="w-full h-full object-cover" 
-                unoptimized
-              />
-            </div>
-            
-            {/* Team Name */}
-            <span className="text-orange-900 font-bold text-xs md:text-sm mr-2 md:mr-3 min-w-[50px] md:min-w-[60px]">
-              {team.name}
-            </span>
-            
-            {/* Score Controls Row */}
-            <div className="flex items-center gap-2 md:gap-3">
-              <button 
-                onClick={() => updateTeamScore(team.id, -100)}
-                className="bg-amber-700 hover:bg-amber-800 text-white rounded-md w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-sm md:text-lg font-bold transition-all duration-200 shadow-sm"
-              >
-                -
-              </button>
-              <span className="text-orange-900 font-extrabold text-base md:text-xl min-w-[35px] md:min-w-[50px] text-center">
-                {team.score ?? 0}
+          <div key={team.id} className="bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 p-[2px] rounded-2xl" dir="ltr">
+            <div className="w-full h-full bg-orange-200/95 rounded-2xl px-3 md:px-4 py-1.5 md:py-1 flex items-center shadow-md">
+              {/* Team Avatar */}
+              <div className="w-8 h-8 md:w-15 md:h-15 rounded-full items-center justify-center overflow-hidden mr-2 md:mr-3 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 p-[2px] hidden md:flex">
+                <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
+                  <Image 
+                    src={`/avatars/${team.avatar}.png`} 
+                    alt={team.name} 
+                    width={40} 
+                    height={40} 
+                    className="w-full h-full object-cover" 
+                    unoptimized
+                  />
+                </div>
+              </div>
+              
+              {/* Team Name */}
+              <span className="text-orange-900 font-bold text-xs md:text-sm mr-2 md:mr-3 min-w-[50px] md:min-w-[60px]">
+                {team.name}
               </span>
-              <button 
-                onClick={() => updateTeamScore(team.id, 100)}
-                className="bg-amber-700 hover:bg-amber-800 text-white rounded-md w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-sm md:text-lg font-bold transition-all duration-200 shadow-sm"
-              >
-                +
-              </button>
+              
+              {/* Score Controls Row */}
+              <div className="flex items-center gap-2 md:gap-3">
+                <button 
+                  onClick={() => updateTeamScore(team.id, -100)}
+                  className="bg-amber-700 hover:bg-amber-800 text-white rounded-md w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-sm md:text-lg font-bold transition-all duration-200 shadow-sm"
+                >
+                  -
+                </button>
+                <span className="text-orange-900 font-extrabold text-base md:text-xl min-w-[35px] md:min-w-[50px] text-center">
+                  {team.score ?? 0}
+                </span>
+                <button 
+                  onClick={() => updateTeamScore(team.id, 100)}
+                  className="bg-amber-700 hover:bg-amber-800 text-white rounded-md w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-sm md:text-lg font-bold transition-all duration-200 shadow-sm"
+                >
+                  +
+                </button>
+              </div>
             </div>
           </div>
         ))

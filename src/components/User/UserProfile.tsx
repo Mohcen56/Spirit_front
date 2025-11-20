@@ -288,7 +288,7 @@ export default function UserProfile({ user, onBack, onSave }: UserProfileProps) 
           <ProcessingButton
             onProcess={handleSave}
             disabled={!isPasswordValid}
-            className={`w-full py-3 px-6 ${
+            className={`w-full py-6  px-6 ${
               !isPasswordValid && 'opacity-50 cursor-not-allowed'
             }`}
             icon="save"
@@ -296,6 +296,7 @@ export default function UserProfile({ user, onBack, onSave }: UserProfileProps) 
             successText="Saved!"
             errorText="Failed to save"
           >
+          
             Save Changes
           </ProcessingButton>
         </div>

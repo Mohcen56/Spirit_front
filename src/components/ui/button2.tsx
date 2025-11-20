@@ -87,6 +87,23 @@ const Download = ({ className }: IconProps) => (
     <line x1="12" x2="12" y1="15" y2="3" />
   </svg>
 );
+// Proper play icon (triangle) instead of duplicated download glyph
+const Play = ({ className }: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <polygon points="6 4 20 12 6 20 6 4" />
+  </svg>
+);
 
 const Save = ({ className }: IconProps) => (
   <svg
@@ -107,6 +124,27 @@ const Save = ({ className }: IconProps) => (
   </svg>
 );
 
+// Users / Teams icon
+const UsersIcon = ({ className }: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+  </svg>
+);
+
 // --- UI Components ---
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -118,7 +156,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         className={cn(
-          "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border",
+          "inline-flex items-center justify-center rounded-md text-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border",
           "h-10 px-2 py-2",
           className
         )}
@@ -140,7 +178,9 @@ interface ProcessingButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement> {
   onProcess: () => Promise<boolean>;
   children: ReactNode;
-  icon?: "save" | "download";
+  // Icon displayed during idle & processing states
+  // Supported: save, download, play, check
+  icon?: "save" | "download" | "play" | "check" | "users";
   processingText?: string;
   successText?: string;
   errorText?: string;
@@ -182,7 +222,15 @@ const ProcessingButton: React.FC<ProcessingButtonProps> = ({
   }
 
   const isProcessing = state === "processing";
-  const IconComponent = icon === "save" ? Save : Download;
+  // Icon registry for idle/processing states
+  const iconMap: Record<string, React.FC<IconProps>> = {
+    save: Save,
+    download: Download,
+    play: Play,
+    check: Check,
+    users: UsersIcon,
+  };
+  const IconComponent = iconMap[icon] || Save;
 
   return (
     <Button
@@ -212,25 +260,25 @@ const ProcessingButton: React.FC<ProcessingButtonProps> = ({
       >
         {state === "idle" && (
           <>
-            <IconComponent className="w-4 h-4 transition-transform duration-200 group-hover:scale-110" />
+            <IconComponent className="w-6 h-6 transition-transform duration-200 group-hover:scale-110" />
             <span>{children}</span>
           </>
         )}
         {state === "processing" && (
           <>
-            <IconComponent className="w-4 h-4 animate-bounce" />
+            <IconComponent className="w-6 h-6 animate-bounce" />
             <span>{processingText}</span>
           </>
         )}
         {state === "success" && (
           <>
-            <Check className="w-4 h-4" />
+            <Check className="w-6 h-6" />
             <span className="font-semibold">{successText}</span>
           </>
         )}
         {state === "error" && (
           <>
-            <X className="w-4 h-4" />
+            <X className="w-6 h-6" />
             <span className="font-semibold">{errorText}</span>
           </>
         )}
@@ -284,11 +332,19 @@ export default function CopyButtonView2() {
 
       <div className="flex gap-4">
         <ProcessingButton onProcess={handleSave} icon="save">
-          Save 
+          Save
         </ProcessingButton>
-        
+
         <ProcessingButton onProcess={handleSave} icon="download">
           Download File
+        </ProcessingButton>
+
+        <ProcessingButton onProcess={handleSave} icon="play">
+          Play Action
+        </ProcessingButton>
+
+        <ProcessingButton onProcess={handleSave} icon="check">
+          Verify
         </ProcessingButton>
       </div>
     </div>

@@ -75,21 +75,23 @@ export default function TeamsSidebar({
             <div key={team.id} className="mt-1 lg:max-w-none lg:mb-0">
               <div className="bg-brown-800  border-brown-900 text-white rounded-xl p-2 lg:p-4 flex flex-col lg:flex-row items-center lg:space-x-4 space-y-1 lg:space-y-0">
                 {/* Team Avatar */}
-                <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-17 lg:h-17 rounded-full bg-white/20 flex items-center justify-center overflow-hidden flex-shrink-0">
-                  {team.avatar ? (
-                    <Image
-                      src={`/avatars/${team.avatar}.png`}
-                      alt={team.name}
-                      width={48}
-                      height={48}
-                      className="w-full h-full object-cover"
-                      unoptimized
-                    />
-                  ) : (
-                    <span className="text-white text-base sm:text-lg font-bold">
-                      {index + 1}
-                    </span>
-                  )}
+                <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-17 lg:h-17 rounded-full border-2 border-amber-500 flex items-center justify-center overflow-hidden flex-shrink-0 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 p-0.5">
+                  <div className="w-full h-full rounded-full bg-brown-800 flex items-center justify-center overflow-hidden">
+                    {team.avatar ? (
+                      <Image
+                        src={`/avatars/${team.avatar}.png`}
+                        alt={team.name}
+                        width={48}
+                        height={48}
+                        className="w-full h-full object-cover"
+                        unoptimized
+                      />
+                    ) : (
+                      <span className="text-white text-base sm:text-lg font-bold">
+                        {index + 1}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Team Info */}

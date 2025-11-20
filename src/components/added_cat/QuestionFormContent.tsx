@@ -3,8 +3,9 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { gameAPI } from "@/lib/api";
 import { logger } from '@/lib/utils/logger';
-import { Mic, Video, Image as ImageIcon, Lock, X } from "lucide-react";
+import { Mic, Video, Image as ImageIcon, Lock, X, Check } from "lucide-react";
 import ImageCropModal from "@/components/added_cat/ImageCropModal";
+import { useNotification } from '@/hooks/useNotification';
 
 interface QuestionFormContentProps {
   categoryId: string | number;
@@ -22,6 +23,7 @@ export default function QuestionFormContent({ categoryId, questionId, mode }: Qu
   const [loading, setLoading] = useState(false);
   const [loadingQuestion, setLoadingQuestion] = useState(false);
   const [error, setError] = useState("");
+  const notify = useNotification();
 
   // Question image states
   const [questionImage, setQuestionImage] = useState<string | null>(null);
@@ -187,12 +189,23 @@ export default function QuestionFormContent({ categoryId, questionId, mode }: Qu
         await gameAPI.addQuestionsToCategory(Number(categoryId), formData);
       }
 
-      // Go back to category edit page
-      router.push(`/categories/edit/${categoryId}`);
+      // Show success toast then navigate
+      notify.success(
+        isEditMode ? 'Question Updated' : 'Question Added',
+        isEditMode ? 'The question has been updated successfully.' : 'The question has been added successfully.',
+        3000
+      );
+      setTimeout(() => {
+        router.push(`/categories/edit/${categoryId}`);
+      }, 250);
     } catch (err) {
       logger.exception(err, { where: 'QuestionFormContent.saveQuestion', isEditMode });
       const errorObj = err as { detail?: string; message?: string; error?: string; errors?: unknown };
       setError(errorObj?.error || errorObj?.detail || errorObj?.message || `There was an error ${isEditMode ? 'updating' : 'adding'} the question`);
+      notify.error(
+        isEditMode ? 'Update Failed' : 'Create Failed',
+        `Unable to ${isEditMode ? 'update' : 'create'} the question. Please try again.`
+      );
     } finally {
       setLoading(false);
     }
@@ -228,10 +241,10 @@ export default function QuestionFormContent({ categoryId, questionId, mode }: Qu
         />
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-8">
         {/* Question Section */}
-        <div className="space-y-3">
-          <label className="block text-black text-lg font-semibold">
+        <div className="space-y-4">
+          <label className="block text-gray-900 text-xl font-bold">
             the question:
           </label>
 
@@ -239,20 +252,20 @@ export default function QuestionFormContent({ categoryId, questionId, mode }: Qu
           <textarea
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-primary-400 text-black placeholder-primary-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="w-full px-6 py-4 rounded-2xl border-2 border-blue-300 text-gray-900 placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-base"
             placeholder="write the question ..."
-            rows={1}
+            rows={2}
             required
           />
 
           {/* Multiple Choice Toggle (Future Feature) */}
           <button
             type="button"
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-black border border-primary-400"
+            className="flex items-center gap-3 px-5 py-3 rounded-2xl text-gray-900 border-2 border-blue-300 bg-white hover:bg-blue-50 transition-colors"
             title="multiple choices (soon)"
           >
-            <div className="w-5 h-5 rounded-full bg-primary-200"></div>
-            <span>multiple choices (soon) </span>
+            <div className="w-6 h-6 rounded-full bg-blue-200 border-2 border-blue-400"></div>
+            <span className="font-medium">multiple choices (soon)</span>
           </button>
 
           {/* Question Image Preview */}
@@ -277,46 +290,46 @@ export default function QuestionFormContent({ categoryId, questionId, mode }: Qu
           )}
 
           {/* Question Media Buttons */}
-          <div className="flex gap-3 justify-center">
+          <div className="flex gap-4 justify-center">
             {/* Audio Button */}
             <button
               type="button"
-              className="relative flex flex-col items-center justify-center w-24 h-24 rounded-xl bg-primary-50 border-2 border-yellow-500 hover:bg-primary-200 transition-colors"
+              className="relative flex flex-col items-center justify-center w-32 h-32 rounded-3xl bg-white border-4 border-amber-400 hover:bg-amber-50 transition-colors shadow-md"
               title="add an audio"
             >
-              <Mic className="h-8 w-8 text-black mb-1" />
-              <span className="text-xs text-black">audio</span>
-              <div className="absolute -bottom-2.5 px-2 py-0.5 bg-yellow-500 text-black text-[10px] font-bold rounded">
+              <Mic className="h-10 w-10 text-gray-900 mb-2" />
+              <span className="text-sm text-gray-900 font-medium">audio</span>
+              <div className="absolute -bottom-3 px-3 py-1 bg-amber-400 text-gray-900 text-xs font-bold rounded-full">
                 premium
               </div>
-              <Lock className="absolute top-1 right-1 h-4 w-4 text-yellow-500" />
+              <Lock className="absolute top-2 right-2 h-5 w-5 text-amber-500" />
             </button>
 
             {/* Video Button */}
             <button
               type="button"
-              className="relative flex flex-col items-center justify-center w-24 h-24 rounded-xl bg-primary-50 border-2 border-yellow-500 hover:bg-primary-200 transition-colors"
+              className="relative flex flex-col items-center justify-center w-32 h-32 rounded-3xl bg-white border-4 border-amber-400 hover:bg-amber-50 transition-colors shadow-md"
               title="add a video"
             >
-              <Video className="h-8 w-8 text-black mb-1" />
-              <span className="text-xs text-black">video</span>
-              <div className="absolute -bottom-2.5 px-2 py-0.5 bg-yellow-500 text-black text-[10px] font-bold rounded">
+              <Video className="h-10 w-10 text-gray-900 mb-2" />
+              <span className="text-sm text-gray-900 font-medium">video</span>
+              <div className="absolute -bottom-3 px-3 py-1 bg-amber-400 text-gray-900 text-xs font-bold rounded-full">
                 premium
               </div>
-              <Lock className="absolute top-1 right-1 h-4 w-4 text-yellow-500" />
+              <Lock className="absolute top-2 right-2 h-5 w-5 text-amber-500" />
             </button>
 
             {/* Image Button */}
             <button
               type="button"
               onClick={() => questionImageInputRef.current?.click()}
-              className="flex flex-col items-center justify-center w-24 h-24 rounded-xl bg-primary-50 border-2 hover:bg-primary-200 transition-colors"
+              className="relative flex flex-col items-center justify-center w-32 h-32 rounded-3xl bg-gray-200 border-4 border-gray-300 hover:bg-gray-300 transition-colors shadow-md"
               title="add an image"
             >
-              <ImageIcon className="h-8 w-8 text-black mb-1" />
-              <span className="text-xs text-black">image</span>
+              <ImageIcon className="h-10 w-10 text-gray-900 mb-2" />
+              <span className="text-sm text-gray-900 font-medium">image</span>
               {questionImage && (
-                <div className="absolute top-1 right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-slate-700"></div>
+                <Check className="absolute top-2 right-2 h-5 w-5 text-green-500" />
               )}
             </button>
 
@@ -333,8 +346,8 @@ export default function QuestionFormContent({ categoryId, questionId, mode }: Qu
         </div>
 
         {/* Answer Section */}
-        <div className="space-y-3">
-          <label className="block text-black text-lg font-semibold">
+        <div className="space-y-4">
+          <label className="block text-gray-900 text-xl font-bold">
             the answer
           </label>
 
@@ -342,9 +355,9 @@ export default function QuestionFormContent({ categoryId, questionId, mode }: Qu
           <textarea
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-primary-400 text-black placeholder-primary-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="w-full px-6 py-4 rounded-2xl border-2 border-blue-300 text-gray-900 placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-base"
             placeholder="write the answere here ..."
-            rows={1}
+            rows={2}
             required
           />
 
@@ -370,46 +383,46 @@ export default function QuestionFormContent({ categoryId, questionId, mode }: Qu
           )}
 
           {/* Answer Media Buttons */}
-          <div className="flex gap-3 justify-center">
+          <div className="flex gap-4 justify-center">
             {/* Audio Button */}
             <button
               type="button"
-              className="relative flex flex-col items-center justify-center w-24 h-24 rounded-xl bg-primary-50 border-2 border-yellow-500 hover:bg-primary-200 transition-colors"
+              className="relative flex flex-col items-center justify-center w-32 h-32 rounded-3xl bg-white border-4 border-amber-400 hover:bg-amber-50 transition-colors shadow-md"
               title="add an audio"
             >
-              <Mic className="h-8 w-8 text-black mb-1" />
-              <span className="text-xs text-black">audio</span>
-              <div className="absolute -bottom-2.5 px-2 py-0.5 bg-yellow-500 text-black text-[10px] font-bold rounded">
+              <Mic className="h-10 w-10 text-gray-900 mb-2" />
+              <span className="text-sm text-gray-900 font-medium">audio</span>
+              <div className="absolute -bottom-3 px-3 py-1 bg-amber-400 text-gray-900 text-xs font-bold rounded-full">
                 premium
               </div>
-              <Lock className="absolute top-1 right-1 h-4 w-4 text-yellow-500" />
+              <Lock className="absolute top-2 right-2 h-5 w-5 text-amber-500" />
             </button>
 
             {/* Video Button */}
             <button
               type="button"
-              className="relative flex flex-col items-center justify-center w-24 h-24 rounded-xl bg-primary-50 border-2 border-yellow-500 hover:bg-primary-200 transition-colors"
+              className="relative flex flex-col items-center justify-center w-32 h-32 rounded-3xl bg-white border-4 border-amber-400 hover:bg-amber-50 transition-colors shadow-md"
               title="add a video"
             >
-              <Video className="h-8 w-8 text-black mb-1" />
-              <span className="text-xs text-black">video</span>
-              <div className="absolute -bottom-2.5 px-2 py-0.5 bg-yellow-500 text-black text-[10px] font-bold rounded">
+              <Video className="h-10 w-10 text-gray-900 mb-2" />
+              <span className="text-sm text-gray-900 font-medium">video</span>
+              <div className="absolute -bottom-3 px-3 py-1 bg-amber-400 text-gray-900 text-xs font-bold rounded-full">
                 premium
               </div>
-              <Lock className="absolute top-1 right-1 h-4 w-4 text-yellow-500" />
+              <Lock className="absolute top-2 right-2 h-5 w-5 text-amber-500" />
             </button>
 
             {/* Image Button */}
             <button
               type="button"
               onClick={() => answerImageInputRef.current?.click()}
-              className="flex flex-col items-center justify-center w-24 h-24 rounded-xl bg-primary-50 border-2 hover:bg-primary-200 transition-colors"
+              className="relative flex flex-col items-center justify-center w-32 h-32 rounded-3xl bg-gray-200 border-4 border-gray-300 hover:bg-gray-300 transition-colors shadow-md"
               title="add an image "
             >
-              <ImageIcon className="h-8 w-8 text-black mb-1" />
-              <span className="text-xs text-black">Image</span>
+              <ImageIcon className="h-10 w-10 text-gray-900 mb-2" />
+              <span className="text-sm text-gray-900 font-medium">Image</span>
               {answerImage && (
-                <div className="absolute top-1 right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-slate-700"></div>
+                <Check className="absolute top-2 right-2 h-5 w-5 text-green-500" />
               )}
             </button>
 
@@ -426,20 +439,20 @@ export default function QuestionFormContent({ categoryId, questionId, mode }: Qu
         </div>
 
         {/* Points Section */}
-        <div className="space-y-3">
-          <label className="block text-black text-lg font-semibold">
+        <div className="space-y-4">
+          <label className="block text-gray-900 text-xl font-bold">
             points:
           </label>
-          <div className="flex gap-2 justify-center flex-wrap">
+          <div className="flex gap-4 justify-center flex-wrap">
             {[200, 400, 600].map((p) => (
               <button
                 key={p}
                 type="button"
                 onClick={() => setPoints(p)}
-                className={`min-w-[70px] px-4 py-3 rounded-xl font-bold text-lg transition-all ${
+                className={`px-12 py-4 rounded-2xl font-bold text-2xl transition-all shadow-md ${
                   points === p
-                    ? "bg-yellow-500 text-primary-400 border-2 border-yellow-400 shadow-lg scale-105"
-                    : "bg-primary-100 text-black border-2 border-primary-200 hover:bg-primary-600"
+                    ? 'bg-amber-400 text-gray-900 scale-105 border-2 border-amber-500'
+                    : 'bg-blue-300 text-gray-900 hover:bg-blue-400 border-2 border-blue-400'
                 }`}
               >
                 {p}
@@ -455,11 +468,11 @@ export default function QuestionFormContent({ categoryId, questionId, mode }: Qu
         )}
 
         {/* Submit Button */}
-        <div className="flex gap-4">
+        <div className="flex gap-6 pt-4">
           <button
             type="submit"
             disabled={loading || loadingQuestion || !question.trim() || !answer.trim()}
-            className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:from-slate-600 disabled:to-slate-700 disabled:cursor-not-allowed py-4 rounded-xl font-bold text-lg text-black shadow-lg transition-all transform hover:scale-[1.02] disabled:scale-100"
+            className="w-full bg-slate-700 hover:bg-slate-800 disabled:bg-slate-400 disabled:cursor-not-allowed py-5 rounded-2xl font-bold text-xl text-white shadow-lg transition-all transform hover:scale-[1.02] disabled:scale-100"
           >
             {loading ? (isEditMode ? "Updating..." : "Saving...") : (isEditMode ? "Update ✓" : "Save ✓")}
           </button>
@@ -468,7 +481,7 @@ export default function QuestionFormContent({ categoryId, questionId, mode }: Qu
           <button
             type="button"
             onClick={() => router.push(`/categories/edit/${categoryId}`)}
-            className="w-full bg-red-400 hover:bg-red-600 py-4 rounded-xl font-semibold text-black transition-all"
+            className="w-full bg-red-400 hover:bg-red-500 py-5 rounded-2xl font-bold text-xl text-white shadow-lg transition-all transform hover:scale-[1.02]"
           >
             Cancel
           </button>

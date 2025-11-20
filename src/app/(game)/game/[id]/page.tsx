@@ -7,6 +7,7 @@ import { logger } from '@/lib/utils/logger';
 import { Game, Category, Team } from '@/types/game';
 import Header from '@/components/Header';
 import Image from 'next/image';
+import { ProcessingButton } from '@/components/ui/button2';
 
 export default function GamePage() {
   const { id } = useParams();
@@ -37,10 +38,16 @@ export default function GamePage() {
     loadGame();
   }, [id]);
 
-  const handleStartGame = () => {
+  const handleStartGame = async () => {
     if (game) {
       router.push(`/game/${game.id}/question`);
+      return true;
     }
+    return false;
+  };
+
+  const isValidToStart = () => {
+    return game && game.teams && game.teams.length > 0;
   };
 
   if (isLoading) {
@@ -91,7 +98,7 @@ export default function GamePage() {
     <div className="min-h-screen bg-eastern-blue-50">
      {/* Header */}
           <Header
-           title="Starting the Game"
+           title="Game Information"
            backHref="/categories"
            
          />
@@ -100,21 +107,21 @@ export default function GamePage() {
      
 
         {/* Game Info */}
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-eastern-blue-100 backdrop-blur-md rounded-2xl p-8 shadow-lg border border-primary-200 mb-8">
-            <h2 className="text-2xl font-bold text-primary-800 mb-6 text-center">Game Information</h2>
+        <div className="max-w-4xl mx-auto  mt-8">
+          <div className="bg-eastern-blue-100 backdrop-blur-md  rounded-2xl p-8 shadow-lg border border-primary-200 mb-8">
+ 
             
                 {/* Categories */}
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold text-primary-800 mb-3">Categories:</h3>
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex gap-2 flex-wrap justify-start w-full">
                     {game.categories.map((category: Category) => (
                       <div
                         key={category.id}
-                        className="flex items-center gap-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-2 border border-primary-200 shadow-sm"
+                        className="flex  justify-start items-center gap-2 bg-white/90 backdrop-blur-sm rounded-full px-2 pr-6 py-2 border border-primary-200 shadow-sm"
                       >
                         {category.image_url || category.image ? (
-                          <div className="w-10 h-10 relative rounded-full overflow-hidden flex-shrink-0">
+                          <div className="w-15 h-15 relative rounded-full overflow-hidden border-3 border-cyan-500 flex-shrink-0">
                             <Image
                               src={(category.image_url || category.image) as string}
                               alt={category.name}
@@ -124,7 +131,7 @@ export default function GamePage() {
                             />
                           </div>
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 flex items-center justify-start text-white font-bold text-sm">
                             {category.name.charAt(0)}
                           </div>
                         )}
@@ -149,7 +156,7 @@ export default function GamePage() {
                         className="bg-white/90 backdrop-blur-sm rounded-2xl p-3 flex items-center justify-between border border-primary-200 shadow-md"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-full overflow-hidden bg-white/20 flex-shrink-0">
+                          <div className="w-12 h-12 rounded-full overflow-hidden bg-white/20 border-3 border-amber-500 flex-shrink-0">
                             <Image
                               src={avatarSrc}
                               alt={team.name}
@@ -173,24 +180,28 @@ export default function GamePage() {
             )}
 
             {/* Game Mode */}
-            <div className="text-center mb-6">
-              <p className="text-primary-600">
-                Game Mode: <span className="text-amber-600 font-semibold">{game.mode}</span>
-              </p>
-            </div>
+           
 
             {/* Start Game Button */}
             <div className="text-center">
-              <button
-                onClick={handleStartGame}
-                className="bg-gradient-to-r from-green-500 to-primary-600 hover:from-green-600 hover:to-primary-700 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
-              >
-                🎮 Start Game
-              </button>
+              <div className="inline-block group/button relative overflow-hidden rounded-xl">
+                <ProcessingButton
+                  onProcess={handleStartGame}
+                  disabled={!isValidToStart()}
+                  icon="play"
+                  processingText="Starting..."
+                  successText="Starting!"
+                  errorText="Failed to start"
+                   className="relative bg-cyan-600 hover:bg-cyan-700 hover:shadow-lg hover:shadow-red-500/30 disabled:bg-gray-600 text-white font-bold py-8 px-10 transition-all duration-300 ease-in-out hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
+                >
+                  <span className="relative z-10">Start Game</span>
+                </ProcessingButton>
+                <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-13deg)_translateX(-100%)] group-hover/button:duration-1000 group-hover/button:[transform:skew(-13deg)_translateX(100%)] pointer-events-none">
+                  <div className="relative h-full w-16 bg-white/30" />
+                </div>
+              </div>
             </div>
           </div>
-
-        
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Notification, { NotificationPosition, NotificationType } from './toast';
+import { ProcessingButton } from '../ui/button2';
 import { AnimatePresence } from 'framer-motion';
 
 // Define the notification item interface
@@ -114,66 +115,122 @@ export default function ToastView() {
       {/* Controls to add new notifications */}
       <div className="mt-20 p-6 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md rounded-xl shadow-lg border border-gray-200/50 dark:border-gray-700/50">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 text-center">Test Notifications</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-            <button
-                onClick={() => addLoadingWithSuccess(
-                    'Processing Payment',
-                    'Please wait while we process your payment...',
-                    'Payment Successful',
-                    'Your payment has been processed successfully!'
-                )}
-                className="px-3 py-2 bg-gradient-to-r from-blue-500 to-purple-500 dark:from-blue-600 dark:to-purple-600 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 dark:hover:from-blue-700 dark:hover:to-purple-700 transition-all duration-200 hover:scale-105 shadow-md"
-            >
-                Payment Processing
-            </button>
-            <button
-                onClick={() => addNotification('error', 'Payment Declined', 'Your payment was declined. Please check your card details.', true, 5000)}
-                className="px-3 py-2 bg-rose-600 dark:bg-rose-700 text-white rounded-lg text-sm font-medium hover:bg-rose-700 dark:hover:bg-rose-800 transition-all duration-200 hover:scale-105 shadow-md"
-            >
-                Payment Declined
-            </button>
-            <button
-                onClick={() => addNotification('error', 'Error!', 'An error occurred. Please try again.', true, 5000)}
-                className="px-3 py-2 bg-red-500 dark:bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-600 dark:hover:bg-red-700 transition-all duration-200 hover:scale-105 shadow-md"
-            >
-                Error
-            </button>
-            <button
-                onClick={() => addNotification('success', 'Payment Success', 'Your payment has been processed successfully.', true, 4000)}
-                className="px-3 py-2 bg-emerald-500 dark:bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-600 dark:hover:bg-emerald-700 transition-all duration-200 hover:scale-105 shadow-md"
-            >
-                Payment Success
-            </button>
-            <button
-                onClick={() => addNotification('success', 'Profile Updated', 'Your profile has been updated successfully.', true, 3000)}
-                className="px-3 py-2 bg-teal-500 dark:bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-600 dark:hover:bg-teal-700 transition-all duration-200 hover:scale-105 shadow-md"
-            >
-                Profile Updated
-            </button>
-            <button
-                onClick={() => addNotification('error', 'Login Failed', 'Invalid username or password. Please try again.', true, 5000)}
-                className="px-3 py-2 bg-red-700 dark:bg-red-800 text-white rounded-lg text-sm font-medium hover:bg-red-800 dark:hover:bg-red-900 transition-all duration-200 hover:scale-105 shadow-md"
-            >
-                Login Failed
-            </button>
-            <button
-                onClick={() => addLoadingWithSuccess(
-                    'Sending Email',
-                    'Preparing and sending your email...',
-                    'Email Sent',
-                    'Your email has been delivered successfully!'
-                )}
-                className="px-3 py-2 bg-gradient-to-r from-orange-500 to-red-500 dark:from-orange-600 dark:to-red-600 text-white rounded-lg text-sm font-medium hover:from-orange-600 hover:to-red-600 dark:hover:from-orange-700 dark:hover:to-red-700 transition-all duration-200 hover:scale-105 shadow-md"
-            >
-                Send Email
-            </button>
-            <button
-                onClick={() => addNotification('success', 'Account Verified', 'Your email has been verified successfully.', true, 4000)}
-                className="px-3 py-2 bg-green-600 dark:bg-green-700 text-white rounded-lg text-sm font-medium hover:bg-green-700 dark:hover:bg-green-800 transition-all duration-200 hover:scale-105 shadow-md"
-            >
-                Account Verified
-            </button>
-        </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                    <ProcessingButton
+                        icon="play"
+                        onProcess={async () => {
+                            addLoadingWithSuccess(
+                                'Processing Payment',
+                                'Please wait while we process your payment...',
+                                'Payment Successful',
+                                'Your payment has been processed successfully!'
+                            );
+                            return true; // Always succeed (visual demo)
+                        }}
+                        processingText="Processing..."
+                        successText="Done"
+                        errorText="Failed"
+                        className="px-3 py-2 text-xs"
+                    >
+                        Payment Processing
+                    </ProcessingButton>
+                    <ProcessingButton
+                        icon="download"
+                        onProcess={async () => {
+                            addNotification('error', 'Payment Declined', 'Your payment was declined. Please check your card details.', true, 5000);
+                            return false; // Show error state
+                        }}
+                        processingText="Sending..."
+                        successText="Sent"
+                        errorText="Declined"
+                        className="px-3 py-2 text-xs"
+                    >
+                        Payment Declined
+                    </ProcessingButton>
+                    <ProcessingButton
+                        icon="check"
+                        onProcess={async () => {
+                            addNotification('error', 'Error!', 'An error occurred. Please try again.', true, 5000);
+                            return false;
+                        }}
+                        processingText="Working..."
+                        successText="OK"
+                        errorText="Error"
+                        className="px-3 py-2 text-xs"
+                    >
+                        Error
+                    </ProcessingButton>
+                    <ProcessingButton
+                        icon="save"
+                        onProcess={async () => {
+                            addNotification('success', 'Payment Success', 'Your payment has been processed successfully.', true, 4000);
+                            return true;
+                        }}
+                        processingText="Posting..."
+                        successText="Success"
+                        errorText="Failed"
+                        className="px-3 py-2 text-xs"
+                    >
+                        Payment Success
+                    </ProcessingButton>
+                    <ProcessingButton
+                        icon="save"
+                        onProcess={async () => {
+                            addNotification('success', 'Profile Updated', 'Your profile has been updated successfully.', true, 3000);
+                            return true;
+                        }}
+                        processingText="Updating..."
+                        successText="Updated"
+                        errorText="Failed"
+                        className="px-3 py-2 text-xs"
+                    >
+                        Profile Updated
+                    </ProcessingButton>
+                    <ProcessingButton
+                        icon="download"
+                        onProcess={async () => {
+                            addNotification('error', 'Login Failed', 'Invalid username or password. Please try again.', true, 5000);
+                            return false;
+                        }}
+                        processingText="Authenticating..."
+                        successText="Logged"
+                        errorText="Failed"
+                        className="px-3 py-2 text-xs"
+                    >
+                        Login Failed
+                    </ProcessingButton>
+                    <ProcessingButton
+                        icon="play"
+                        onProcess={async () => {
+                            addLoadingWithSuccess(
+                                'Sending Email',
+                                'Preparing and sending your email...',
+                                'Email Sent',
+                                'Your email has been delivered successfully!'
+                            );
+                            return true;
+                        }}
+                        processingText="Sending..."
+                        successText="Sent"
+                        errorText="Failed"
+                        className="px-3 py-2 text-xs"
+                    >
+                        Send Email
+                    </ProcessingButton>
+                    <ProcessingButton
+                        icon="check"
+                        onProcess={async () => {
+                            addNotification('success', 'Account Verified', 'Your email has been verified successfully.', true, 4000);
+                            return true;
+                        }}
+                        processingText="Verifying..."
+                        successText="Verified"
+                        errorText="Failed"
+                        className="px-3 py-2 text-xs"
+                    >
+                        Account Verified
+                    </ProcessingButton>
+                </div>
       </div>
 
       {/* Position controls */}
