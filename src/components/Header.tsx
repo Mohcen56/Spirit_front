@@ -21,10 +21,10 @@ export default function Header({ title, backHref }: HeaderProps) {
       <div className="w-full px-4 lg:px-8 py-4">
         <div className="relative flex items-center justify-between">
           {/* Left: Back and Logo */}
-          <div className="flex items-center space-x-1 lg:space-x-4">
+          <div className="flex items-center  space-x-4">
             <Link
               href={backHref}
-              className="flex items-center space-x-1 lg:space-x-3 text-white hover:text-primary-100 transition-colors group"
+              className="flex items-center  space-x-3 text-white hover:text-primary-100 transition-colors group"
             >
               <ArrowLeft className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
               <span className="font-medium">Back</span>

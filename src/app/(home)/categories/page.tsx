@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { categoriesAPI } from '@/lib/api';
 import { Category, Collection } from '@/types/game';
 import { logger } from '@/lib/utils/logger';
-import { Crown, Lock, Eye, Pencil, Info, Search } from 'lucide-react';
+import { Crown, Lock, Eye, Pencil, Info, Search, ChevronDown } from 'lucide-react';
 import { ProcessingButton } from '@/components/ui/button2';
 import { useNotification } from '@/hooks/useNotification';
 import Image from 'next/image';
@@ -26,6 +26,8 @@ export default function CategoriesPage() {
   // Search & filter state
   const [search, setSearch] = useState('');
   const [selectedCollectionId, setSelectedCollectionId] = useState<number | 'all'>('all');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   
   // Fetch all category data using React Query
   const { data, isLoading, error: queryError } = useQuery({
@@ -78,6 +80,17 @@ export default function CategoriesPage() {
   useEffect(() => {
     setHeader({ title: "Categories", backHref: "/dashboard" });
   }, [setHeader]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Handle query errors
   useEffect(() => {
@@ -180,7 +193,7 @@ export default function CategoriesPage() {
 
           {/* Categories Selection */}
           <div className="space-y-6">
-            <div className="flex flex-col gap-3 justify-center mb-6 md:flex-row md:items-center md:gap-4">
+            <div className="flex flex-col gap-3 justify-center mb-8 md:flex-row md:items-center md:gap-4">
               {/* Search input */}
               <div className="relative flex-1 max-w-xl">
                 <Search className="w-4 h-4 text-primary-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -194,22 +207,53 @@ export default function CategoriesPage() {
                 />
               </div>
 
-              {/* Collection filter select */}
-              <div className="relative">
-                <select
-                  value={selectedCollectionId}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    setSelectedCollectionId(v === 'all' ? 'all' : Number(v));
-                  }}
-                  className="inline-flex items-center gap-2 bg-white/70 px-3 py-2 rounded-xl border border-primary-200 shadow-sm text-sm text-primary-800"
+              {/* Collection filter custom dropdown */}
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="inline-flex items-center gap-2 bg-white/70 px-6 py-2 rounded-xl border border-primary-200 shadow-sm text-sm text-primary-800 hover:bg-white transition-colors min-w-[250px] justify-between"
                   aria-label="Filter by collection"
                 >
-                  <option value="all">All collections</option>
-                  {collections.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name} ({(c.categories || []).length})</option>
-                  ))}
-                </select>
+                  <span>
+                    {selectedCollectionId === 'all'
+                      ? 'All collections'
+                      : collections.find((c) => c.id === selectedCollectionId)?.name || 'All collections'}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isDropdownOpen && (
+                  <div className="absolute top-full mt-2 w-full min-w-[250px] bg-white rounded-xl border border-primary-200 shadow-lg z-50 overflow-hidden">
+                    <button
+                      onClick={() => {
+                        setSelectedCollectionId('all');
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-4 py-3 text-sm transition-colors hover:bg-blue-50 ${
+                        selectedCollectionId === 'all' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-primary-800'
+                      }`}
+                    >
+                      All collections
+                    </button>
+                    {collections.map((c) => (
+                      <button
+                        key={c.id}
+                        onClick={() => {
+                          setSelectedCollectionId(c.id);
+                          setIsDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-3 text-sm transition-colors hover:bg-blue-50 flex items-center justify-between ${
+                          selectedCollectionId === c.id ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-primary-800'
+                        }`}
+                      >
+                        <span>{c.name}</span>
+                        <span className="text-xs bg-primary-100 text-primary-600 px-2 py-1 rounded-full">
+                          {(c.categories || []).length}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
              

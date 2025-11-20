@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { logger } from '@/lib/utils/logger';
-import { ChevronLeft, Camera, Eye, EyeOff, Check } from 'lucide-react';
+import { ChevronLeft, Camera, Eye, EyeOff, Check, Lock } from 'lucide-react';
 import Image from 'next/image';
 import { ProcessingButton } from '@/components/ui/button2';
 import { useNotification } from '@/hooks/useNotification';
@@ -46,6 +46,11 @@ export default function UserProfile({ user, onBack, onSave }: UserProfileProps) 
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user.is_premium) {
+      notify.error('Premium Feature', 'Avatar changing is available for premium members only');
+      return;
+    }
+    
     const file = e.target.files?.[0];
     if (file) {
       setAvatarFile(file);
@@ -137,8 +142,17 @@ export default function UserProfile({ user, onBack, onSave }: UserProfileProps) 
                 />
               )}
             </div>
-            <label htmlFor="avatar-upload" className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
-              <Camera className="w-8 h-8 text-white" />
+            <label htmlFor="avatar-upload" className={`absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity ${
+              user.is_premium ? 'cursor-pointer' : 'cursor-not-allowed'
+            }`}>
+              {user.is_premium ? (
+                <Camera className="w-8 h-8 text-white" />
+              ) : (
+                <div className="flex flex-col items-center gap-1">
+                  <Lock className="w-6 h-6 text-yellow-400" />
+                  <span className="text-xs text-yellow-400 font-semibold">Premium</span>
+                </div>
+              )}
             </label>
             <input
               id="avatar-upload"
@@ -147,6 +161,7 @@ export default function UserProfile({ user, onBack, onSave }: UserProfileProps) 
               onChange={handleAvatarChange}
               className="hidden"
               aria-label="Upload profile picture"
+              disabled={!user.is_premium}
             />
           </div>
           <div className="flex items-center gap-2 mt-4">
@@ -155,7 +170,14 @@ export default function UserProfile({ user, onBack, onSave }: UserProfileProps) 
               <VerifyBadge type="premium" size="md" showLabel={false} />
             )}
           </div>
-          <p className="text-sm text-gray-500 mt-2">Click to change profile picture</p>
+          <p className="text-sm text-gray-500 mt-2">
+            {user.is_premium ? 'Click to change profile picture' : (
+              <span className="flex items-center gap-1 justify-center">
+              
+                
+              </span>
+            )}
+          </p>
         </div>
 
         {/* Basic Info */}

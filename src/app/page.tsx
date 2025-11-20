@@ -62,13 +62,13 @@ export default function HomePage() {
       <div className="bg-gradient-to-b from-cyan-900 to-cyan-800">
         {/* Header */}
         <header className="relative z-10 backdrop-blur-md">
-          <div className="container relative mx-auto flex w-full items-center justify-center px-4 py-3">
+          <div className="container relative mx-auto flex w-full items-center justify-center px-1 py-3">
             
        
 
             
             <div
-              className="absolute left-1 top-12 flex -translate-y-1/2 items-center space-x-4"
+              className="absolute  left-2 lg:left-0 top-12 flex -translate-y-1/2 items-center space-x-4"
               ref={menuRef}
             >
               {/* Avatar Button (always clickable) */}
@@ -76,7 +76,7 @@ export default function HomePage() {
                 onClick={() => setMenuOpen(!menuOpen)}
                 title={user?.username ? `${user.username} menu` : "User menu"}
                 aria-label={user?.username ? `Open ${user.username} menu` : "Open user menu"}
-                className="relative mt-5 lg:mt-0 w-10 h-10 lg:w-20 lg:h-20 rounded-full overflow-hidden border-2 border-white hover:ring-2 hover:ring-offset-2 hover:ring-primary-400 transition-all"
+                className="relative mt-3 lg:mt-1 w-15 h-15 lg:w-20 lg:h-20 rounded-full overflow-hidden border-2 border-white hover:ring-2 hover:ring-offset-2 hover:ring-primary-400 transition-all"
               >
                 <Image
                   src={avatarSrc}
@@ -93,7 +93,7 @@ export default function HomePage() {
 
               {/* Dropdown Menu */}
               {menuOpen && (
-                <div className="absolute left-7 top-22 w-40 bg-white rounded-xl shadow-xl py-2 border border-gray-200 z-20 animate-fadeIn">
+                <div className="absolute  left-2 md:left-5 top-22 w-30 md:w-40 bg-white rounded-xl shadow-xl py-2 border border-gray-200 z-10 animate-fadeIn">
                   {/* Little arrow */}
                   <div className="absolute top-[-6px] left-4 w-3 h-3 bg-white border-t border-l border-gray-200 rotate-45"></div>
 
@@ -148,7 +148,7 @@ export default function HomePage() {
             className="relative left-[calc(50%-11rem)] aspect-1155/678 w-144.5 -translate-x-1/2 rotate-30 bg-linear-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%-30rem)] sm:w-288.75"
           />
         </div>
-        <div className="mx-auto max-w-2xl relative z-10 -mt-30 pt-4 pb-32 sm:pt-10 sm:pb-40 lg:pt-0 lg:pb-12">
+        <div className="mx-auto max-w-2xl relative z-10  -mt-10 md:-mt-30 pt-4 pb-32 sm:pt-10 sm:pb-40 lg:pt-0 lg:pb-12">
   <div className="text-center">
     {/* Logo */}
     <div className="flex justify-center mb-12 relative z-50">
