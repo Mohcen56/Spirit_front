@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useHeader } from "@/contexts/HeaderContext";
-import QuestionFormContent from "@/components/added_cat/QuestionFormContent";
+import QuestionFormContent from "@/components/category/QuestionFormContent";
 
 export default function AddQuestionPage() {
   const params = useParams();

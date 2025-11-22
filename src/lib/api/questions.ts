@@ -46,14 +46,7 @@ export const questionsAPI = {
     }
   },
 
-  /**
-   * Get a random question from selected categories
-   */
-  getRandomQuestion: async (categoryIds: number[]) => {
-    const query = categoryIds.map((id) => `category_ids=${id}`).join('&');
-    const response = await api.get(`/api/content/questions/random/?${query}&count=1`);
-    return response.data[0];
-  },
+
 
   /**
    * Delete a specific question

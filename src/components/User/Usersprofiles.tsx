@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { gameAPI } from '@/lib/api/index';
 import { VerifyBadge } from '@/components/ui/verify-badge';
 import { AnimatedBadge } from '@/components/ui/animatedbadge';
-import { useCreatorBadge } from '@/components/useCreatorBadge';
+import { useCreatorBadge } from '@/components/User/useCreatorBadge';
 
 interface User {
   id: number;

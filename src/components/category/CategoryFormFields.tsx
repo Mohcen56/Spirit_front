@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import { ImagePlus, Edit3, Trash } from 'lucide-react';
-import ImageCropModal from '../added_cat/ImageCropModal';
+import ImageCropModal from '../utils/ImageCropModal';
 import { ProcessingButton } from '@/components/ui/button2';
 import { useNotification } from '@/hooks/useNotification';
 import CategoryDisplay from './CategoryDisplay';

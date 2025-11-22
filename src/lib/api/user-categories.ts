@@ -7,19 +7,7 @@ import { normalizeApiResponse } from '@/lib/utils/utils';
  * User Categories API - User-created custom categories
  */
 export const userCategoriesAPI = {
-  /**
-   * Create a new user category with optional questions
-   */
-  createUserCategory: async (formData: FormData) => {
-    try {
-      const response = await api.post('/api/content/user-categories/', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
+
 
   /**
    * Like a user category

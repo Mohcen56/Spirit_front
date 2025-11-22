@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { logger } from '@/lib/utils/logger';
 import { useRouter, useParams } from 'next/navigation';
-import QuestionsList from '@/components/added_cat/QuestionsList';
+import QuestionsList from '@/components/category/QuestionsList';
 import CategoryFormFields from '@/components/category/CategoryFormFields';
 import CategoryPublicView from '@/components/category/CategoryPublicView';
 import { useHeader } from '@/contexts/HeaderContext';

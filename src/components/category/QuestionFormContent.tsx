@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { gameAPI } from "@/lib/api";
 import { logger } from '@/lib/utils/logger';
 import { Mic, Video, Image as ImageIcon, Lock, X, Check } from "lucide-react";
-import ImageCropModal from "@/components/added_cat/ImageCropModal";
+import ImageCropModal from "@/components/utils/ImageCropModal";
 import { useNotification } from '@/hooks/useNotification';
 
 interface QuestionFormContentProps {

@@ -1,4 +1,4 @@
-import { NotificationType } from '../components/ui/toast';
+import { NotificationType } from '../../components/ui/toast';
 
 // Define the notification item interface
 interface NotificationItem {

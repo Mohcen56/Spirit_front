@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import Notification, { NotificationType } from '@/components/ui/toast';
-import { notificationService } from '@/lib/notificationService';
+import { notificationService } from '@/lib/utils/notificationService';
 
 interface NotificationItem {
   id: number;

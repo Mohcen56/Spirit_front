@@ -34,7 +34,7 @@ export default function GameBoardPage() {
     questions,
     playedQuestions,
   } = useAppSelector(state => state.game);
-   // 👇 Replace your huge useEffect with:
+   
   const { game, isLoading, error } = useGameData(gameId);
    // 👇 Sync fetched teams with Redux
   useSyncTeams(game?.teams, liveTeams);

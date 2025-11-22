@@ -43,16 +43,5 @@ export const categoriesAPI = {
     }
   },
 
-  /**
-   * Get all collections with their associated categories
-   */
-  getCollectionsWithCategories: async (): Promise<Collection[]> => {
-    try {
-      const response = await api.get('/api/content/collections/with_categories/');
-      return response.data;
-    } catch (error) {
-        logger.exception(error, { where: 'categories.getCollectionsWithCategories' });
-      throw error;
-    }
-  },
+
 };

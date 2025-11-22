@@ -1,7 +1,7 @@
 import { api } from './base';
 import { logger } from '@/lib/utils/logger';
 import { Game } from '@/types/game';
-import { normalizeApiResponse } from '@/lib/utils/utils';
+
 
 /**
  * Games API - Game session management and gameplay
@@ -28,18 +28,6 @@ export const gamesAPI = {
     }
   },
 
-  /**
-   * Get all games for the current user
-   */
-  getGames: async (): Promise<Game[]> => {
-    try {
-      const response = await api.get('/api/gameplay/games/');
-      return normalizeApiResponse<Game>(response.data);
-    } catch (error) {
-      logger.exception(error, { where: 'games.getGames' });
-      throw error;
-    }
-  },
 
   /**
    * Get a specific game by ID

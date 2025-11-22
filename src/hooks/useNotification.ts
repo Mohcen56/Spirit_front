@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { notificationService } from '@/lib/notificationService';
+import { notificationService } from '@/lib/utils/notificationService';
 
 /**
  * Custom hook for showing notifications throughout the app

@@ -5,7 +5,7 @@ import { logger } from '@/lib/utils/logger';
 import { useRouter } from 'next/navigation';
 import { gameAPI } from '@/lib/api/index';
 import { ImagePlus, Lock } from 'lucide-react';
-import ImageCropModal from '@/components/added_cat/ImageCropModal';
+import ImageCropModal from '@/components/utils/ImageCropModal';
 import { useHeader } from '@/contexts/HeaderContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMembership } from '@/hooks/useMembership';

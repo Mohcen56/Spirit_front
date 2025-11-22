@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-import ReduxProvider from "@/components/ReduxProvider";
+import ReduxProvider from "@/components/utils/ReduxProvider";
 import { QueryProvider } from "@/providers/QueryProvider";
-import ErrorBoundary from "@/components/ErrorBoundary";
+import ErrorBoundary from "@/components/utils/ErrorBoundary";
 import { NotificationProvider } from "@/providers/NotificationProvider";
 
 const geistSans = Geist({
