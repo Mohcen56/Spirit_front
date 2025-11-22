@@ -1,0 +1,378 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { logger } from '@/lib/utils/logger';
+import { useParams, useRouter } from 'next/navigation';
+import { gameAPI } from '@/lib/api';
+import { Question } from '@/types/game';
+import Image from 'next/image';
+import GameHeader from '@/components/game/GameHeader';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { startGame, switchToNextTeam, awardPoints, setGameQuestions, endGame } from '@/store/gameSlice';
+import { useGameData } from '@/hooks/useGameData';
+import { useSyncTeams } from '@/hooks/useSyncTeams';
+
+
+
+interface QuestionSlot {
+  points: number;
+  question: Question;
+  isSolved: boolean;
+  index: number;
+}
+
+export default function GameBoardPage() {
+  const params = useParams();
+  const router = useRouter();
+  const gameId = params.id as string;
+  const dispatch = useAppDispatch();
+  const {
+    currentTeam,
+    isGameActive,
+    gameId: currentGameId,
+    teams: liveTeams,
+    questions,
+    playedQuestions,
+  } = useAppSelector(state => state.game);
+   
+  const { game, isLoading, error } = useGameData(gameId);
+   // 👇 Sync fetched teams with Redux
+  useSyncTeams(game?.teams, liveTeams);
+
+  useEffect(() => {
+    if (!game || questions.length > 0) return;
+
+    const numericGameId = Number(gameId);
+    if (!Number.isFinite(numericGameId)) return;
+
+    let cancelled = false;
+
+    const loadQuestions = async () => {
+      try {
+        const data = await gameAPI.getAvailableQuestions(numericGameId);
+        if (!cancelled) {
+          dispatch(setGameQuestions(data));
+        }
+      } catch (err) {
+        logger.exception(err, { where: 'game.[id].question.loadAvailable' });
+      }
+    };
+
+    loadQuestions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [dispatch, game, gameId, questions.length]);
+
+
+  // Initialize game in Redux when component mounts and game data is loaded
+  useEffect(() => {
+    if (game && (!isGameActive || currentGameId !== gameId)) {
+      dispatch(startGame({ 
+        gameId: gameId, 
+        totalTeams: game.teams.length 
+      }));
+    }
+  }, [game, gameId, isGameActive, currentGameId, dispatch]);
+
+  // Handle team turn change
+  const handleTeamTurnChange = () => {
+    dispatch(switchToNextTeam());
+  };
+
+  // Handle back to board (navigate to home or games list)
+  const handleBackToBoard = () => {
+    router.push('/');
+  };
+
+  // Handle ending the game
+  const handleEndGame = async () => {
+    try {
+      const numericGameId = Number(gameId);
+      if (Number.isFinite(numericGameId)) {
+        await gameAPI.finishRound(numericGameId, playedQuestions);
+      }
+    } catch (error) {
+      logger.exception(error, { where: 'game.[id].question.finishRound' });
+    }
+
+    dispatch(endGame());
+    router.push(`/game/${gameId}/results`);
+  };
+
+  // Local score updates via Redux only
+  const updateTeamScore = (teamId: number, increment: number) => {
+    dispatch(awardPoints({ teamId, delta: increment }));
+  };
+
+ 
+    
+    
+ 
+
+  // Organize questions by category (memoized to prevent recalculation)
+  const organizeQuestionsByCategory = React.useMemo(() => {
+    if (!game) return {};
+    const organized: Record<number, Question[]> = {};
+
+    game.categories.forEach((category) => {
+      organized[category.id] = [];
+    });
+
+    questions.forEach((question) => {
+      const questionCategoryId = question.category?.id;
+      if (questionCategoryId && organized[questionCategoryId]) {
+        organized[questionCategoryId].push(question);
+      }
+    });
+
+    Object.keys(organized).forEach((categoryId) => {
+      organized[parseInt(categoryId, 10)].sort((a, b) => a.points - b.points);
+    });
+
+    return organized;
+  }, [game, questions]);
+
+  // Create question grid for a category using only backend-returned questions
+  const createQuestionGrid = (categoryId: number): QuestionSlot[] => {
+    const categoryQuestions = organizeQuestionsByCategory[categoryId] || [];
+    logger.log(`Category ${categoryId} questions:`, categoryQuestions);
+    logger.log(`Category ${categoryId} question count: ${categoryQuestions.length}`);
+    
+    // Backend should already limit to 6 questions, but add safety check
+    if (categoryQuestions.length > 6) {
+      logger.warn(`Category ${categoryId} has more than 6 questions (${categoryQuestions.length}), this should not happen!`);
+    }
+    
+    // Sort by points descending (harder questions first)
+    const sortedQuestions = [...categoryQuestions].sort((a: Question, b: Question) => b.points - a.points);
+    
+    logger.log(`Category ${categoryId} after sorting:`, sortedQuestions.length, 'questions');
+    
+    return sortedQuestions.map((question: Question, index: number): QuestionSlot => ({
+      points: question.points,
+      question,
+      isSolved: playedQuestions.includes(question.id),
+      index
+    }));
+  };
+
+  // Handle question select
+  const handleQuestionSelect = (question: Question) => {
+    if (!question || playedQuestions.includes(question.id)) return;
+    router.push(`/game/${gameId}/question/${question.id}`);
+  };
+
+  // Track image load errors to avoid retrying failed images
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-custom-bg flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-600 text-xl mb-4">{error}</div>
+          <div className="text-gray-600 text-sm mb-4">Game ID: {gameId}</div>
+          <div className="space-x-4 space-x-reverse">
+            <button
+              onClick={() => router.push('/create-game')}
+              className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded"
+            >
+              Create New Game
+            </button>
+            <button
+              onClick={() => router.push('/')}
+              className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded"
+            >
+              Back to Home
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+
+
+if (isLoading) {
+  return (
+    <div className="h-screen flex flex-col bg-white overflow-hidden">
+      <GameHeader 
+        onBackToBoard={handleBackToBoard}
+        currentTeamTurn={currentTeam}
+        onTeamTurnChange={handleTeamTurnChange}
+        onEndGame={handleEndGame}
+      />
+
+      <main className="flex-1 p-4 overflow-hidden bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300">
+        <div className="h-full grid grid-cols-3 md:grid-cols-6 gap-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="h-full flex flex-col">
+              <div className="relative h-24 md:h-32 w-full rounded-xl overflow-hidden border-4 border-white shadow mb-3 flex-shrink-0 bg-gray-200 animate-pulse">
+                <div className="absolute bottom-0 left-0 w-full bg-gray-300 py-1 text-center">
+                  <span className="text-gray-500 text-xs md:text-sm font-bold">Loading...</span>
+                </div>
+              </div>
+
+              <div className="flex-1 flex flex-col gap-1 md:gap-2">
+                {Array.from({ length: 6 }).map((_, qIndex) => (
+                  <div
+                    key={qIndex}
+                    className="flex-1 bg-gray-200 animate-pulse rounded-lg"
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </main>
+
+      <footer className="bg-gradient-to-r from-amber-400 to-orange-400 py-2 md:py-3 flex items-center justify-center gap-3 md:gap-4 border-t-4 border-amber-500 h-16 md:h-25 flex-shrink-0">
+        <div className="text-gray-600 text-sm">Loading teams...</div>
+      </footer>
+    </div>
+  );
+}
+
+if (error) {
+  return <div className="text-red-500 text-center mt-10">{error}</div>;
+}
+
+if (!game) {
+  return <div className="text-gray-600 text-center mt-10">No game found.</div>;
+}
+
+
+  function handleImageError(name: string): void {
+    setImageErrors(prev => ({ ...prev, [name]: true }));
+  }
+
+  function hasImageError(name: string): boolean {
+    return !!imageErrors[name];
+  }
+
+return (
+  <div className="h-screen flex flex-col bg-white overflow-hidden">
+    {/* Header */}
+    <GameHeader 
+      onBackToBoard={handleBackToBoard}
+      currentTeamTurn={currentTeam}
+      onTeamTurnChange={handleTeamTurnChange}
+      onEndGame={handleEndGame}
+    />
+
+    {/* Game Board - Takes remaining height */}
+    <main className="flex-1 p-2 overflow-hidden bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300">
+      <div className="h-full grid grid-cols-3 md:grid-cols-6 gap-3">
+        {game.categories.map((category) => {
+          const questionGrid = createQuestionGrid(category.id);
+          return (
+            <div key={category.id} className="h-full flex flex-col">
+            
+            {/* Category image + name - Fixed height */}
+            <div className="relative h-24 md:h-50  w-full rounded-xl overflow-hidden border-4 border-white shadow mb-3 flex-shrink-0">
+              {category.image && !hasImageError(category.name) ? (
+                <Image
+                  src={category.image}
+                  alt={category.name}
+                  fill
+                  className="object-cover"
+                  onError={() => handleImageError(category.name)}
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-300 flex items-center justify-center">
+                  <span className="text-gray-600 text-xl md:text-2xl">🎯</span>
+                </div>
+              )}
+              <div className="absolute bottom-0 left-0 md:h-10 w-full bg-black/70 py-1 text-center">
+                <span className="text-white text-xs md:text-lg font-bold">{category.name}</span>
+              </div>
+            </div>
+
+            {/* Questions - Takes remaining height */}
+            <div className="flex-1 flex flex-col gap-1 md:gap-2">
+              {questionGrid.map((slot: QuestionSlot) => (
+                <button
+                  key={`${category.id}-${slot.question.id}`}
+                  onClick={() => slot.question && handleQuestionSelect(slot.question)}
+                  disabled={slot.isSolved || !slot.question}
+                  className={`
+                    flex-1 font-bold text-sm md:text-lg rounded-lg shadow transition flex items-center justify-center
+                    ${slot.isSolved || !slot.question 
+                      ? 'bg-[#8a95ab] text-[#5a6578] opacity-60 cursor-not-allowed' 
+                      : 'bg-[#bcc2d3] text-[#34446b] hover:bg-[#cfd6e1] cursor-pointer'
+                    }
+                  `}
+                >
+                  {slot.points}
+                </button>
+              ))}
+              {/* Add empty slots if less than 6 questions to maintain consistent height */}
+              {Array.from({length: Math.max(0, 6 - questionGrid.length)}).map((_, index) => (
+                <div
+                  key={`empty-${category.id}-${index}`}
+                  className="flex-1 bg-[#8a95ab] opacity-30 rounded-lg"
+                />
+              ))}
+            </div>
+            </div>
+          );
+        })}
+      </div>
+    </main>
+
+    {/* Footer / Scoreboard - Fixed height (uses Redux liveTeams) */}
+    <footer className="bg-gradient-to-r from-brown-600 to-brown-800 py-2 md:py-4 flex items-center justify-center gap-3 md:gap-4 border-t-4 border-2 border-amber-500 h-20 md:h-23 flex-shrink-0">
+      {liveTeams && liveTeams.length > 0 ? (
+        liveTeams.map((team) => (
+          <div key={team.id} className="bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 p-[2px] rounded-2xl" dir="ltr">
+            <div className="w-full h-full bg-orange-200/95 rounded-2xl px-3 md:px-4 py-1.5 md:py-1 flex items-center shadow-md">
+              {/* Team Avatar */}
+              <div className="w-8 h-8 md:w-15 md:h-15 rounded-full items-center justify-center overflow-hidden mr-2 md:mr-3 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 p-[2px] hidden md:flex">
+                <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
+                  <Image 
+                    src={`/avatars/${team.avatar}.png`} 
+                    alt={team.name} 
+                    width={40} 
+                    height={40} 
+                    className="w-full h-full object-cover" 
+                    unoptimized
+                  />
+                </div>
+              </div>
+              
+              {/* Team Name */}
+              <span className="text-orange-900 font-bold text-xs md:text-sm mr-2 md:mr-3 min-w-[50px] md:min-w-[60px]">
+                {team.name}
+              </span>
+              
+              {/* Score Controls Row */}
+              <div className="flex items-center gap-2 md:gap-3">
+                <button 
+                  onClick={() => updateTeamScore(team.id, -100)}
+                  className="bg-amber-700 hover:bg-amber-800 text-white rounded-md w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-sm md:text-lg font-bold transition-all duration-200 shadow-sm"
+                >
+                  -
+                </button>
+                <span className="text-orange-900 font-extrabold text-base md:text-xl min-w-[35px] md:min-w-[50px] text-center">
+                  {team.score ?? 0}
+                </span>
+                <button 
+                  onClick={() => updateTeamScore(team.id, 100)}
+                  className="bg-amber-700 hover:bg-amber-800 text-white rounded-md w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-sm md:text-lg font-bold transition-all duration-200 shadow-sm"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+        ))
+      ) : (
+        <div className="text-white text-sm bg-red-500/20 border border-red-400 rounded-xl p-4">
+          <p className="text-red-600">No teams added to this game</p>
+        </div>
+      )}
+    </footer>
+  </div>
+);  
+}

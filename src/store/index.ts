@@ -4,9 +4,20 @@ import storage from 'redux-persist/lib/storage';
 import gameReducer from './gameSlice';
 
 const persistConfig = {
-  key: 'brainigo-game',
+  key: 'trivia-spirit-game',
   storage,
-  whitelist: ['currentTeam', 'gameId', 'totalTeams', 'isGameActive', 'teams', 'doublePerkActiveTeamId', 'doublePerkUsed', 'rerollPerkUsed'], // Persist teams/scores & perk state
+  whitelist: [
+    'currentTeam',
+    'gameId',
+    'totalTeams',
+    'isGameActive',
+    'teams',
+    'doublePerkActiveTeamId',
+    'doublePerkUsed',
+    'rerollPerkUsed',
+    'questions',
+    'playedQuestions',
+  ],
 };
 
 const persistedGameReducer = persistReducer(persistConfig, gameReducer);

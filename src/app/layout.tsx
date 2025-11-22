@@ -1,21 +1,30 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { GameProvider } from "@/contexts/GameContext";
-import ReduxProvider from "@/components/ReduxProvider";
+
+import ReduxProvider from "@/components/utils/ReduxProvider";
+import { QueryProvider } from "@/providers/QueryProvider";
+import ErrorBoundary from "@/components/utils/ErrorBoundary";
+import { NotificationProvider } from "@/providers/NotificationProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap", // Add font-display: swap for better performance
+  preload: true,
+  fallback: ['system-ui', 'arial'],
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap", // Add font-display: swap for better performance
+  preload: true,
+  fallback: ['monospace'],
 });
 
 export const metadata: Metadata = {
-  title: "brainigo - Trivia Game",
+  title: "trivia spirit - Trivia Game",
   description: "A modern trivia game with categories and team competition",
 };
 
@@ -26,15 +35,24 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" dir="ltr">
+      <head>
+        {/* Preconnect to Google Fonts for faster font loading */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning={true}
       >
-        <ReduxProvider>
-          <GameProvider>
-            {children}
-          </GameProvider>
-        </ReduxProvider>
+        <QueryProvider>
+          <ReduxProvider>
+            <ErrorBoundary>
+              <NotificationProvider>
+                {children}
+              </NotificationProvider>
+            </ErrorBoundary>
+          </ReduxProvider>
+        </QueryProvider>
       </body>
     </html>
   );
