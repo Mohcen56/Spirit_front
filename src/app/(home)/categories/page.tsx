@@ -14,6 +14,7 @@ import Image from 'next/image';
 import { useMembership } from '@/hooks/useMembership';
 import { useImageError } from '@/hooks/useImageError';
 import { useHeader } from '@/contexts/HeaderContext';
+import CategorySkeleton from '@/components/skeletons/CategorySkeleton';
 
 export default function CategoriesPage() {
   const { membership, currentUserId, error, setError } = useMembership();
@@ -175,8 +176,8 @@ export default function CategoriesPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-custom-bg flex items-center justify-center">
-        <div className="text-primary-800 text-xl">Loading...</div>
+      <div className="min-h-screen bg-eastern-blue-50">
+        <CategorySkeleton count={10} showAddButton={false} variant="default" />
       </div>
     );
   }
@@ -342,7 +343,7 @@ export default function CategoriesPage() {
                         {playedPercent}%
                       </div>
                       {/* Category Illustration */}
-                      <div className={`h-full w-full bg-gradient-to-br from-cyan-700 to-cyan-800 ${(!canSelect ? 'grayscale' : '')}`}>
+                      <div className={`h-full w-full bg-cyan-100 ${(!canSelect ? 'grayscale' : '')}`}>
                         {((category.image_url || category.image || getLocalIllustration(category.name))) && !hasImageError(category.name) ? (
                           <Image
                             src={(category.image_url || category.image || getLocalIllustration(category.name))!}
