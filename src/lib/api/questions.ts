@@ -19,7 +19,6 @@ export const questionsAPI = {
       throw error;
     }
   },
-
   /**
    * Get questions filtered by category ID
    */
