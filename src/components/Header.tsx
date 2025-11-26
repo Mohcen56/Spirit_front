@@ -37,7 +37,12 @@ export default function Header({ title, backHref }: HeaderProps) {
           </div>
 
           {/* Centered title */}
-          <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+          <div className="absolute left-1/2  top-1/2 
+             transform 
+             -translate-y-1/2
+             -translate-x-[30%]   /* mobile shift */
+             md:-translate-x-1/2  /* desktop perfect center */
+             pointer-events-none">
             <h1 className="lg:text-xl font-bold text-white">{title}</h1>
           </div>
 

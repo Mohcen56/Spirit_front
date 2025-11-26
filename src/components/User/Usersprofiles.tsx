@@ -1,14 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { logger } from '@/lib/utils/logger';
+import React, { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { gameAPI } from '@/lib/api/index';
 import { VerifyBadge } from '@/components/ui/verify-badge';
 import { AnimatedBadge } from '@/components/ui/animatedbadge';
-import { useCreatorBadge } from '@/components/User/useCreatorBadge';
+import { useUserCategories } from '@/hooks/useUserCategories';
 
 interface User {
   id: number;
@@ -18,20 +16,6 @@ interface User {
   is_premium?: boolean;
 }
 
-interface Category {
-  id: number;
-  name: string;
-  description?: string;
-  image?: string;
-  image_url?: string;
-  questions_count?: number;
-  privacy?: 'public' | 'private';
-  created_by_id?: number;
-  created_by_username?: string;
-  created_by_is_premium?: boolean;
-  is_approved?: boolean;
-}
-
 interface UserProfileProps {
   user: User;
   onBack: () => void;
@@ -39,38 +23,13 @@ interface UserProfileProps {
 
 export default function UserProfile({ user, onBack }: UserProfileProps) {
   const router = useRouter();
+  const { userCategories, isLoadingCategories, approvedCategoriesCount, creatorBadge } = useUserCategories(user.id);
   const [formData] = useState({
     username: user.username,
     avatar: user.avatar,
   });
   
   const [avatarPreview, setAvatarPreview] = useState(user.avatar || '/avatars/thumbs.svg');
-  const [userCategories, setUserCategories] = useState<Category[]>([]);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
-
-  // Fetch categories created by this user
-  useEffect(() => {
-    const fetchUserCategories = async () => {
-      try {
-        setIsLoadingCategories(true);
-        const allCategories = await gameAPI.getUserCategories();
-        
-        // Filter to only show categories created by this user
-        const filtered = allCategories.filter((cat: Category) => cat.created_by_id === user.id);
-        setUserCategories(filtered);
-      } catch (error) {
-        logger.exception(error, { where: 'Usersprofiles.fetchUserCategories' });
-      } finally {
-        setIsLoadingCategories(false);
-      }
-    };
-
-    fetchUserCategories();
-  }, [user.id]);
-  
-  // Calculate approved categories count and use the creator badge hook
-  const approvedCategoriesCount = userCategories.filter(cat => cat.is_approved).length;
-  const creatorBadge = useCreatorBadge(approvedCategoriesCount);
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4">

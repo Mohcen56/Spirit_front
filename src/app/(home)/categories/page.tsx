@@ -74,8 +74,10 @@ export default function CategoriesPage() {
       }),
     }));
 
-    // Remove empty collections (optional)
-    return base.filter((c) => (c.categories || []).length > 0);
+    // Remove empty collections, BUT always keep "Added Categories" so users can add their first category
+    return base.filter((c) => 
+      c.name.toLowerCase() === 'added categories' || (c.categories || []).length > 0
+    );
   }, [collections, search, selectedCollectionId]);
 
   useEffect(() => {

@@ -9,35 +9,43 @@ export function useAuthGate({ redirectIfGuest }: { redirectIfGuest?: string } = 
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setLoading] = useState(true);
 
+  const fetchUser = async () => {
+    if (typeof window === 'undefined') return;
+
+    const token = localStorage.getItem('authToken');
+
+    // 🔹 Short-circuit safely (don't call API if no token)
+    if (!token) {
+      logger.log('No token, skipping getCurrentUser');
+      setLoading(false); // ✅ stop loading
+      if (redirectIfGuest) router.replace(redirectIfGuest);
+      return;
+    }
+
+    try {
+      const current = await authAPI.getCurrentUser();
+      setUser(current);
+    } catch {
+      if (redirectIfGuest) router.replace(redirectIfGuest);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    (async () => {
-      if (typeof window === 'undefined') return;
-
-      const token = localStorage.getItem('authToken');
-
-      // 🔹 Short-circuit safely (don't call API if no token)
-      if (!token) {
-        logger.log('No token, skipping getCurrentUser');
-        setLoading(false); // ✅ stop loading
-        if (redirectIfGuest) router.replace(redirectIfGuest);
-        return;
-      }
-
-      try {
-        const current = await authAPI.getCurrentUser();
-        setUser(current);
-      } catch {
-        if (redirectIfGuest) router.replace(redirectIfGuest);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [router, redirectIfGuest]);
+    fetchUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const logout = async () => {
     await authAPI.logout();
     router.replace('/login');
   };
 
-  return { user, setUser, isLoading, logout };
+  const refetchUser = async () => {
+    setLoading(true);
+    await fetchUser();
+  };
+
+  return { user, setUser, isLoading, logout, refetchUser };
 }

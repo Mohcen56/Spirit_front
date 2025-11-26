@@ -7,6 +7,8 @@ import Image from 'next/image';
 import { ProcessingButton } from '@/components/ui/button2';
 import { useNotification } from '@/hooks/useNotification';
 import { VerifyBadge } from '@/components/ui/verify-badge';
+import { AnimatedBadge } from '../ui/animatedbadge';
+import { useUserCategories } from '@/hooks/useUserCategories';
 
 interface User {
   id: number;
@@ -24,6 +26,7 @@ interface UserProfileProps {
 
 export default function UserProfile({ user, onBack, onSave }: UserProfileProps) {
   const notify = useNotification();
+  const { approvedCategoriesCount, creatorBadge } = useUserCategories(user.id);
   const [formData, setFormData] = useState({
     username: user.username,
     email: user.email,
@@ -164,12 +167,31 @@ export default function UserProfile({ user, onBack, onSave }: UserProfileProps) 
               disabled={!user.is_premium}
             />
           </div>
-          <div className="flex items-center gap-2 mt-4">
+          
             <h2 className="text-xl font-bold text-gray-800">{user.username}</h2>
             {user.is_premium && (
-              <VerifyBadge type="premium" size="md" showLabel={false} />
+             <div className="flex items-center space-x-2">
+                       {/* Premium Badge */}
+                       {user.is_premium && (
+                         <div className="flex mt-2">
+                           <VerifyBadge type="premium" size="md" showLabel={true} />
+                         </div>
+                       )}
+             
+                         {/* Creator Level - Animated Badge based on approved categories */}
+                         {approvedCategoriesCount > 0 && (
+                           <div className="mt-2 flex">
+                             <AnimatedBadge
+                               text={`${creatorBadge.level} · ${creatorBadge.count}`}
+                               icon={creatorBadge.icon}
+                               borderColor={creatorBadge.borderColor}
+                               shadowColor={creatorBadge.shadowColor}
+                             />
+                           </div>
+                         )}
+                     </div>
             )}
-          </div>
+         
           <p className="text-sm text-gray-500 mt-2">
             {user.is_premium ? 'Click to change profile picture' : (
               <span className="flex items-center gap-1 justify-center">
