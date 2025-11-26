@@ -1,79 +1,16 @@
 'use client';
 
-
-import {  useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
-import { authAPI } from '@/lib/api/index';
-import { Play, History,  } from 'lucide-react';
-import UserProfile from '@/components/User/UserProfile';
+import { Play, History } from 'lucide-react';
 import { useAuthGate } from '@/hooks/useAuthGate';
-
 import { useHeader } from '@/contexts/HeaderContext';
-import { logger } from '@/lib/utils/logger';
+
 export default function HomePage() {
-  const [showProfile, setShowProfile] = useState(false);
- const { setHeader } = useHeader();
-const { user, setUser, isLoading,  } = useAuthGate({ redirectIfGuest: '/login' });
+  const { setHeader } = useHeader();
+  const { user, isLoading } = useAuthGate({ redirectIfGuest: '/login' });
 
-  const handleProfileSave = async (data: { username: string; email: string; avatar: string; avatarFile?: File; password?: string; currentPassword?: string }) => {
-    try {
-      let updatedUser = user;
-
-      // Update basic profile information
-      if (data.username !== user?.username || data.email !== user?.email) {
-        logger.log('Updating profile info...');
-        const profileResult = await authAPI.updateProfile({
-          username: data.username,
-          email: data.email,
-        });
-        
-        if (!profileResult.success) {
-          throw new Error(profileResult.error || 'Failed to update profile');
-        }
-        updatedUser = profileResult.user;
-      }
-
-      // Update profile picture if a new file was selected
-      if (data.avatarFile) {
-        logger.log('Updating profile picture...');
-        const avatarResult = await authAPI.updateProfilePicture(data.avatarFile);
-        
-        logger.log('Avatar update result:', avatarResult);
-        
-        if (!avatarResult.success) {
-          throw new Error(avatarResult.error || 'Failed to update profile picture');
-        }
-        if (updatedUser) {
-          logger.log('Updating user avatar from:', updatedUser.avatar, 'to:', avatarResult.avatar_url);
-          updatedUser = { ...updatedUser, avatar: avatarResult.avatar_url };
-        }
-      }
-
-      // Change password if provided
-      if (data.password && data.currentPassword) {
-        logger.log('Changing password...');
-        const passwordResult = await authAPI.changePassword(data.currentPassword, data.password);
-        
-        if (!passwordResult.success) {
-          throw new Error(passwordResult.error || 'Failed to change password');
-        }
-      }
-
-      // Update user state with new data
-      logger.log('Setting user state to:', updatedUser);
-      setUser(updatedUser);
-      
-      // Close profile view
-      setShowProfile(false);
-      
-      logger.log('Profile updated successfully');
-    } catch (error) {
-      logger.exception(error, { where: 'dashboard.handleProfileSave' });
-      // You might want to show an error message to the user here
-      alert(error instanceof Error ? error.message : 'Failed to update profile');
-    }
-  };
- useEffect(() => {
+  useEffect(() => {
     setHeader({ title: "", backHref: "/" });
   }, [setHeader]);
   if (isLoading) {
@@ -90,17 +27,6 @@ const { user, setUser, isLoading,  } = useAuthGate({ redirectIfGuest: '/login' }
 
   return (
     <div className="min-h-screen bg-custom-bg">
-      {showProfile && user ? (
-        <UserProfile
-          user={user}
-          onBack={() => setShowProfile(false)}
-          onSave={handleProfileSave}
-        />
-      ) : (
-        <>
-  
-
-
       {/* Main Content */}
       <main className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
@@ -146,13 +72,8 @@ const { user, setUser, isLoading,  } = useAuthGate({ redirectIfGuest: '/login' }
           </div>
 
           {/* Quick Stats */}
-         
-           
-          
         </div>
       </main>
-        </>
-      )}
     </div>
   );
 }
