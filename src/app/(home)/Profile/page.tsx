@@ -8,7 +8,7 @@ import { useNotification } from '@/hooks/useNotification';
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, setUser, isLoading } = useAuthGate();
+  const { user, setUser, isLoading } = useAuthGate({ redirectIfGuest: '/login' });
   const notify = useNotification();
 
   const handleSave = async (data: {
