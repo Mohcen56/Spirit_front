@@ -97,7 +97,7 @@ export default function UserDropdown({ align = "left" } ) {
 
       {open && (
         <div
-          className={`absolute ${sideClass} left-25 top-14 w-60 bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-gray-200 dark:border-zinc-700 z-[9999] p-2`}
+          className={`absolute ${sideClass} left-25 top-14 w-70 bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-gray-200 dark:border-zinc-700 z-[9999] p-2`}
         >
           <div
             className={`absolute ${arrowSide} -top-1.5 w-3 h-3 bg-white dark:bg-zinc-900 border-t border-l border-gray-200 dark:border-zinc-700 rotate-45`}
@@ -146,11 +146,7 @@ export default function UserDropdown({ align = "left" } ) {
                   text="Your Profile"
                   onClick={() => router.push("/profile")}
                 />
-                <MenuItem
-                  icon={<Icon.Settings />}
-                  text="Settings"
-                  onClick={() => router.push("/settings")}
-                />
+            
                 <MenuItem
                   icon={<Icon.CreditCard />}
                   text="Billing & Plans"

@@ -4,10 +4,12 @@ import UserProfile from "@/components/User/UserProfile";
 import { useAuthGate } from "@/hooks/useAuthGate";
 import { authAPI } from "@/lib/api/auth";
 import { logger } from '@/lib/utils/logger';
+import { useNotification } from '@/hooks/useNotification';
 
 export default function ProfilePage() {
   const router = useRouter();
   const { user, setUser, isLoading } = useAuthGate();
+  const notify = useNotification();
 
   const handleSave = async (data: {
     username: string;
@@ -16,7 +18,7 @@ export default function ProfilePage() {
     avatarFile?: File;
     password?: string;
     currentPassword?: string;
-  }) => {
+  }): Promise<boolean> => {
     try {
       // 1) Update basic profile fields if changed
       if (
@@ -27,29 +29,69 @@ export default function ProfilePage() {
           username: data.username,
           email: data.email,
         });
-        if (!res.success) throw new Error(res.error || "Failed to update profile");
+        if (!res.success) {
+          // Handle specific error messages
+          const errorMsg = res.error || "Failed to update profile";
+          
+          if (errorMsg.toLowerCase().includes('username') && errorMsg.toLowerCase().includes('already')) {
+            notify.error('Username Taken', 'This username is already in use. Please choose a different one.');
+          } else if (errorMsg.toLowerCase().includes('email') && errorMsg.toLowerCase().includes('already')) {
+            notify.error('Email Already Used', 'This email is already registered. Please use a different email.');
+          } else if (errorMsg.toLowerCase().includes('invalid')) {
+            notify.error('Invalid Input', errorMsg);
+          } else {
+            notify.error('Update Failed', errorMsg);
+          }
+          return false; // Return false to prevent success notification
+        }
         if (res.user) setUser(res.user);
       }
 
       // 2) Update avatar if a new file was selected
       if (data.avatarFile) {
         const res = await authAPI.updateProfilePicture(data.avatarFile);
-        if (!res.success) throw new Error(res.error || "Failed to update avatar");
+        if (!res.success) {
+          const errorMsg = res.error || "Failed to update avatar";
+          
+          if (errorMsg.toLowerCase().includes('size') || errorMsg.toLowerCase().includes('large')) {
+            notify.error('File Too Large', 'Please upload an image smaller than 5MB.');
+          } else if (errorMsg.toLowerCase().includes('format') || errorMsg.toLowerCase().includes('type')) {
+            notify.error('Invalid Format', 'Please upload a valid image file (JPG, PNG, or GIF).');
+          } else if (errorMsg.toLowerCase().includes('premium')) {
+            notify.error('Premium Feature', 'Avatar changing is available for premium members only.');
+          } else {
+            notify.error('Avatar Update Failed', errorMsg);
+          }
+          return false; // Return false to prevent success notification
+        }
         if (res.user) setUser(res.user);
       }
 
       // 3) Change password if provided
       if (data.password) {
         const res = await authAPI.changePassword(data.currentPassword || "", data.password);
-        if (!res.success) throw new Error(res.error || "Failed to change password");
+        if (!res.success) {
+          const errorMsg = res.error || "Failed to change password";
+          
+          if (errorMsg.toLowerCase().includes('current password') || errorMsg.toLowerCase().includes('incorrect')) {
+            notify.error('Wrong Password', 'The current password you entered is incorrect. Please try again.');
+          } else if (errorMsg.toLowerCase().includes('too short') || errorMsg.toLowerCase().includes('weak')) {
+            notify.error('Weak Password', 'Your new password must be at least 6 characters long.');
+          } else if (errorMsg.toLowerCase().includes('same')) {
+            notify.error('Same Password', 'New password must be different from your current password.');
+          } else {
+            notify.error('Password Change Failed', errorMsg);
+          }
+          return false; // Return false to prevent success notification
+        }
       }
 
-      // Optional: show a toast/snackbar here
-        logger.log("Profile saved successfully");
+      logger.log("Profile saved successfully");
+      return true; // Return true only if everything succeeded
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to save profile";
-        logger.exception(message, { where: 'profile.saveProfile' });
-      // Optional: show error toast
+      logger.exception(message, { where: 'profile.saveProfile' });
+      return false; // Return false on exception
     }
   };
 

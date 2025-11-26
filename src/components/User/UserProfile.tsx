@@ -21,7 +21,7 @@ interface User {
 interface UserProfileProps {
   user: User;
   onBack: () => void;
-  onSave: (data: { username: string; email: string; avatar: string; avatarFile?: File; password?: string; currentPassword?: string }) => void;
+  onSave: (data: { username: string; email: string; avatar: string; avatarFile?: File; password?: string; currentPassword?: string }) => Promise<boolean>;
 }
 
 export default function UserProfile({ user, onBack, onSave }: UserProfileProps) {
@@ -89,12 +89,14 @@ export default function UserProfile({ user, onBack, onSave }: UserProfileProps) 
     }
 
     try {
-      await onSave(saveData);
-      notify.profileUpdated();
-      return true;
+      const success = await onSave(saveData);
+      if (success) {
+        notify.profileUpdated();
+      }
+      return success;
     } catch (error) {
       logger.exception(error, { where: 'UserProfile.save' });
-      notify.error('Save Failed', 'Unable to update profile. Please try again.');
+      // Error notification is handled in the parent component (profile page)
       return false;
     }
   };

@@ -90,10 +90,17 @@ export default function CategoriesPage() {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
       }
+      // Close info modal when clicking outside
+      if (infoModal.open) {
+        const target = event.target as HTMLElement;
+        if (!target.closest('[role="button"]') && !target.closest('.info-dropdown')) {
+          setInfoModal({ open: false, category: null });
+        }
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [infoModal.open]);
 
   // Handle query errors
   useEffect(() => {
@@ -316,32 +323,60 @@ export default function CategoriesPage() {
                     {/* Top Section - Cream Background */}
                     <div className="relative h-[80%]   ">
                       {/* Info/Edit/View Icon Button */}
-                      <span
-                        role="button"
-                        tabIndex={3}
-                        onClick={e => {
-                          e.stopPropagation();
-                          // If custom category, navigate to edit/view page
-                          if (category.is_custom) {
-                            router.push(`/categories/edit/${category.id}`);
-                          } else {
-                            // For official categories, show info modal
-                            setInfoModal({ open: true, category });
-                          }
-                        }}
-                        className="absolute top-2 right-2  bg-gradient-to-br from-cyan-700 to-cyan-800 text-white w-7 h-7 rounded-full flex items-center justify-center text-base font-bold hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400 z-10 cursor-pointer"
-                      >
-                        {category.is_custom && category.created_by_id === currentUserId ? (
-                          <Pencil className="h-4 w-4" />
-                        ) : category.is_custom ? (
-                          <Eye className="h-4 w-4" />
-                      
-                        ) : (
-                          <Info className="h-9 w-9" />
+                      <div className="absolute top-2 ml-1  z-30">
+                        <span
+                          role="button"
+                          tabIndex={3}
+                          onClick={e => {
+                            e.stopPropagation();
+                            // If custom category, navigate to edit/view page
+                            if (category.is_custom) {
+                              router.push(`/categories/edit/${category.id}`);
+                            } else {
+                              // For official categories, toggle dropdown
+                              setInfoModal({ 
+                                open: infoModal.category?.id === category.id ? !infoModal.open : true, 
+                                category 
+                              });
+                            }
+                          }}
+                          className="bg-gradient-to-br from-cyan-700 to-cyan-800 text-white w-7 h-7 rounded-full flex items-center justify-center text-base font-bold hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400 cursor-pointer"
+                        >
+                          {category.is_custom && category.created_by_id === currentUserId ? (
+                            <Pencil className="h-4 w-4" />
+                          ) : category.is_custom ? (
+                            <Eye className="h-4 w-4" />
+                          ) : (
+                            <Info className="h-9 w-9" />
+                          )}
+                        </span>
+                        
+                        {/* Dropdown Info Panel */}
+                        {infoModal.open && infoModal.category?.id === category.id && (
+                          <div 
+                            className="info-dropdown absolute top-full  mt-2 w-53 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 z-50 animate-fadeIn"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <h3 className="font-bold text-gray-900 text-sm">{category.name}</h3>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setInfoModal({ open: false, category: null });
+                                }}
+                                className="text-gray-400 hover:text-gray-600 -mt-1"
+                              >
+                                ×
+                              </button>
+                            </div>
+                            <p className="text-gray-600 text-xs leading-relaxed">
+                              {category.description || 'No description available for this category.'}
+                            </p>
+                          </div>
                         )}
-                      </span>
+                      </div>
                       {/* Percentage Badge */}
-                      <div className="absolute top-2   bg-gradient-to-br from-cyan-700 to-cyan-800 text-white text-xs lg:text-sm font-bold px-2 lg:px-3 py-1  lg:min-w-[45px] text-center z-20">
+                      <div className="absolute top-2 right-0 bg-gradient-to-br from-cyan-700 to-cyan-800 text-white text-xs lg:text-sm font-bold px-2 lg:px-3 py-1  lg:min-w-[45px] text-center z-20">
                         {playedPercent}%
                       </div>
                       {/* Category Illustration */}
@@ -414,27 +449,6 @@ export default function CategoriesPage() {
               </p>
             </div>
           </div>
-
-          {/* Info Modal */}
-          {infoModal.open && infoModal.category && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-              <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative animate-fadeIn">
-                <button
-                  className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-2xl font-bold focus:outline-none"
-                  onClick={() => setInfoModal({ open: false, category: null })}
-                  aria-label="Close"
-                >
-                  ×
-                </button>
-                <h2 className="text-xl font-bold mb-2 text-gray-900 text-center">
-                  {infoModal.category.name}
-                </h2>
-                <div className="text-gray-700 text-center mb-4">
-                  {infoModal.category.description || 'No description available for this category.'}
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Proceed to Teams Button */}
           <div className="text-center ">
