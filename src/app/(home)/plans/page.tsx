@@ -8,6 +8,7 @@ import { useHeader } from "@/contexts/HeaderContext";
 import { createCheckout, redirectToCheckout } from "@/lib/payments";
 import { useRouter } from "next/navigation";
 import { useMembership } from "@/hooks/useMembership";
+import { useAuthGate } from "@/hooks/useAuthGate";
 import { PremiumDashboard } from "@/components/Premium/PremiumDashboard";
 
  
@@ -63,13 +64,14 @@ export default function PlansPage() {
     const router = useRouter();
     const [isProcessing, setIsProcessing] = useState(false);
     const { membership } = useMembership();
+  const { user } = useAuthGate();
     
      useEffect(() => {
     setHeader({ title: "Level Up Your Trivia Experience", backHref: "/dashboard" });
   }, [setHeader]);
 
   // Show Premium Dashboard if user is premium
-  if (membership?.is_premium) {
+  if (membership?.is_premium || user?.is_premium) {
     return <PremiumDashboard />;
   }
 
@@ -127,7 +129,7 @@ export default function PlansPage() {
       />
       <p className="text-center text-sm text-gray-500 mt-6">
         Psst… sometimes we surprise our {" "} <a
-    href="https://instagram.com/YOUR_USERNAME"
+    href="https://instagram.com/Trivia.Spirit"
     target="_blank"
     rel="noopener noreferrer"
     className="text-blue-500 underline"

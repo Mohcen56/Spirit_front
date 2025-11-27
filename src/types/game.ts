@@ -4,13 +4,7 @@ export interface User {
   email: string;
   avatar: string;
   is_premium?: boolean;
-}
-
-export interface Membership {
-  id: number;
-  user: User;
-  is_premium: boolean;
-  expiry_date?: string;
+  premium_expiry?: string | null;
 }
 
 export interface Category {

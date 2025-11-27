@@ -3,7 +3,7 @@
  * Reduces redundant localStorage access across the application
  */
 
-import type { User, Membership } from '@/types/game';
+import type { User } from '@/types/game';
 
 export const getAuthToken = (): string | null => {
   if (typeof window === 'undefined') return null;
@@ -36,19 +36,10 @@ export const removeCurrentUser = (): void => {
   localStorage.removeItem('user');
 };
 
-export const getMembership = (): Membership | null => {
-  if (typeof window === 'undefined') return null;
-  const membershipData = localStorage.getItem('membership');
-  return membershipData ? JSON.parse(membershipData) : null;
-};
-
-export const setMembership = (membership: Membership): void => {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem('membership', JSON.stringify(membership));
-};
-
+// Membership storage removed; user now carries premium fields.
 export const removeMembership = (): void => {
   if (typeof window === 'undefined') return;
+  // Cleanup legacy key if present
   localStorage.removeItem('membership');
 };
 

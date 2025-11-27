@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authAPI } from '@/lib/api/auth';
+import { setCurrentUser } from '@/lib/utils/auth-utils';
 import type { User } from '@/types/game';
 import { logger } from '@/lib/utils/logger';
 
@@ -23,8 +24,11 @@ export function useAuthGate({ redirectIfGuest }: { redirectIfGuest?: string } = 
     }
 
     try {
-      const current = await authAPI.getCurrentUser();
-      setUser(current);
+         // Fetch full profile; user includes premium fields now
+      const profile = await authAPI.getProfile();
+      setUser(profile.user);
+         // Persist latest user for other hooks/components
+      setCurrentUser(profile.user);
     } catch {
       if (redirectIfGuest) router.replace(redirectIfGuest);
     } finally {

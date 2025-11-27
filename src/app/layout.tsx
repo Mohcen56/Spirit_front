@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import ReduxProvider from "@/components/utils/ReduxProvider";
 import { QueryProvider } from "@/providers/QueryProvider";
 import ErrorBoundary from "@/components/utils/ErrorBoundary";
@@ -24,8 +24,58 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "trivia spirit - Trivia Game",
-  description: "A modern trivia game with categories and team competition",
+  metadataBase: new URL("https://triviaspirit.com"),
+
+  title: "Trivia Spirit – The Ultimate Trivia Game | Play, Compete & Learn Fast",
+  description:
+    "Play Trivia Spirit — the fun, fast, and modern trivia game with thousands of curated questions across history, tech, movies, geography, anime, science, sports, and more!",
+
+  keywords: [
+    "trivia game",
+    "quiz game",
+    "brain quiz",
+    "knowledge game",
+    "online trivia",
+    "fun trivia",
+    "quiz categories",
+    "brainigo",
+    "play trivia online",
+    "fast trivia game",
+    "smart quiz",
+    "trivia challenges",
+  ],
+
+  authors: [{ name: "Mohcen" }],
+
+  openGraph: {
+    title: "Trivia Spirit – The Ultimate Trivia Game",
+    description:
+      "Challenge your mind with thousands of curated trivia questions across a wide range of categories. Play instantly — no downloads needed!",
+    url: "https://triviaspirit.com",
+    siteName: "Trivia Spirit",
+    images: [
+      {
+        url: "https://cdn.triviaspirit.com/og/trivia-spirit-og.png", // <-- put your real path here
+        width: 1200,
+        height: 630,
+        alt: "Trivia Spirit Game Cover",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "Trivia Spirit – The Ultimate Trivia Game",
+    description:
+      "Play Trivia Spirit — a fast and exciting trivia experience across dozens of categories!",
+    images: ["https://cdn.triviaspirit.com/og/trivia-spirit-og.png"],
+  },
+
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
@@ -48,7 +98,7 @@ export default function RootLayout({
           <ReduxProvider>
             <ErrorBoundary>
               <NotificationProvider>
-                {children}
+                {children}<SpeedInsights />
               </NotificationProvider>
             </ErrorBoundary>
           </ReduxProvider>

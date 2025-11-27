@@ -24,7 +24,6 @@ export default function LoginPage() {
       if (response.success) {
         localStorage.setItem('authToken', response.token)
         localStorage.setItem('user', JSON.stringify(response.user))
-        localStorage.setItem('membership', JSON.stringify(response.membership))
         notify.success('Login Successful', 'Welcome back!', 2000)
         router.push('/dashboard')
       } else {

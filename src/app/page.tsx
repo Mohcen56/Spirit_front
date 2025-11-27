@@ -9,17 +9,13 @@ import { logger } from "@/lib/utils/logger";
 import Link from "next/link";
 
 export default function HomePage() {
-  const [showWelcome, setShowWelcome] = useState(false);
+ 
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   const { user, isLoading, logout } = useAuthGate();
 
-  useEffect(() => {
-    if (isLoading) return;
-    setShowWelcome(!!user);
-  }, [isLoading, user]);
 
   const avatarSrc = useMemo(() => {
     if (!user?.avatar || user.avatar === "/avatars/thumbs.svg") {
@@ -39,7 +35,7 @@ export default function HomePage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleJumpIn = () => router.push("/dashboard");
+ 
   const handleHeroCTA = () => {
     if (user) {
       router.push("/dashboard");
@@ -47,7 +43,6 @@ export default function HomePage() {
     }
     router.push("/login");
   };
-  const handleStayHere = () => setShowWelcome(false);
 
   if (isLoading) {
     return (
@@ -61,78 +56,29 @@ export default function HomePage() {
     <>
       <div className="bg-gradient-to-b from-cyan-900 to-cyan-800">
         {/* Header */}
-        <header className="relative z-10 backdrop-blur-md">
-          <div className="container relative mx-auto flex w-full items-center justify-center px-1 py-3">
-            
-       
+      <header className="relative z-10 backdrop-blur-md">
+  <div className="container mx-auto flex items-center px-3 py-3 relative">
 
-            
-            <div
-              className="absolute  left-2 lg:left-0 top-12 flex -translate-y-1/2 items-center space-x-4"
-              ref={menuRef}
-            >
-              {/* Avatar Button (always clickable) */}
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                title={user?.username ? `${user.username} menu` : "User menu"}
-                aria-label={user?.username ? `Open ${user.username} menu` : "Open user menu"}
-                className="relative mt-3 lg:mt-1 w-15 h-15 lg:w-20 lg:h-20 rounded-full overflow-hidden border-2 border-white hover:ring-2 hover:ring-offset-2 hover:ring-primary-400 transition-all"
-              >
-                <Image
-                  src={avatarSrc}
-                  alt="Profile"
-                  width={80}
-                  height={80}
-                  className="object-cover w-full h-full"
-                  onError={(e) => {
-                    logger.warn("Avatar failed to load:", avatarSrc);
-                    (e.target as HTMLImageElement).src = "/avatars/thumbs.svg";
-                  }}
-                />
-              </button>
+    <div
+      className="absolute top-6 left-6 lg:top-8 lg:left-8 flex items-center space-x-4"
+      ref={menuRef}
+    >
+      <button
+        onClick={() => setMenuOpen(!menuOpen)}
+        className="relative w-16 h-16 lg:w-20 lg:h-20 rounded-full overflow-hidden border-2 border-white hover:ring-2 hover:ring-offset-2 hover:ring-primary-400 transition-all"
+      >
+        <Image
+          src={avatarSrc}
+          alt="Profile"
+          width={80}
+          height={80}
+          className="object-cover w-full h-full"
+        />
+      </button>
+    </div>
+  </div>
+</header>
 
-              {/* Dropdown Menu */}
-              {menuOpen && (
-                <div className="absolute  left-2 md:left-5 top-22 w-30 md:w-40 bg-white rounded-xl shadow-xl py-2 border border-gray-200 z-10 animate-fadeIn">
-                  {/* Little arrow */}
-                  <div className="absolute top-[-6px] left-4 w-3 h-3 bg-white border-t border-l border-gray-200 rotate-45"></div>
-
-                  {user ? (
-                    <>
-                      <button
-                        onClick={() => {
-                          logout();
-                          setMenuOpen(false);
-                        }}
-                        className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 transition"
-                      >
-                        Logout
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <Link
-                        href="/login"
-                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition"
-                        onClick={() => setMenuOpen(false)}
-                      >
-                        Login
-                      </Link>
-                      <Link
-                        href="/signup"
-                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition"
-                        onClick={() => setMenuOpen(false)}
-                      >
-                        Sign Up
-                      </Link>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
-   
       
       
         <div className="relative px-6 pt-0   lg:px-8">
@@ -171,7 +117,7 @@ export default function HomePage() {
     <div className="mt-8 flex justify-center">
       <button
         onClick={handleHeroCTA}
-        className="group/button relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-md bg-indianred px-30 py-5 text-xs font-normal text-white transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-red-500/30"
+        className="group/button relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-md bg-indianred px-15 py-3 md:px-30 md:py-5 text-xs font-normal text-white transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-red-500/30"
       >
         <span className="flex h-8 w-8 items-center justify-center rounded text-white">
           <svg
@@ -183,8 +129,8 @@ export default function HomePage() {
             <path d="M4 3.065v5.87a.4.4 0 0 0 .623.331l4.268-2.935a.4.4 0 0 0 0-.662L4.623 2.064A.4.4 0 0 0 4 2.395Z" />
           </svg>
         </span>
-        <span className="text-xl font-bold">Start playing</span>
-        <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-13deg)_translateX(-100%)] group-hover/button:duration-1000 group-hover/button:[transform:skew(-13deg)_translateX(100%)]">
+        <span className=" text-lg md:text-xl font-bold">Start playing</span>
+        <div className="absolute inset-0 flex h-full  w-full justify-center [transform:skew(-13deg)_translateX(-100%)] group-hover/button:duration-1000 group-hover/button:[transform:skew(-13deg)_translateX(100%)]">
           <div className="relative h-full w-8 bg-white/20" />
         </div>
       </button>
@@ -417,10 +363,38 @@ export default function HomePage() {
           <Image src="/icons/bars-4.svg" alt="Help perks icon" width={24} height={24} className="w-6 h-6" /> help perks
         </Link>
 
-        <Link href="#" className="flex items-center gap-2 justify-center lg:justify-start  hover:text-white transition">
-          <Image src="/logo/Instagram_Glyph_Gradient.svg" alt="Instagram" width={24} height={24} className="w-6 h-6" />
-          <span> Follow us on Instagram</span>
-        </Link>
+            <a
+        href="https://instagram.com/trivia.spirit"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-2 justify-center lg:justify-start hover:text-white transition"
+      >
+        <Image
+          src="/logo/Instagram_Glyph_Gradient.svg"
+          alt="Instagram"
+          width={24}
+          height={24}
+          className="w-6 h-6"
+        />
+        <span>Follow us on Instagram</span>
+      </a>
+
+      <a
+        href="https://discord.gg/cYC6rMVKHj"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-2 justify-center lg:justify-start hover:text-white transition"
+      >
+        <Image
+          src="/logo/discord.webp"
+          alt="Discord"
+          width={24}
+          height={24}
+          className="w-6 h-6"
+        />
+        <span>Join us on Discord</span>
+      </a>
+
       </ul>
     </div>
   </div>
@@ -432,40 +406,8 @@ export default function HomePage() {
 </footer>
 
 
-      {/* Welcome choice overlay — only for logged-in users who don't prefer auto-jump */}
-      {user && showWelcome && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/50">
-          <div className="w-[min(92vw,520px)] rounded-2xl bg-white p-6 shadow-xl dark:bg-neutral-900">
-            <div className="space-y-2 text-center">
-              <h2 className="text-xl font-semibold">
-                👋 Welcome back, {user.username}!
-              </h2>
-              <p className="text-sm opacity-80">
-                Do you want to jump into your games, or stay here to explore updates?
-              </p>
-            </div>
-
-            <div className="mt-5 flex items-center justify-center gap-3">
-              <button
-                onClick={handleJumpIn}
-                className="rounded-lg bg-black px-4 py-2 text-white dark:bg-white dark:text-black"
-              >
-                Jump In →
-              </button>
-              <button
-                onClick={handleStayHere}
-                className="rounded-lg border px-4 py-2"
-              >
-                Stay Here
-              </button>
-            </div>
-
-            <p className="mt-3 text-center text-xs opacity-60">
-              Tip: We’ll remember if you choose “Jump In” for next time.
-            </p>
-          </div>
-        </div>
-      )}
+     
+     
     
     </>
   );

@@ -123,7 +123,7 @@ export default function UserDropdown({ align = "left" } ) {
                 <div>
                   <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
                     {user.username}
-                    {membership?.is_premium && (
+                    {(membership?.is_premium || user?.is_premium) && (
                       <VerifyIcon type="premium" size="xs" />
                     )}
                   </div>

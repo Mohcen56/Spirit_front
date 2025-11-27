@@ -203,15 +203,15 @@ export default function CategoriesPage() {
 
           {/* Categories Selection */}
           <div className="space-y-6">
-            <div className="flex flex-col gap-3 justify-center mb-8 md:flex-row md:items-center md:gap-4">
+            <div className="flex  gap-3 justify-center mb-8 flex-row md:items-center md:gap-4">
               {/* Search input */}
-              <div className="relative flex-1 max-w-xl">
+              <div className="relative flex-1 max-w-xs md:max-w-4xl">
                 <Search className="w-4 h-4 text-primary-500 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search by name or creator…"
+                  placeholder="Search by name  "
                   className="w-full pl-9 pr-3 py-2 rounded-xl border border-primary-200 bg-white/80 outline-none focus:ring-2 focus:ring-eastern-blue-400 text-sm text-primary-800 placeholder:text-primary-400"
                   aria-label="Search categories"
                 />
@@ -221,7 +221,7 @@ export default function CategoriesPage() {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="inline-flex items-center gap-2 bg-white/70 px-6 py-2 rounded-xl border border-primary-200 shadow-sm text-sm text-primary-800 hover:bg-white transition-colors min-w-[250px] justify-between"
+                  className="inline-flex items-center gap-2 bg-white/70 px-6 py-2 rounded-xl border border-primary-200 shadow-sm text-sm text-primary-800 hover:bg-white transition-colors min-w-[200px] md:min-w-[300px] justify-between"
                   aria-label="Filter by collection"
                 >
                   <span>
@@ -233,13 +233,13 @@ export default function CategoriesPage() {
                 </button>
 
                 {isDropdownOpen && (
-                  <div className="absolute top-full mt-2 w-full min-w-[250px] bg-white rounded-xl border border-primary-200 shadow-lg z-50 overflow-hidden">
+                  <div className="absolute top-full mt-2 w-full max-w-xs md:min-w-[300px] bg-white rounded-xl border border-primary-200 shadow-lg z-50 overflow-hidden">
                     <button
                       onClick={() => {
                         setSelectedCollectionId('all');
                         setIsDropdownOpen(false);
                       }}
-                      className={`w-full text-left px-4 py-3 text-sm transition-colors hover:bg-blue-50 ${
+                      className={`w-full text-left px-4 py-3 text-xs md:text-sm transition-colors hover:bg-blue-50 ${
                         selectedCollectionId === 'all' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-primary-800'
                       }`}
                     >
@@ -252,7 +252,7 @@ export default function CategoriesPage() {
                           setSelectedCollectionId(c.id);
                           setIsDropdownOpen(false);
                         }}
-                        className={`w-full text-left px-4 py-3 text-sm transition-colors hover:bg-blue-50 flex items-center justify-between ${
+                        className={`w-full text-left px-4 py-3  text-xs md:text-sm transition-colors hover:bg-blue-50 flex items-center justify-between ${
                           selectedCollectionId === c.id ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-primary-800'
                         }`}
                       >
@@ -273,9 +273,9 @@ export default function CategoriesPage() {
             {filteredCollections.map((collection) => (
               <div key={collection.id} className="bg-cyan-50 backdrop-blur-md rounded-2xl p-6  mb-8 border border-primary-200 shadow-lg">
                 {/* Collection Header */}
-                <div className="relative flex justify-center  -mt-11 mb-4">
-                  <div className="bg-cyan-700 text-white px-6 py-2   rounded-full shadow-md">
-                    <h3 className="lg:text-xl font-bold text-center">{collection.name}</h3>
+                <div className="relative flex md:justify-center  -mt-11 mb-4">
+                  <div className="bg-cyan-700 text-white px-6 py-2  rounded-full shadow-md">
+                    <h3 className="lg:text-xl font-bold text-start md:text-center">{collection.name}</h3>
                   </div>
                   <div className="absolute -right-3 lg:right-0 top-1/2 transform -translate-y-1/2 text-primary-600 text-sm bg-primary-50 px-3 py-1 rounded-full">
                     {collection.categories?.length || 0} categories
@@ -288,16 +288,16 @@ export default function CategoriesPage() {
                   {collection.name.toLowerCase() === "added categories" && (
                     <Link
                       href="/categories/add"
-                      className="relative w-full aspect-[3/4] min-h-[180px] sm:min-h-[220px] rounded-3xl border-2 border-dashed border-eastern-blue-400 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 hover:border-eastern-blue-600 bg-white/50 backdrop-blur-sm flex flex-col items-center justify-center group"
+                      className="relative w-full aspect-[3/4] min-h-[180px] sm:min-h-[220px] rounded-3xl border-2 border-dashed border-cyan-600 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 hover:border-cyan-600 bg-white/50 backdrop-blur-sm flex flex-col items-center justify-center group"
                     >
                       <div className="flex flex-col items-center justify-center space-y-3">
-                        <div className="w-15 h-15 lg:w-20 lg:h-20 bg-gradient-to-br from-eastern-blue-400 to-eastern-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        <div className="w-15 h-15 lg:w-20 lg:h-20 bg-gradient-to-br from-cyan-600 to-cyan-700 rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
                           <svg className="w-8 h-8 lg:w-12 lg:h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
                           </svg>
                         </div>
                         
-                          <div className="text-sm font-normal text-eastern-blue-600 mt-1">Add Category</div>
+                          <div className="text-sm font-normal text-cyan-600 mt-1">Add Category</div>
                         </div>
                       
                     </Link>

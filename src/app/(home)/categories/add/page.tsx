@@ -220,9 +220,9 @@ export default function AddedCategoriesPage() {
             </div>
           )}
               {/* Search + Filters */}
-              <div className="flex flex-col gap-3 justify-center mb-6 md:flex-row md:items-center md:gap-4">
+              <div className="flex  gap-3 justify-center mb-6 flex-row md:items-center md:gap-4">
                 {/* Search input */}
-                <div className="relative flex-1 max-w-xl">
+                <div className="relative flex-1 max-w-5xl">
                   <Search className="w-4 h-4 text-primary-500 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
@@ -238,7 +238,7 @@ export default function AddedCategoriesPage() {
                 <div className="relative">
                   <button 
                     onClick={() => setFiltersOpen((v) => !v)}
-                    className="inline-flex items-center gap-2 bg-white/70 hover:bg-white/90 px-3 py-2 rounded-xl border border-primary-200 shadow-sm text-sm text-primary-800"
+                    className="inline-flex items-center gap-2 bg-white/70 hover:bg-white/90 px-8 py-2 rounded-xl border border-primary-200 shadow-sm text-sm text-primary-800"
                     aria-haspopup="true"
                     aria-expanded={filtersOpen ? 'true' : 'false'}
                   >
@@ -273,11 +273,11 @@ export default function AddedCategoriesPage() {
               </div>
             </div>
           {/* Categories Section */}
-          <div className="bg-eastern-blue-100 backdrop-blur-md rounded-2xl p-6 mb-8 border border-primary-200 shadow-lg">
+          <div className="bg-cyan-50 backdrop-blur-md rounded-2xl p-6 mb-8 border border-primary-200 shadow-lg">
             {/* Section Header */}
             <div className="relative flex flex-col gap-4 -mt-11 mb-4">
               <div className="flex items-center justify-between">
-                <div className="bg-eastern-blue-700 text-white px-6 py-2 rounded-full shadow-md">
+                <div className="bg-cyan-700 text-white px-6 py-2 rounded-full shadow-md">
                   <h3 className=" text-sm md:text-xl font-bold text-center">Added Categories</h3>
                 </div>
                 <div className="text-primary-600 text-sm bg-primary-50 px-3 py-1 rounded-full">
@@ -292,15 +292,15 @@ export default function AddedCategoriesPage() {
               {/* Add Category Button */}
               <Link
                 href="/categories/create"
-                className="relative w-full aspect-[3/4] min-h-[220px] sm:min-h-[220px] rounded-3xl border-2 border-dashed border-eastern-blue-400 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 hover:border-eastern-blue-600 bg-white/50 backdrop-blur-sm flex flex-col items-center justify-center group"
+                className="relative w-full aspect-[3/4] min-h-[220px] sm:min-h-[220px] rounded-3xl border-2 border-dashed border-cyan-600 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 hover:border-cyan-600 bg-white/50 backdrop-blur-sm flex flex-col items-center justify-center group"
               >
                 <div className="flex flex-col items-center justify-center space-y-3">
-                  <div className="w-15 h-15 md:w-20 md:h-20 bg-gradient-to-br from-eastern-blue-400 to-eastern-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <div className="w-15 h-15 md:w-20 md:h-20 bg-gradient-to-br from-cyan-600 to-cyan-700 rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
                     <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
                     </svg>
                   </div>
-                  <div className=" text-center text-xs font-normal text-eastern-blue-600 mt-1">Add your own Category</div>
+                  <div className=" text-center text-xs font-normal text-cyan-600 mt-1">Add your own Category</div>
                 </div>
               </Link>
 

@@ -14,7 +14,6 @@ export const authAPI = {
         success: true,
         token: response.data.token,
         user: response.data.user,
-        membership: response.data.membership,
       };
     } catch (error: unknown) {
       let errorMessage = 'Login failed';
@@ -49,7 +48,6 @@ export const authAPI = {
         success: true,
         token: response.data.token,
         user: response.data.user,
-        membership: response.data.membership,
       };
     } catch (error: unknown) {
       let errorMessage = 'Registration failed';
@@ -76,7 +74,6 @@ export const authAPI = {
     const response = await api.get('/api/auth/profile/');
     return {
       user: response.data.user,
-      membership: response.data.membership,
     };
   },
 
