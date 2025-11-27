@@ -396,7 +396,7 @@ export default function CategoriesPage() {
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <div className="w-20 h-20  bg-gradient-to-br from-cyan-700 to-cyan-800 flex items-center justify-center text-white text-2xl font-bold shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
+                            <div className="w-20 h-20  bg-gradient-to-br from-cyan-700 to-cyan-800 flex items-center justify-center text-white  text-sm md:text-2xl font-bold shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
                               {category.name.charAt(0)}
                             </div>
                           </div>
@@ -419,7 +419,7 @@ export default function CategoriesPage() {
                       {isPremium && (
                         <div className="absolute top-1 text-center">
                           {canSelect ? (
-                            <Crown className="h-4 w-4 text-yellow-400" />
+                            <Crown className="h-3 w-3 md:h-4 md:w-4 text-yellow-400" />
                           ) : (
                             <Lock className="h-4 w-4 text-gray-400" />
                           )}
