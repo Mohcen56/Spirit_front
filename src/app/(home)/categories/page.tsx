@@ -314,14 +314,14 @@ export default function CategoriesPage() {
                     key={category.id}
                     onClick={() => handleCategoryToggle(category.id, isPremium)}
                     disabled={!canSelect || isLocked}
-                    className={`relative w-full aspect-[3/4] min-h-[180px] sm:min-h-[220px] overflow-hidden border-4 rounded-4xl transition-all duration-200 transform hover:scale-105 ${
+                    className={`relative w-full aspect-[3/4] min-h-[200px] sm:min-h-[220px] overflow-hidden border-4 rounded-4xl transition-all duration-200 transform hover:scale-105 ${
                       isSelected
                               ? 'border-amber-600' // Selected border color
                               : 'border-cyan-700' // Default border color
                     } ${(!canSelect || isLocked) ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {/* Top Section - Cream Background */}
-                    <div className="relative h-[80%]   ">
+                    <div className="relative h-[79%]   ">
                       {/* Info/Edit/View Icon Button */}
                       <div className="absolute top-2 ml-1  z-30">
                         <span
@@ -396,7 +396,7 @@ export default function CategoriesPage() {
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <div className="w-20 h-20  bg-gradient-to-br from-cyan-700 to-cyan-800 flex items-center justify-center text-white  text-sm md:text-2xl font-bold shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
+                            <div className="w-20 h-20  bg-gradient-to-br from-cyan-700 to-cyan-800 flex items-center justify-center text-white  text-xs md:text-2xl font-bold shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
                               {category.name.charAt(0)}
                             </div>
                           </div>
@@ -411,8 +411,8 @@ export default function CategoriesPage() {
                       </div>
                     </div>
                     {/* Bottom Section - Dark Background */}
-                    <div className="relative h-[21%] bg-gradient-to-br from-cyan-700 to-cyan-800 flex items-center justify-center z-50 p-4">
-                      <h3 className="text-white  items-center font-bold text-sm lg:text-lg text-center leading-tight">
+                    <div className="relative h-[22%] bg-gradient-to-br from-cyan-700 to-cyan-800 flex items-center justify-center z-50 p-4">
+                      <h3 className="text-white  items-center font-bold text-xs md:text-lg text-center leading-tight">
                         {category.name}
                       </h3>
                       {/* Premium/Lock Indicator */}
