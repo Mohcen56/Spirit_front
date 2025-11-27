@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { VerifyBadge } from '@/components/ui/verify-badge';
 import { AnimatedBadge } from '@/components/ui/animatedbadge';
 import { useUserCategories } from '@/hooks/useUserCategories';
+import { useMembership } from '@/hooks/useMembership';
 
 interface User {
   id: number;
@@ -23,6 +24,7 @@ interface UserProfileProps {
 
 export default function UserProfile({ user, onBack }: UserProfileProps) {
   const router = useRouter();
+  const { membership } = useMembership(); // ✅ get membership info
   const { userCategories, isLoadingCategories, approvedCategoriesCount, creatorBadge } = useUserCategories(user.id);
   const [formData] = useState({
     username: user.username,
@@ -82,7 +84,7 @@ export default function UserProfile({ user, onBack }: UserProfileProps) {
           </h2>
           <div className="flex items-center space-x-2">
           {/* Premium Badge */}
-          {user.is_premium && (
+          {membership?.is_premium || user?.is_premium && (
             <div className="mt-2">
               <VerifyBadge type="premium" size="md" showLabel={true} />
             </div>
@@ -132,7 +134,7 @@ export default function UserProfile({ user, onBack }: UserProfileProps) {
                         sizes="(max-width: 768px) 50vw, 33vw"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-eastern-blue-500 to-eastern-blue-700 flex items-center justify-center group-hover:from-eastern-blue-600 group-hover:to-eastern-blue-800 transition-all">
+                      <div className="w-full h-full bg-gradient-to-br from-cyan-500 to-cyan-900 flex items-center justify-center group-hover:from-cyan-600 group-hover:to-cyan-800 transition-all">
                         <span className="text-white text-4xl font-bold">
                           {category.name.charAt(0).toUpperCase()}
                         </span>
