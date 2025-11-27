@@ -275,7 +275,7 @@ export default function CategoriesPage() {
                 {/* Collection Header */}
                 <div className="relative flex md:justify-center  -mt-11 mb-4">
                   <div className="bg-cyan-700 text-white px-6 py-2  rounded-full shadow-md">
-                    <h3 className="lg:text-xl font-bold text-start md:text-center">{collection.name}</h3>
+                    <h3 className=" text-sm lg:text-xl font-bold text-start md:text-center">{collection.name}</h3>
                   </div>
                   <div className="absolute -right-3 lg:right-0 top-1/2 transform -translate-y-1/2 text-primary-600 text-sm bg-primary-50 px-3 py-1 rounded-full">
                     {collection.categories?.length || 0} categories
