@@ -24,13 +24,13 @@ export default function Header({ title, backHref }: HeaderProps) {
           <div className="flex items-center  space-x-4">
             <Link
               href={backHref}
-              className="flex items-center  space-x-3 text-white hover:text-primary-100 transition-colors group"
+              className="flex items-center  md:space-x-3 text-white hover:text-primary-100 transition-colors group"
             >
               <ArrowLeft className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-              <span className="font-medium">Back</span>
+              <span className="font-medium hidden sm:inline ">Back</span>
             </Link>
             <div className="h-8 w-px bg-white/30"></div>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center md:space-x-3">
                <UserDropdown />
               
             </div>
@@ -43,7 +43,7 @@ export default function Header({ title, backHref }: HeaderProps) {
              -translate-x-[30%]   /* mobile shift */
              md:-translate-x-1/2  /* desktop perfect center */
              pointer-events-none">
-            <h1 className="lg:text-xl font-bold text-white">{title}</h1>
+            <h1 className="text-sm md:text-xl font-bold text-white">{title}</h1>
           </div>
 
           {/* Right: logo */}
