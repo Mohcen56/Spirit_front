@@ -277,10 +277,10 @@ export default function AddedCategoriesPage() {
             {/* Section Header */}
             <div className="relative flex flex-col gap-4 -mt-11 mb-4">
               <div className="flex items-center justify-between">
-                <div className="bg-cyan-700 text-white px-6 py-2 rounded-full shadow-md">
-                  <h3 className=" text-sm md:text-xl font-bold text-center">Added Categories</h3>
+                <div className="bg-cyan-700 text-white px-2 md:px-6 py-2 rounded-full  shadow-md">
+                  <h3 className=" text-xs md:text-xl font-bold text-start md:text-center">Added Categories</h3>
                 </div>
-                <div className="text-primary-600 text-sm bg-primary-50 px-3 py-1 rounded-full">
+                <div className="text-primary-600 text-xs px-2 md:text-sm bg-primary-50 md:px-3 py-1 rounded-full">
                   {filteredCategories.length} of {list.length} categories
                 </div>
               </div>
@@ -292,7 +292,7 @@ export default function AddedCategoriesPage() {
               {/* Add Category Button */}
               <Link
                 href="/categories/create"
-                className="relative w-full aspect-[3/4] min-h-[220px] sm:min-h-[220px] rounded-3xl border-2 border-dashed border-cyan-600 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 hover:border-cyan-600 bg-white/50 backdrop-blur-sm flex flex-col items-center justify-center group"
+                className="relative w-full aspect-[3/4] min-h-[230px] sm:min-h-[230px] rounded-3xl border-2 border-dashed border-cyan-600 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 hover:border-cyan-600 bg-white/50 backdrop-blur-sm flex flex-col items-center justify-center group"
               >
                 <div className="flex flex-col items-center justify-center space-y-3">
                   <div className="w-15 h-15 md:w-20 md:h-20 bg-gradient-to-br from-cyan-600 to-cyan-700 rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
@@ -324,7 +324,7 @@ export default function AddedCategoriesPage() {
                     <div
                       key={category.id}
                       onClick={() => handleCategoryClick(category)}
-                      className={`relative w-full h-full aspect-[3/4] min-h-[220px] rounded-3xl border-primary-300 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 cursor-pointer ${
+                      className={`relative w-full h-full aspect-[3/4] min-h-[230px] rounded-3xl border-primary-300 overflow-hidden shadow-xl transition-all duration-200 transform hover:scale-105 cursor-pointer ${
                         isPending ? 'opacity-75 ring-2 ring-orange-400' : ''
                       }`}
                     >
@@ -352,7 +352,7 @@ export default function AddedCategoriesPage() {
                                 setShowProfile(true);
                               }
                             }}
-                            className="w-8 h-8 rounded-full flex items-center justify-center hover:scale-105 transition-transform cursor-pointer overflow-hidden shadow-lg bg-white/20"
+                            className=" w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center hover:scale-105 transition-transform cursor-pointer overflow-hidden shadow-lg bg-white/20"
                             aria-label="View creator profile"
                           >
                             <Image
@@ -365,7 +365,7 @@ export default function AddedCategoriesPage() {
                               quality={75}
                             />
                           </button>
-                          <span className="text-eastern-blue-100 text-sm font-semibold leading-tight flex items-center gap-1">
+                          <span className="text-eastern-blue-100  text-xs md:text-sm font-semibold leading-tight flex items-center gap-1">
                             {category.created_by_username || 'Unknown'}
                             {category.created_by_is_premium && (
                               <VerifyIcon type="premium" size="xs" />
@@ -407,16 +407,16 @@ export default function AddedCategoriesPage() {
                       </div>
 
                       {/* Bottom Section - Dark Background with Actions */}
-                      <div className="relative h-[20%] bg-gradient-to-br from-cyan-500 to-cyan-900  px-3 py-1 flex flex-col justify-between">
+                      <div className="relative h-[22%] bg-gradient-to-br from-cyan-500 to-cyan-900  px-3 py-1 flex flex-col justify-between">
 
                         <div className="flex flex-col gap-1 ">
                           {/* Category Name */}
-                          <h3 className="text-eastern-blue-100 font-bold text-sm leading-tight  line-clamp-2 flex-grow">
+                          <h3 className="text-eastern-blue-100 font-bold mb-0 text-xs md:text-sm leading-tight  line-clamp-2 flex-grow">
                             {category.name}
                           </h3>
 
                           {/* Actions */}
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 mb-1">
                             <button
                               onClick={(e) => handleSaveCategory(e, category)}
                               disabled={!canSave && !category.is_saved}
@@ -426,7 +426,7 @@ export default function AddedCategoriesPage() {
                                   : canSave
                                   ? 'bg-white/20 hover:bg-white/30 backdrop-blur-sm'
                                   : 'bg-gray-500/50 cursor-not-allowed'
-                              } text-white text-xs font-semibold py-2 px-3 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 ${!canSave && !category.is_saved ? 'opacity-60' : ''}`}
+                              } text-white text-xs font-semibold p-1 md:py-2 px-3 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 ${!canSave && !category.is_saved ? 'opacity-60' : ''}`}
                               title={!canSave && !category.is_saved ? '🔒 Premium feature' : ''}
                             >
                               {!canSave && !category.is_saved && (
@@ -457,7 +457,7 @@ export default function AddedCategoriesPage() {
                                 category.is_liked 
                                   ? 'bg-red-500 hover:bg-red-600' 
                                   : 'bg-white/20 hover:bg-white/30'
-                              } backdrop-blur-sm px-3 py-2 rounded-lg transition-all shadow-md hover:shadow-lg group flex items-center gap-1.5`}
+                              } backdrop-blur-sm px-3 md:py-2 py-1 rounded-lg transition-all shadow-md hover:shadow-lg group flex items-center gap-1.5`}
                               aria-label={category.is_liked ? 'Unlike category' : 'Like category'}
                               title={category.is_liked ? 'Unlike this category' : 'Like this category'}
                             >

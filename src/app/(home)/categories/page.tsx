@@ -273,11 +273,11 @@ export default function CategoriesPage() {
             {filteredCollections.map((collection) => (
               <div key={collection.id} className="bg-cyan-50 backdrop-blur-md rounded-2xl p-6  mb-8 border border-primary-200 shadow-lg">
                 {/* Collection Header */}
-                <div className="relative flex md:justify-center  -mt-11 mb-4">
-                  <div className="bg-cyan-700 text-white px-6 py-2  rounded-full shadow-md">
-                    <h3 className=" text-sm lg:text-xl font-bold text-start md:text-center">{collection.name}</h3>
+                <div className="relative flex items-center justify-between  -mt-11 mb-4">
+                  <div className="bg-cyan-700 text-white px-2 md:px-6 py-2  rounded-full shadow-md">
+                    <h3 className=" text-xs md:text-xl font-bold text-start md:text-center">{collection.name}</h3>
                   </div>
-                  <div className="absolute -right-3 lg:right-0 top-1/2 transform -translate-y-1/2 text-primary-600 text-sm bg-primary-50 px-3 py-1 rounded-full">
+                  <div className="absolute -right-3 lg:right-0 top-1/2 transform -translate-y-1/2 text-primary-600 text-xs md:text-sm bg-primary-50 px-2 md:px-3 py-1 rounded-full">
                     {collection.categories?.length || 0} categories
                   </div>
                 </div>
@@ -316,7 +316,7 @@ export default function CategoriesPage() {
                     disabled={!canSelect || isLocked}
                     className={`relative w-full aspect-[3/4] min-h-[200px] sm:min-h-[220px] overflow-hidden border-4 rounded-4xl transition-all duration-200 transform hover:scale-105 ${
                       isSelected
-                              ? 'border-amber-600' // Selected border color
+                              ? 'border-yellow-400' // Selected border color
                               : 'border-cyan-700' // Default border color
                     } ${(!canSelect || isLocked) ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
@@ -354,11 +354,11 @@ export default function CategoriesPage() {
                         {/* Dropdown Info Panel */}
                         {infoModal.open && infoModal.category?.id === category.id && (
                           <div 
-                            className="info-dropdown absolute top-full  mt-2 w-53 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 z-50 animate-fadeIn"
+                            className="info-dropdown absolute top-full  mt-2 min-w-33 md:w-53 bg-white rounded-xl shadow-2xl border border-gray-200 p-2 md:p-4 z-50 animate-fadeIn"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <div className="flex justify-between items-start mb-2">
-                              <h3 className="font-bold text-gray-900 text-sm">{category.name}</h3>
+                              <h3 className="font-bold text-gray-900 text-xs md:text-sm">{category.name}</h3>
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -369,7 +369,7 @@ export default function CategoriesPage() {
                                 ×
                               </button>
                             </div>
-                            <p className="text-gray-600 text-xs leading-relaxed">
+                            <p className="text-gray-600 text-[9px] md:text-xs  leading-relaxed">
                               {category.description || 'No description available for this category.'}
                             </p>
                           </div>
@@ -427,7 +427,7 @@ export default function CategoriesPage() {
                       )}
                       {/* Selection Indicator */}
                       {isSelected && (
-                        <div className="absolute top-0 left-2 lg:top-2 lg:left-2 bg-green-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold">
+                        <div className="absolute top-0 left-2 lg:top-2 lg:left-2 bg-yellow-400 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold">
                           ✓
                         </div>
                       )}
