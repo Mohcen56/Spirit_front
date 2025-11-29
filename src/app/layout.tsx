@@ -6,6 +6,7 @@ import ReduxProvider from "@/components/utils/ReduxProvider";
 import { QueryProvider } from "@/providers/QueryProvider";
 import ErrorBoundary from "@/components/utils/ErrorBoundary";
 import { NotificationProvider } from "@/providers/NotificationProvider";
+import { Analytics } from '@vercel/analytics/next';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -99,6 +100,7 @@ export default function RootLayout({
             <ErrorBoundary>
               <NotificationProvider>
                 {children}<SpeedInsights />
+                 <Analytics />
               </NotificationProvider>
             </ErrorBoundary>
           </ReduxProvider>
