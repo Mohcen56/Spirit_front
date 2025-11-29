@@ -19,7 +19,7 @@ export default function GameHeader({ onBackToBoard, currentTeamTurn, onTeamTurnC
           {/* Left: Logo + Team turn */}
           <div className="flex items-center gap-3">
             <Image
-              src="/logo/mylogo.svg"
+              src="/logo/mylogo.webp"
               alt="Trivia Logo"
               width={40}
               height={40}

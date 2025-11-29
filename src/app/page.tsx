@@ -99,7 +99,7 @@ export default function HomePage() {
     {/* Logo */}
     <div className="flex justify-center mb-12 relative z-50">
       <Image
-        src="logo/logo3.svg"
+        src="logo/logo3.webp"
         alt="Trivia Logo"
         width={650}
         height={650}
@@ -302,7 +302,7 @@ export default function HomePage() {
       {/* SVG Logo Placeholder */}
     <div className="-mt-8 lg:-ml-40 ">
       <Image
-        src="logo/mylogo.svg"
+        src="logo/mylogo.webp"
         alt="Trivia Logo"
         width={150}
         height={150}

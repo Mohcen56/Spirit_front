@@ -62,7 +62,7 @@ const ResetPassword = () => {
        {/* Logo area */}
         <div className="flex justify-center mb-6">
          <Image
-                          src="logo/mylogo.svg"
+                          src="logo/mylogo.webp"
                           alt="Trivia Logo"
                           width={100}
                           height={100}
