@@ -33,7 +33,7 @@ export default function HomePage() {
           {/* Welcome Section */}
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-800 mb-4">
-              Welcome to trivia spirit
+              Welcome to Trivia Spirit
             </h2>
             <p className="text-xl text-gray-600">
               Test your knowledge and have fun with your friends
