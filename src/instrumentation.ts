@@ -13,7 +13,7 @@ export async function register() {
     dsn,
     enabled: process.env.NODE_ENV === 'production',
     tracesSampleRate: 1,
-    enableLogs: true,
+    enableLogs: false,
     sendDefaultPii: false,
     integrations: (defaults) => defaults.filter((i) => i.name !== 'Prisma'),
     beforeSend(event) {
