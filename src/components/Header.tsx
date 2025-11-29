@@ -49,7 +49,7 @@ export default function Header({ title, backHref }: HeaderProps) {
           {/* Right: logo */}
           <div className="flex p-0">
                 <Image
-                  src="/logo/mylogo.webp"
+                  src="/logo/mylogo.svg"
                   alt="Trivia Logo"
                   width={50}
                   height={50}

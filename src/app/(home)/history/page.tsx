@@ -9,6 +9,7 @@ import { useHeader } from '@/contexts/HeaderContext';
 import { Clock, Play } from 'lucide-react';
 import Image from 'next/image';
 import { useImageError } from '@/hooks/useImageError';
+import { ShinyButton } from '@/components/ui/ShinyButton';
 
 interface GameCategory {
   id: number;
@@ -100,12 +101,15 @@ export default function HistoryPage() {
         </div>
         <h3 className="text-2xl font-bold text-gray-800 mb-2">No Games Yet</h3>
         <p className="text-gray-600 mb-6">Start your first game to see it here!</p>
-        <button
+        <ShinyButton
           onClick={() => router.push('/categories')}
-          className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105"
+          icon="play-svg"
+          bgColor="bg-gradient-to-r from-green-600 to-blue-600"
+          hoverColor="hover:from-green-700 hover:to-blue-700"
+          shadowColor="hover:shadow-green-500/30"
         >
           Start New Game
-        </button>
+        </ShinyButton>
       </div>
     ) : (
       <div className="space-y-6">
@@ -114,11 +118,11 @@ export default function HistoryPage() {
         {games.map((game) => (
           <div
             key={game.id}
-            className="bg-eastern-blue-100 backdrop-blur-md rounded-2xl p-6 mb-10 border border-primary-200 shadow-lg relative pb-20"
+            className="bg-cyan-50 backdrop-blur-md rounded-2xl p-4 mb-12 border border-primary-200 shadow-lg relative pb-20"
           >
             {/* Game Header */}
-            <div className="relative flex justify-between items-center -mt-11 mb-6">
-              <div className="bg-eastern-blue-700 text-white px-6 py-2 rounded-full shadow-md">
+            <div className="relative flex justify-between items-center -mt-10 mb-6">
+              <div className="bg-cyan-700 text-white px-6 py-2 rounded-full shadow-md">
                 <h3 className=" text-xs lg:text-xl font-bold text-center flex items-center gap-2">
                   <Clock className="h-5 w-5" />
                   {formatDate(game.date_played)}
@@ -173,15 +177,21 @@ export default function HistoryPage() {
               ))}
             </div>
 
-            {/* Play Again Button — FIXED AT THE BOTTOM */}
-            <div className="absolute -bottom-5 left-0 w-full flex justify-center">
-              <button
+            {/* Play Again Button — STICKY TO CARD BOTTOM */}
+            <div className="absolute -bottom-9 left-0 w-full flex justify-center pb-4 z-10">
+              <ShinyButton
                 onClick={() => handlePlayAgain(game.categories)}
-                className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-bold py-3 px-8 rounded-xl transition-all duration-200 transform hover:scale-105 flex items-center space-x-3 shadow-lg"
+                icon={Play}
+                bgColor="bg-cyan-600"
+                hoverColor="hover:bg-cyan-700"
+                shadowColor="hover:shadow-cyan-500/30"
+                className="shadow-lg"
+                 paddingX="px-6 md:px-12"
+                paddingY="py-2 md:py-4"
+                textSize="text-xs md:text-xl"
               >
-                <Play className="h-5 w-5" />
-                <span>Play Again with Same Categories</span>
-              </button>
+                Play Again 
+              </ShinyButton>
             </div>
           </div>
         ))}
