@@ -38,7 +38,7 @@ export default function TeamSelector({
       </div>
 
       {/* Team Selection Grid - Responsive Layout */}
-      <div className="grid grid-cols-2  content-center gap-2  md:gap-4  md:mb-8 max-w-2xl mx-auto min-h-[20rem]">
+      <div className="grid grid-cols-2  md:content-center gap-1  md:gap-4  md:mb-8 max-w-2xl mx-auto min-h-[15rem]">
         {teams.map((team) => (
           <button
             key={team.id}
@@ -69,7 +69,7 @@ export default function TeamSelector({
 
             {/* Team Name */}
             <div className="flex-1 text-center">
-              <h3 className="font-bold text-xl text-white">
+              <h3 className="font-bold md:text-xl text-white">
                 {team.name}
               </h3>
             </div>
@@ -96,7 +96,7 @@ export default function TeamSelector({
 
           {/* No Answer Text */}
           <div className="flex-1 text-center">
-            <h3 className="font-bold text-xl text-white">
+            <h3 className="font-bold md:text-xl text-white">
             no one answered
             </h3>
           </div>
@@ -113,7 +113,7 @@ export default function TeamSelector({
           <div className=" absolute -bottom-6 -right-15 transform -translate-x-1/2">
             <button
               onClick={onBackToAnswer}
-              className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors  text-xs md:text-lg font-bold"
+              className="bg-slate-700 hover:bg-slate-600 text-white md:px-6 md:py-3 py-2 px-3 rounded-lg flex items-center space-x-2 transition-colors  text-xs md:text-lg font-bold"
             >
               <RotateCcw className="h-4 w-4" />
               <span>Back to Answer</span>

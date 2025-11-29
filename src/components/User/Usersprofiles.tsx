@@ -84,21 +84,30 @@ export default function UserProfile({ user, onBack }: UserProfileProps) {
           </h2>
           <div className="flex items-center space-x-2">
           {/* Premium Badge */}
-          {membership?.is_premium || user?.is_premium && (
+          {(membership?.is_premium || user?.is_premium) && (
             <div className="mt-2">
-              <VerifyBadge type="premium" size="md" showLabel={true} />
+              {/* Smaller on mobile, full on md+ */}
+              <div className="sm:hidden">
+                <VerifyBadge type="premium" size="sm" showLabel={false} />
+              </div>
+              <div className="hidden sm:block">
+                <VerifyBadge type="premium" size="md" showLabel={true} />
+              </div>
             </div>
           )}
 
             {/* Creator Level - Animated Badge based on approved categories */}
             {approvedCategoriesCount > 0 && (
               <div className="mt-2 flex">
-                <AnimatedBadge
-                  text={`${creatorBadge.level} · ${creatorBadge.count}`}
-                  icon={creatorBadge.icon}
-                  borderColor={creatorBadge.borderColor}
-                  shadowColor={creatorBadge.shadowColor}
-                />
+                {/* Slightly scale down on mobile */}
+                <div className="scale-90 md:scale-100 origin-left">
+                  <AnimatedBadge
+                    text={`${creatorBadge.level} · ${creatorBadge.count}`}
+                    icon={creatorBadge.icon}
+                    borderColor={creatorBadge.borderColor}
+                    shadowColor={creatorBadge.shadowColor}
+                  />
+                </div>
               </div>
             )}
         </div></div>

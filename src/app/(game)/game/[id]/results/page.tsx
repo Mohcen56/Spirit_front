@@ -34,11 +34,13 @@ export default function GameResultsPage() {
   const getRankIcon = (position: number) => {
     switch (position) {
       case 1:
-        return <Trophy className="h-8 w-8 text-yellow-500" />;
+        return <Medal className="h-8 w-8 text-yellow-500" />;
       case 2:
-        return <Medal className="h-8 w-8 text-gray-400" />;
+        return <Award className="h-8 w-8 text-gray-400" />;
       case 3:
         return <Award className="h-8 w-8 text-amber-600" />;
+      case 4:
+        return <Award className="h-8 w-8 text-blue-500" />;
       default:
         return <span className="text-2xl font-bold text-gray-600">#{position}</span>;
     }
@@ -48,6 +50,7 @@ export default function GameResultsPage() {
     if (position === 1) return '1st Place';
     if (position === 2) return '2nd Place';
     if (position === 3) return '3rd Place';
+    if (position === 4) return '4th Place';
     return `${position}th Place`;
   };
 
@@ -79,7 +82,7 @@ export default function GameResultsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-yellow-100 via-orange-100 to-pink-100 flex items-center justify-center">
+      <div className="min-h-screen bg-cyan-50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-600 text-xl mb-4">{error}</div>
           <button
@@ -110,7 +113,7 @@ export default function GameResultsPage() {
         </div>
 
         {/* Results Grid */}
-        <div className="max-w-4xl mx-auto grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="max-w-7xl mx-auto grid  gap-6 grid-cols-2 lg:grid-cols-4">
           {sortedTeams.map((team, index) => {
             const position = index + 1;
             return (
@@ -118,9 +121,15 @@ export default function GameResultsPage() {
                 key={team.id}
                 className={`${getTeamCardColor(
                   position
-                )} rounded-xl p-6 shadow-lg transform hover:scale-105 transition-all duration-300 border-4 border-white ${
-                  position === 1 ? 'ring-4 ring-yellow-400 scale-105' : ''
-                }`}
+                )} rounded-xl p-6  shadow-lg transform transition-all duration-300 border-1 border-white ${
+                  position === 1
+                    ? 'ring-2 ring-yellow-500  scale-105'
+                    : position === 2
+                    ? 'ring-1 ring-gray-400 scale-100'
+                    : position === 3
+                    ? ' ring-1 ring-amber-500 scale-97'
+                    : ' ring-1 ring-blue-500 scale-93'
+                } `}
               >
                 <div className="flex flex-col items-center text-center">
                   <div className="mb-3">{getRankIcon(position)}</div>
@@ -162,10 +171,16 @@ export default function GameResultsPage() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12">
           <button
             onClick={handleBackHome}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors"
+            className="group/button relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-lg bg-cyan-600 px-1 py-3 md:px-8  text-sm md:text-base font-bold text-white transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/30 disabled:bg-gray-600 disabled:scale-100 disabled:cursor-not-allowed"
           >
-            <Home className="h-5 w-5" />
-            Back to Home
+            <span className="flex h-8 w-8 items-center justify-center rounded text-white">
+              <Home className="h-6 w-6" />
+            </span>
+            <span className="text-lg md:text-xl font-bold">Back to Home</span>
+            {/* Animated sheen overlay */}
+            <div className="pointer-events-none absolute inset-0 flex h-full w-full justify-center [transform:skew(-13deg)_translateX(-100%)] group-hover/button:duration-700 group-hover/button:[transform:skew(-13deg)_translateX(100%)]">
+              <div className="relative h-full w-8 bg-white/20" />
+            </div>
           </button>
         </div>
 

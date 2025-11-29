@@ -470,7 +470,7 @@ export default function QuestionPage() {
                    <div className="absolute -bottom-6 left-26 transform -translate-x-1/2">
                     <button
                       onClick={handleShowAnswer}
-                      className="bg-brown-800 hover:bg-brown-700 text-white font-bold py-3 px-8 rounded-xl  shadow-lg transition-all duration-200 text-lg"
+                      className="bg-brown-800 hover:bg-brown-700 text-white font-bold py-2 px-4 md:py-3 md:px-8 rounded-xl  shadow-lg transition-all duration-200 text-md"
                     >
                       Answer
                     </button>

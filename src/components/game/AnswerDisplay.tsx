@@ -61,7 +61,7 @@ export default function AnswerDisplay({ question, onShowQuestion, onShowTeamSele
         {/* Back to Question Button */}
         <button
           onClick={onShowQuestion}
-          className=" bg-brown-800 hover:bg-brown-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors text-xs md:text-lg font-bold"
+          className=" bg-brown-800 hover:bg-brown-700 text-white md:px-6  md:py-3 py-2 px-3 rounded-lg flex items-center space-x-2 transition-colors text-xs md:text-lg font-bold"
         >
           <RotateCcw className="h-4 w-4" />
           <span>Show Question</span>
@@ -72,7 +72,7 @@ export default function AnswerDisplay({ question, onShowQuestion, onShowTeamSele
       <div className="absolute -bottom-6 left-20 md:left-35 transform -translate-x-1/2">
         <button
           onClick={onShowTeamSelector}
-          className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-3 rounded-xl flex items-center space-x-2 transition-colors font-bold text-xs md:text-lg"
+          className="bg-slate-700 hover:bg-slate-600 text-white md:px-4 md:py-3 py-2 px-3 rounded-xl flex items-center space-x-2 transition-colors font-bold text-xs md:text-lg"
         >
           <Users className="h-4 w-4" />
           <span>Who Answered?</span>

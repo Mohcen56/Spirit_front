@@ -322,11 +322,12 @@ return (
     </main>
 
     {/* Footer / Scoreboard - Fixed height (uses Redux liveTeams) */}
-    <footer className="bg-gradient-to-r from-brown-600 to-brown-800 py-2 md:py-4 flex items-center justify-center gap-3 md:gap-4 border-t-4 border-2 border-amber-500 h-20 md:h-23 flex-shrink-0">
+    <footer className="bg-gradient-to-r from-brown-600 to-brown-800 py-2 md:py-4 flex items-center justify-center gap-1 md:gap-4 border-t-4 border-2 border-amber-500 h-15 md:h-23 flex-shrink-0">
       {liveTeams && liveTeams.length > 0 ? (
         liveTeams.map((team) => (
-          <div key={team.id} className="bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 p-[2px] rounded-2xl" dir="ltr">
-            <div className="w-full h-full bg-orange-200/95 rounded-2xl px-3 md:px-4 py-1.5 md:py-1 flex items-center shadow-md">
+          <div key={team.id} className="bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 p-[1px] rounded-2xl" dir="ltr">
+            {/* Make inner container stack on mobile and row on md+ */}
+            <div className="w-full h-full bg-orange-200/95 rounded-2xl px-2 md:px-4  py-1 flex flex-col md:flex-row items-center md:items-center shadow-md">
               {/* Team Avatar */}
               <div className="w-8 h-8 md:w-15 md:h-15 rounded-full items-center justify-center overflow-hidden mr-2 md:mr-3 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 p-[2px] hidden md:flex">
                 <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
@@ -342,24 +343,24 @@ return (
               </div>
               
               {/* Team Name */}
-              <span className="text-orange-900 font-bold text-xs md:text-sm mr-2 md:mr-3 min-w-[50px] md:min-w-[60px]">
+              <span className="text-orange-900 font-bold text-xs md:text-sm  md:mb-0 md:mr-3 min-w-[40px] md:min-w-[60px] text-center w-full md:w-auto">
                 {team.name}
               </span>
               
               {/* Score Controls Row */}
-              <div className="flex items-center gap-2 md:gap-3">
+              <div className="flex items-center justify-center gap-2 md:gap-3 w-full md:w-auto">
                 <button 
                   onClick={() => updateTeamScore(team.id, -100)}
-                  className="bg-amber-700 hover:bg-amber-800 text-white rounded-md w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-sm md:text-lg font-bold transition-all duration-200 shadow-sm"
+                  className="bg-amber-700 hover:bg-amber-800 text-white rounded-md w-5 h-5 md:w-8 md:h-8 flex items-center justify-center text-xs md:text-lg font-bold transition-all duration-200 shadow-sm"
                 >
                   -
                 </button>
-                <span className="text-orange-900 font-extrabold text-base md:text-xl min-w-[35px] md:min-w-[50px] text-center">
+                <span className="text-orange-900 font-extrabold text-base md:text-xl min-w-[20px] md:min-w-[50px] text-center">
                   {team.score ?? 0}
                 </span>
                 <button 
                   onClick={() => updateTeamScore(team.id, 100)}
-                  className="bg-amber-700 hover:bg-amber-800 text-white rounded-md w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-sm md:text-lg font-bold transition-all duration-200 shadow-sm"
+                  className="bg-amber-700 hover:bg-amber-800 text-white rounded-md w-5 h-5 md:w-8 md:h-8 flex items-center justify-center text-sm md:text-lg font-bold transition-all duration-200 shadow-sm"
                 >
                   +
                 </button>
