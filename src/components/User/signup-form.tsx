@@ -167,7 +167,7 @@ export function SignupForm({
 
           <div className="bg-eastern-blue-700 relative hidden md:block">
             <Image
-              src="/logo/logo3..svg"
+              src="/logo/logo3.svg"
               alt="Image"
               fill
               className="absolute inset-0 object-cover dark:brightness-[0.2] dark:grayscale"
