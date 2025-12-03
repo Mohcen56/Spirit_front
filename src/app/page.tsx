@@ -339,18 +339,12 @@ export default function HomePage() {
       description="Start for free or unlock everything with our Lifetime Premium plan"
       tiers={pricingTiers}
     />
-    <p className="text-center text-sm text-gray-500 mt-6">
-      Psst… sometimes we surprise our{" "}
-      <a
-        href="https://instagram.com/Trivia.Spirit"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-blue-500 underline"
-      >
-        Instagram
-      </a>{" "}
-      followers with secret discount codes 👀
-    </p>
+      <p className="text-center text-xs text-gray-500 mt-6 max-w-2xl mx-auto">
+        By proceeding to purchase this plan, you accept our{" "}
+        <Link href="/terms" className="text-blue-600 hover:underline">Terms of Service</Link>,{" "}
+        <Link href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>, and{" "}
+        <Link href="/refund" className="text-blue-600 hover:underline">Refund Policy</Link>.
+      </p>
   </div>
 </section>
 
