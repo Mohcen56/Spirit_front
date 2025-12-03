@@ -294,7 +294,7 @@ export default function HomePage() {
     </div>
   </div>
 </section>
-<footer className="bg-gradient-to-b from-cyan-900 to-cyan-800 text-gray-200 pt-10 pb-4">
+<footer className="bg-gradient-to-b from-cyan-900 to-cyan-800 text-gray-200 pt-10 p-1">
   <div className="container mx-auto px-6 grid grid-cols-1 mb-3 md:grid-cols-3 gap-10  justify-center items-center lg:items-start">
 
     {/* Logo + Description (LEFT in English) */}
@@ -400,9 +400,17 @@ export default function HomePage() {
   </div>
 
   {/* Divider + Copyright */}
-  <div className=" border-t border-gray-500/40 pt-3 text-center text-sm text-gray-400">
+    
+  <div className="text-sm text-gray-400 mt-6 flex flex-col sm:flex-row gap-3 sm:gap-6 justify-center">
+  <Link href="/terms" className="hover:text-gray-200">Terms of Service</Link>
+  <Link href="/privacy" className="hover:text-gray-200">Privacy Policy</Link>
+  <Link href="/refund" className="hover:text-gray-200">Refund Policy</Link>
+</div>
+  <div className=" border-t border-gray-500/40 py-1 text-center text-sm text-gray-400">
     © {new Date().getFullYear()} Trivia Spirit. All rights reserved.
   </div>
+  
+
 </footer>
 
 
