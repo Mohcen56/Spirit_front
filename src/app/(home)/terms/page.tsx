@@ -1,6 +1,7 @@
   export default function TermsPage() {
   return (
     <div className="prose max-w-3xl mx-auto py-10">
+      <h1>Owner</h1><h2>Mohcen Djeid (Sole Proprietor)</h2>
       <h1>Terms of Service</h1>
       <p>Last updated: December 2025</p>
 

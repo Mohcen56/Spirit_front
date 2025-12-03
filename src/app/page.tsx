@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuthGate } from "@/hooks/useAuthGate";
 import { logger } from "@/lib/utils/logger";
+import { CreativePricing } from "@/components/ui/creative-pricing";
+import type { PricingTier } from "@/components/ui/creative-pricing";
+import { Pencil, Star } from "lucide-react";
 
 import Link from "next/link";
 
@@ -14,7 +17,40 @@ export default function HomePage() {
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  const { user, isLoading, logout } = useAuthGate();
+  const { user, isLoading } = useAuthGate();
+
+  const pricingTiers: PricingTier[] = [
+    {
+      name: "Free",
+      icon: <Pencil className="w-6 h-6" />,
+      price: 0,
+      description: "Try 6 base categories — no cost",
+      color: "blue",
+      href: user ? "/dashboard" : "/login",
+      features: [
+        "Access 6 base categories",
+        "No repeated questions",
+        "Create & play your own category",
+      ],
+    },
+    {
+      name: "Lifetime Premium",
+      icon: <Star className="w-6 h-6" />,
+      price: 40,
+      originalPrice: 50,
+      description: "Unlock ALL content now and ALL future updates",
+      color: "yellow",
+      href: user ? "/plans" : "/login",
+      features: [
+        "No ads",
+        "All current categories unlocked",
+        "All future categories and game updates included",
+        "Access all community categories",
+        "Early Supporter Badge",
+      ],
+      popular: true,
+    },
+  ];
 
 
   const avatarSrc = useMemo(() => {
@@ -294,6 +330,30 @@ export default function HomePage() {
     </div>
   </div>
 </section>
+
+{/* Pricing Section */}
+<section id="pricing" className="py-8 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+  <div className="  mx-auto px-4">
+    <CreativePricing
+      title="Plans"
+      description="Start for free or unlock everything with our Lifetime Premium plan"
+      tiers={pricingTiers}
+    />
+    <p className="text-center text-sm text-gray-500 mt-6">
+      Psst… sometimes we surprise our{" "}
+      <a
+        href="https://instagram.com/Trivia.Spirit"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-500 underline"
+      >
+        Instagram
+      </a>{" "}
+      followers with secret discount codes 👀
+    </p>
+  </div>
+</section>
+
 <footer className="bg-gradient-to-b from-cyan-900 to-cyan-800 text-gray-200 pt-10 p-1">
   <div className="container mx-auto px-6 grid grid-cols-1 mb-3 md:grid-cols-3 gap-10  justify-center items-center lg:items-start">
 
@@ -356,45 +416,50 @@ export default function HomePage() {
     <div className=" text-center lg:text-left ">
       <h3 className="text-xl font-bold mb-5">Useful Links</h3>
       <ul className="space-y-3 text-gray-300 text-lg">
-        <Link href="#how-to-play" className="flex items-center gap-2 justify-center  lg:justify-start  hover:text-white transition">
-          <Image src="/icons/brain.svg" alt="Brain icon" width={24} height={24} className="w-6 h-6" /> How to Play
-        </Link>
-        <Link href="#help-perks" className="flex items-center gap-2 justify-center lg:justify-start  hover:text-white transition">
-          <Image src="/icons/bars-4.svg" alt="Help perks icon" width={24} height={24} className="w-6 h-6" /> help perks
-        </Link>
-
-            <a
-        href="https://instagram.com/trivia.spirit"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center gap-2 justify-center lg:justify-start hover:text-white transition"
-      >
-        <Image
-          src="/logo/Instagram_Glyph_Gradient.svg"
-          alt="Instagram"
-          width={24}
-          height={24}
-          className="w-6 h-6"
-        />
-        <span>Follow us on Instagram</span>
-      </a>
-
-      <a
-        href="https://discord.gg/cYC6rMVKHj"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center gap-2 justify-center lg:justify-start hover:text-white transition"
-      >
-        <Image
-          src="/logo/discord.webp"
-          alt="Discord"
-          width={24}
-          height={24}
-          className="w-6 h-6"
-        />
-        <span>Join us on Discord</span>
-      </a>
-
+        <li>
+          <Link href="#how-to-play" className="flex items-center gap-2 justify-center  lg:justify-start  hover:text-white transition">
+            <Image src="/icons/brain.svg" alt="Brain icon" width={24} height={24} className="w-6 h-6" /> How to Play
+          </Link>
+        </li>
+        <li>
+          <Link href="#help-perks" className="flex items-center gap-2 justify-center lg:justify-start  hover:text-white transition">
+            <Image src="/icons/bars-4.svg" alt="Help perks icon" width={24} height={24} className="w-6 h-6" /> help perks
+          </Link>
+        </li>
+        <li>
+          <a
+            href="https://instagram.com/trivia.spirit"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 justify-center lg:justify-start hover:text-white transition"
+          >
+            <Image
+              src="/logo/Instagram_Glyph_Gradient.svg"
+              alt="Instagram"
+              width={24}
+              height={24}
+              className="w-6 h-6"
+            />
+            <span>Follow us on Instagram</span>
+          </a>
+        </li>
+        <li>
+          <a
+            href="https://discord.gg/cYC6rMVKHj"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 justify-center lg:justify-start hover:text-white transition"
+          >
+            <Image
+              src="/logo/discord.webp"
+              alt="Discord"
+              width={24}
+              height={24}
+              className="w-6 h-6"
+            />
+            <span>Join us on Discord</span>
+          </a>
+        </li>
       </ul>
     </div>
   </div>
