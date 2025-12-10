@@ -32,7 +32,7 @@ const sampleTiers: PricingTier[] = [
   {
     name: "Lifetime Premium",
     icon: <Star className="w-6 h-6" />,
-    price: 40,
+    price: 39.99,
     originalPrice: 50,    
     description: "Unlock ALL content now and ALL future updates",
     color: "yellow",
@@ -119,31 +119,36 @@ export default function PlansPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-12">
-      <CreativePricing
-        title="Level Up Your Trivia Experience"
-        description="Enjoy premium perks with our Lifetime Premium plan."
-        tiers={sampleTiers}
-        onSelectTier={handlePurchase}
-        isProcessing={isProcessing}
-      />
-      <p className="text-center text-sm text-gray-500 mt-6">
-        Psst… sometimes we surprise our {" "} <a
-    href="https://instagram.com/Trivia.Spirit"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="text-blue-500 underline"
-  >
-    Instagram
-  </a>{" "} followers with secret discount codes 👀
-      </p>
-      <p className="text-center text-xs text-gray-500 mt-6 max-w-2xl mx-auto">
-        By proceeding to purchase this plan, you accept our{" "}
-        <Link href="/terms" className="text-blue-600 hover:underline">Terms of Service</Link>,{" "}
-        <Link href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>, and{" "}
-        <Link href="/refund" className="text-blue-600 hover:underline">Refund Policy</Link>.
-      </p>
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex flex-col">
+      <div className="flex-1 pt-15 ">
+        <CreativePricing
+          title="Level Up Your Trivia Experience"
+          description="Enjoy premium perks with our Lifetime Premium plan."
+          tiers={sampleTiers}
+          onSelectTier={handlePurchase}
+          isProcessing={isProcessing}
+        />
+        <p className="text-center text-sm text-gray-500 mt-15">
+          Psst… sometimes we surprise our {" "} <a
+      href="https://instagram.com/Trivia.Spirit"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-blue-500 underline"
+    >
+      Instagram
+    </a>{" "} followers with secret discount codes 👀
+        </p>
+      </div>
+      <footer className="mt-auto py-4 border-t border-gray-300">
+        <p className="text-center text-xs text-gray-500  max-w-2xl mx-auto">
+          By proceeding to purchase this plan, you accept our{" "}
+          <Link href="/terms" className="text-blue-600 hover:underline">Terms of Service</Link>,{" "}
+          <Link href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>, and{" "}
+          <Link href="/refund" className="text-blue-600 hover:underline">Refund Policy</Link>.
+        </p>
+      </footer>
     </div>
+    
   );
 }
 

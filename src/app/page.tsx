@@ -13,9 +13,6 @@ import BounceLoader from '@/components/ui/loadingscreen';
 import Link from "next/link";
 
 export default function HomePage() {
- 
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   const { user, isLoading } = useAuthGate();
@@ -61,17 +58,6 @@ export default function HomePage() {
     return user.avatar;
   }, [user?.avatar]);
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
  
   const handleHeroCTA = () => {
     if (user) {
@@ -96,14 +82,8 @@ export default function HomePage() {
       <header className="relative z-10 backdrop-blur-md">
   <div className="container mx-auto flex items-center px-3 py-3 relative">
 
-    <div
-      className="absolute top-6 left-6 lg:top-8 lg:left-8 flex items-center space-x-4"
-      ref={menuRef}
-    >
-      <button
-        onClick={() => setMenuOpen(!menuOpen)}
-        className="relative w-16 h-16 lg:w-20 lg:h-20 rounded-full overflow-hidden border-2 border-white hover:ring-2 hover:ring-offset-2 hover:ring-primary-400 transition-all"
-      >
+    <div className="absolute top-6 left-6 lg:top-8 lg:left-8">
+      <div className="relative w-16 h-16 lg:w-20 lg:h-20 rounded-full overflow-hidden border-2 border-white">
         <Image
           src={avatarSrc}
           alt="Profile"
@@ -111,7 +91,7 @@ export default function HomePage() {
           height={80}
           className="object-cover w-full h-full"
         />
-      </button>
+      </div>
     </div>
   </div>
 </header>
@@ -234,40 +214,40 @@ export default function HomePage() {
   </div>
 </section>
 <section id="how-to-play" className="py-20 text-center bg-[#f4f6fd]">
-  <h2 className="text-4xl font-bold text-purple-700 mb-4">How to Play?</h2>
+  <h2 className="text-4xl font-bold  mb-20">How to Play?</h2>
 
   <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto mt-10">
     {/* Teams */}
-    <div className="bg-purple-50 rounded-2xl shadow-sm p-6 w-56">
-      <div className="text-purple-600 text-4xl mb-3">👥</div>
+    <div className="bg-cyan-100 rounded-2xl shadow-sm p-6 w-56">
+      <div className="text-cyan-600 text-4xl mb-3">👥</div>
       <h3 className="text-xl font-semibold mb-2 text-gray-800">Teams</h3>
       <p className="text-gray-600 text-sm">Two teams compete against each other.</p>
     </div>
 
     {/* Choose Categories */}
-    <div className="bg-purple-50 rounded-2xl shadow-sm p-6 w-56">
-      <div className="text-purple-600 text-4xl mb-3">📲</div>
+    <div className="bg-cyan-100 rounded-2xl shadow-sm p-6 w-56">
+      <div className="text-cyan-600 text-4xl mb-3">📲</div>
       <h3 className="text-xl font-semibold mb-2 text-gray-800">Choose Categories</h3>
       <p className="text-gray-600 text-sm">Each team selects 3 categories.</p>
     </div>
 
     {/* Team Turn */}
-    <div className="bg-purple-50 rounded-2xl shadow-sm p-6 w-56">
-      <div className="text-purple-600 text-4xl mb-3">↔️</div>
+    <div className="bg-cyan-100 rounded-2xl shadow-sm p-6 w-56">
+      <div className="text-cyan-600 text-4xl mb-3">↔️</div>
       <h3 className="text-xl font-semibold mb-2 text-gray-800">Team Turn</h3>
       <p className="text-gray-600 text-sm">Teams take turns choosing questions.</p>
     </div>
 
     {/* Time */}
-    <div className="bg-purple-50 rounded-2xl shadow-sm p-6 w-56">
-      <div className="text-purple-600 text-4xl mb-3">⏱️</div>
+    <div className="bg-cyan-100 rounded-2xl shadow-sm p-6 w-56">
+      <div className="text-cyan-600 text-4xl mb-3">⏱️</div>
       <h3 className="text-xl font-semibold mb-2 text-gray-800">Time</h3>
       <p className="text-gray-600 text-sm">60 seconds for Team 1, 30 seconds for Team 2.</p>
     </div>
 
     {/* Winning */}
-    <div className="bg-purple-50 rounded-2xl shadow-sm p-6 w-56">
-      <div className="text-purple-600 text-4xl mb-3">🏆</div>
+    <div className="bg-cyan-100 rounded-2xl shadow-sm p-6 w-56">
+      <div className="text-cyan-600 text-4xl mb-3">🏆</div>
       <h3 className="text-xl font-semibold mb-2 text-gray-800">Winning</h3>
       <p className="text-gray-600 text-sm">The team with the highest score wins!</p>
     </div>
@@ -332,22 +312,7 @@ export default function HomePage() {
   </div>
 </section>
 
-{/* Pricing Section */}
-<section id="pricing" className="py-8 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-  <div className="  mx-auto px-4">
-    <CreativePricing
-      title="Plans"
-      description="Start for free or unlock everything with our Lifetime Premium plan"
-      tiers={pricingTiers}
-    />
-      <p className="text-center text-xs text-gray-500 mt-6 max-w-2xl mx-auto">
-        By proceeding to purchase this plan, you accept our{" "}
-        <Link href="/terms" className="text-blue-600 hover:underline">Terms of Service</Link>,{" "}
-        <Link href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>, and{" "}
-        <Link href="/refund" className="text-blue-600 hover:underline">Refund Policy</Link>.
-      </p>
-  </div>
-</section>
+
 
 <footer className="bg-gradient-to-b from-cyan-900 to-cyan-800 text-gray-200 pt-10 p-1">
   <div className="container mx-auto px-6 grid grid-cols-1 mb-3 md:grid-cols-3 gap-10  justify-center items-center lg:items-start">
@@ -461,14 +426,31 @@ export default function HomePage() {
 
   {/* Divider + Copyright */}
     
-  <div className="text-sm text-gray-400 mt-6 flex flex-col sm:flex-row gap-3 sm:gap-6 justify-center">
-  <Link href="/terms" className="hover:text-gray-200">Terms of Service</Link>
-  <Link href="/privacy" className="hover:text-gray-200">Privacy Policy</Link>
-  <Link href="/refund" className="hover:text-gray-200">Refund Policy</Link>
+<div className= " border-t border-gray-500/40 py-2 mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-3 text-sm text-gray-400">
+  <span>© {new Date().getFullYear()} Trivia Spirit. All rights reserved.</span>
+  <span className="font-bold text-gray-300">•</span>
+
+  <Link href="/terms" className="hover:text-gray-200">
+    Terms of Service
+  </Link>
+
+  <span className="font-bold text-gray-300">•</span>
+
+  <Link href="/privacy" className="hover:text-gray-200">
+    Privacy Policy
+  </Link>
+
+  <span className="font-bold text-gray-300">•</span>
+
+  <Link href="/refund" className="hover:text-gray-200">
+    Refund Policy
+  </Link>
+
+  
+
+  
 </div>
-  <div className=" border-t border-gray-500/40 py-1 text-center text-sm text-gray-400">
-    © {new Date().getFullYear()} Trivia Spirit. All rights reserved.
-  </div>
+
   
 
 </footer>
