@@ -8,6 +8,7 @@ import { Game, Category, Team } from '@/types/game';
 import Header from '@/components/Header';
 import Image from 'next/image';
 import { ProcessingButton } from '@/components/ui/button2';
+import BounceLoader from '@/components/ui/loadingscreen';
 
 export default function GamePage() {
   const { id } = useParams();
@@ -52,12 +53,9 @@ export default function GamePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-eastern-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-primary-800 text-xl">Loading game...</p>
-        </div>
-      </div>
+     <div className="min-h-screen bg-eastern-blue-50 flex items-center justify-center">
+           <BounceLoader />
+         </div>
     );
   }
 
