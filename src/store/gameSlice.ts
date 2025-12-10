@@ -55,6 +55,9 @@ const gameSlice = createSlice({
       state.totalTeams = totalTeams;
       state.isGameActive = true;
       state.currentTeam = Math.floor(Math.random() * Math.max(totalTeams, 1)) + 1;
+      // Clear backup questions from previous game
+      state.backupQuestions = [];
+      state.playedQuestions = [];
     },
     switchToNextTeam: (state) => {
       if (state.isGameActive && state.totalTeams > 0) {
@@ -108,6 +111,9 @@ const gameSlice = createSlice({
       state.currentTeam = 1;
       state.totalTeams = 2;
       state.doublePerkActiveTeamId = null;
+      // Clear backup questions when game ends
+      state.backupQuestions = [];
+      state.playedQuestions = [];
     },
     activateDoublePerk: (state, action: PayloadAction<{ teamId: number }>) => {
       const { teamId } = action.payload;
@@ -154,6 +160,8 @@ const gameSlice = createSlice({
     setGameQuestions: (state, action: PayloadAction<Question[]>) => {
       state.questions = action.payload;
       state.playedQuestions = [];
+      // Clear backup questions when setting new game questions
+      state.backupQuestions = [];
       // clear buffers when new question set received
       for (const teamId of Object.keys(state.rerollBuffer)) {
         state.rerollBuffer[Number(teamId)] = null;

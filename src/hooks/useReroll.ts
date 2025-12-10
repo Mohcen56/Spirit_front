@@ -62,6 +62,18 @@ export function useReroll(gameId: number | string, currentQuestion?: Question | 
       if (backups.length === 0) return; // nothing to reroll to
     }
 
+    // Filter out already-played questions
+    const availableBackups = backups.filter(q => !playedQuestions.includes(q.id));
+    if (availableBackups.length === 0) {
+      // If all backups are played, fetch fresh ones
+      backups = await fetchAndSetBackups();
+      const availableAfterFetch = backups.filter(q => !playedQuestions.includes(q.id));
+      if (availableAfterFetch.length === 0) return; // nothing to reroll to
+      const next = availableAfterFetch[0];
+    } else {
+      backups = availableBackups;
+    }
+
     const next = backups[0];
     if (!next) return;
 
