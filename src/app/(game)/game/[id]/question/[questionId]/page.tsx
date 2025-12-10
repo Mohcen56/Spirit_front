@@ -14,7 +14,7 @@ import TeamsSidebar from '@/components/game/TeamsSidebar';
 import { getFullImageUrl } from '@/lib/utils/imageUtils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { switchToNextTeam, awardPoints, clearActivePerk, setGameQuestions, setBackupQuestions, markQuestionPlayed, endGame, activateChoicesPerk, lockPerks, unlockPerks, setRerollBuffer } from '@/store/gameSlice';
-import { Loader } from 'lucide-react';
+import { Loader, Play, Pause, RotateCcw } from 'lucide-react';
 import { useGameData } from '@/hooks/useGameData';
 import { useSyncTeams } from '@/hooks/useSyncTeams';
 import { consumeBackupQuestion } from '@/store/gameSlice';
@@ -42,7 +42,7 @@ export default function QuestionPage() {
   const [awardSuccess, setAwardSuccess] = useState('');
   const [elapsedTime, setElapsedTime] = useState(0); // Chronometer instead of countdown
   const [currentView, setCurrentView] = useState<'question' | 'answer' | 'teamSelector'>('question');
-  const [isChronoRunning, setIsChronoRunning] = useState(false);
+  const [isChronoRunning, setIsChronoRunning] = useState(true); // Start automatically
   // Choices dialog state
   const [isChoicesDialogOpen, setIsChoicesDialogOpen] = useState(false);
   const [selectedQuestionForChoices, setSelectedQuestionForChoices] = useState<QuestionType | null>(null);
@@ -428,15 +428,17 @@ export default function QuestionPage() {
                     <button 
                       onClick={toggleChronometer}
                       className="text-white hover:text-gray-300 transition-colors"
+                      aria-label={isChronoRunning ? "Pause timer" : "Start timer"}
                     >
-                      <span className="text-lg">{isChronoRunning ? '⏸️' : '▶️'}</span>
+                      {isChronoRunning ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
                     </button>
                     <span className="text-xl font-mono font-bold">{formatTime(elapsedTime)}</span>
                     <button 
                       onClick={() => {setElapsedTime(0); setIsChronoRunning(false);}}
                       className="text-white hover:text-gray-300 transition-colors"
+                      aria-label="Reset timer"
                     >
-                      <span className="text-lg">↻</span>
+                      <RotateCcw className="w-5 h-5" />
                     </button>
                   </div>
 

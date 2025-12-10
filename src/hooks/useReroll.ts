@@ -2,7 +2,7 @@
 import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { activateRerollPerk, markQuestionPlayed, pushBackupQuestions, setBackupQuestions, consumeBackupQuestion } from '@/store/gameSlice';
+import { activateRerollPerk, markQuestionPlayed, setBackupQuestions, consumeBackupQuestion } from '@/store/gameSlice';
 import { gamesAPI } from '@/lib/api';
 import { Question } from '@/types/game';
 import { logger } from '@/lib/utils/logger';
@@ -56,62 +56,34 @@ export function useReroll(gameId: number | string, currentQuestion?: Question | 
     if (!isTeamsTurn || perksLocked) return;
     if (rerollPerkUsed[teamId]) return;
 
-    let backups = backupQuestions;
-    if (!backups || backups.length === 0) {
-      backups = await fetchAndSetBackups();
-      if (backups.length === 0) return; // nothing to reroll to
-    }
-
-    // Filter out already-played questions
-    const availableBackups = backups.filter(q => !playedQuestions.includes(q.id));
-    
-    let next: Question | undefined;
+    // Filter backup questions to exclude already played ones
+    const availableBackups = backupQuestions.filter(q => !playedQuestions.includes(q.id));
     
     if (availableBackups.length === 0) {
-      // If all backups are played, fetch fresh ones
-      backups = await fetchAndSetBackups();
-      const availableAfterFetch = backups.filter(q => !playedQuestions.includes(q.id));
-      if (availableAfterFetch.length === 0) return; // nothing to reroll to
-      next = availableAfterFetch[0];
-    } else {
-      next = availableBackups[0];
+      logger.warn('No backup questions available for reroll');
+      return;
     }
 
+    const next = availableBackups[0];
     if (!next) return;
 
-    // Mark as used, consume the backup question, mark current as played, and navigate
+    // Mark reroll perk as used for this team
     dispatch(activateRerollPerk({ teamId }));
-    dispatch(consumeBackupQuestion()); // Remove the used backup question from the list
+    
+    // Mark current question as played
     if (currentQuestion?.id) {
       dispatch(markQuestionPlayed(currentQuestion.id));
     }
-    // Mark the new question as played to prevent it from appearing again
+    
+    // Consume the backup question from Redux list
+    dispatch(consumeBackupQuestion());
+    
+    // Mark the new question as played to avoid reusing it
     dispatch(markQuestionPlayed(next.id));
 
+    // Navigate to the new question
     router.push(`/game/${gameId}/question/${next.id}`);
-
-    // Proactively top-up to keep buffer around 4 (optional)
-    try {
-      if (backups.length <= 2) {
-        const gid = Number(gameId);
-        if (Number.isFinite(gid)) {
-          const more = await gamesAPI.prefetchOutsideBoard(gid, 4);
-          const existingIds = new Set(boardQuestions.map(q => q.id));
-          const filtered = Array.isArray(more)
-            ? more.filter((q) => (
-                q && typeof q.id === 'number' &&
-                q.id !== (currentQuestion?.id ?? -1) &&
-                !playedQuestions.includes(q.id) &&
-                !existingIds.has(q.id)
-              ))
-            : [];
-          if (filtered.length) dispatch(pushBackupQuestions(filtered));
-        }
-      }
-    } catch (e) {
-      logger.warn('Top-up backup questions failed:', e);
-    }
-  }, [teams, currentTeam, perksLocked, rerollPerkUsed, backupQuestions, dispatch, currentQuestion?.id, router, gameId, fetchAndSetBackups, playedQuestions, boardQuestions]);
+  }, [teams, currentTeam, perksLocked, rerollPerkUsed, backupQuestions, playedQuestions, dispatch, currentQuestion?.id, router, gameId]);
 
   return { reroll, fetchAndSetBackups };
 }
