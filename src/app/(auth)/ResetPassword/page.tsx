@@ -1,6 +1,7 @@
 "use client";
 import React, { useState} from "react";
 import { logger } from "@/lib/utils/logger";
+import { API_BASE_URL } from "@/lib/api/base";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -33,8 +34,16 @@ const ResetPassword = () => {
     setLoading(true);
     setMessage("");
 
+    if (!API_BASE_URL) {
+      setMessage("Service is temporarily unavailable. Please contact support.");
+      setLoading(false);
+      return;
+    }
+
+    const baseUrl = API_BASE_URL.replace(/\/+$/, "");
+
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/password-reset-confirm/`, {
+      const res = await fetch(`${baseUrl}/api/auth/password-reset-confirm/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ uid, token, new_password: password }),

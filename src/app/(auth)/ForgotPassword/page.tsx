@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { logger } from "@/lib/utils/logger";
+import { API_BASE_URL } from "@/lib/api/base";
 import Image from "next/image";
 
 export default function ForgotPassword() {
@@ -12,12 +13,20 @@ export default function ForgotPassword() {
     e.preventDefault();
     if (!email) return;
 
+    // Ensure API base is configured before attempting the request
+    if (!API_BASE_URL) {
+      setMessage("Service is temporarily unavailable. Please contact support.");
+      return;
+    }
+
+    const baseUrl = API_BASE_URL.replace(/\/+$/, "");
+
     setLoading(true);
     setMessage("");
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/password-reset/`,
+        `${baseUrl}/api/auth/password-reset/`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
