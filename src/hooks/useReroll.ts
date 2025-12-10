@@ -64,17 +64,19 @@ export function useReroll(gameId: number | string, currentQuestion?: Question | 
 
     // Filter out already-played questions
     const availableBackups = backups.filter(q => !playedQuestions.includes(q.id));
+    
+    let next: Question | undefined;
+    
     if (availableBackups.length === 0) {
       // If all backups are played, fetch fresh ones
       backups = await fetchAndSetBackups();
       const availableAfterFetch = backups.filter(q => !playedQuestions.includes(q.id));
       if (availableAfterFetch.length === 0) return; // nothing to reroll to
-      const next = availableAfterFetch[0];
+      next = availableAfterFetch[0];
     } else {
-      backups = availableBackups;
+      next = availableBackups[0];
     }
 
-    const next = backups[0];
     if (!next) return;
 
     // Mark as used, consume the backup question, mark current as played, and navigate
