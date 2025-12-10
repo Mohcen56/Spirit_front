@@ -11,7 +11,7 @@ interface GameHeaderProps {
   teams?: Array<{ id: number; name: string }>;
 }
 
-export default function GameHeader({ onBackToBoard, currentTeamTurn, onTeamTurnChange, onEndGame, teams }: GameHeaderProps) {
+function GameHeader({ onBackToBoard, currentTeamTurn, onTeamTurnChange, onEndGame, teams }: GameHeaderProps) {
   // Find the current team name based on currentTeamTurn index
   const currentTeam = teams?.[currentTeamTurn - 1];
   const teamDisplayName = currentTeam?.name || `Team ${currentTeamTurn}`;
@@ -66,3 +66,6 @@ export default function GameHeader({ onBackToBoard, currentTeamTurn, onTeamTurnC
     </header>
   );
 }
+
+// Memoize to prevent rerenders when parent state changes unrelated to header props
+export default React.memo(GameHeader);

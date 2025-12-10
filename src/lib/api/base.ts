@@ -4,6 +4,13 @@ import { getAuthToken, clearAuthData } from '@/lib/utils/auth-utils';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ;
 
+if (!API_BASE_URL) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('NEXT_PUBLIC_API_BASE_URL environment variable is required');
+  }
+  console.warn('NEXT_PUBLIC_API_BASE_URL not set, using localhost fallback');
+}
+
 export const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 8000,

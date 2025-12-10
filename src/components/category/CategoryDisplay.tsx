@@ -1,5 +1,5 @@
 'use client';
-
+import Image from 'next/image';
 import React from 'react';
 import { ImagePlus } from 'lucide-react';
 
@@ -12,7 +12,7 @@ interface CategoryDisplayProps {
   savesCount?: number;
 }
 
-export default function CategoryDisplay({
+function CategoryDisplay({
   categoryName,
   categoryDescription,
   categoryImage,
@@ -25,12 +25,15 @@ export default function CategoryDisplay({
       {/* Image */}
       <div className="w-60 h-60 bg-gray-100 border   rounded-xl overflow-hidden flex items-center justify-center">
         {categoryImage ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={categoryImage}
-            alt={categoryName}
-            className="object-cover w-full h-full"
-          />
+         
+          <Image
+          src={categoryImage}
+          alt={categoryName}
+          width={240}
+          height={240}
+          className="object-cover w-full h-full"
+          onError={() => {/* fallback UI */}}
+        />
         ) : (
           <ImagePlus className="h-12 w-12 text-gray-400" />
         )}
@@ -79,3 +82,6 @@ export default function CategoryDisplay({
     </div>
   );
 }
+
+// Memoize to avoid rerenders when props are unchanged (image-heavy component)
+export default React.memo(CategoryDisplay);

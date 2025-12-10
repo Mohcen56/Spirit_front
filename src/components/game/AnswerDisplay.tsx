@@ -13,7 +13,7 @@ interface AnswerDisplayProps {
   onShowTeamSelector: () => void;
 }
 
-export default function AnswerDisplay({ question, onShowQuestion, onShowTeamSelector }: AnswerDisplayProps) {
+function AnswerDisplay({ question, onShowQuestion, onShowTeamSelector }: AnswerDisplayProps) {
   const [answerImageStatus, setAnswerImageStatus] = useState<'idle' | 'loading' | 'loaded' | 'error'>('idle');
 
   useEffect(() => {
@@ -81,3 +81,6 @@ export default function AnswerDisplay({ question, onShowQuestion, onShowTeamSele
     </GameCard>
   );
 }
+
+// Memoize because this component renders images and heavy layout; avoid rerenders unless props change
+export default React.memo(AnswerDisplay);

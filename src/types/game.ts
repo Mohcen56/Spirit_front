@@ -54,7 +54,7 @@ export interface Question {
   answer_image?: string;
   points: number;
   difficulty: 'easy' | 'medium' | 'hard';
-  played_by_team?: number | null;
+  played_by_team_id?: number | null;
 }
 
 export interface Team {
