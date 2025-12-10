@@ -153,14 +153,14 @@ export default function TeamsSidebar({
                       onClick={onShowChoices}
                       disabled={(choicesPerkUsed?.[team.id] ?? false) || isPerkDisabled(team.id)}
                       title={
-                        rerollPerkUsed[team.id]
-                          ? 'Reroll already used'
+                        choicesPerkUsed?.[team.id]
+                          ? 'Choices already used'
                           : !isTeamsTurn
                             ? "You can only use on your team's turn"
                             : 'Show answer choices'
                       }
                       className={`p-1 sm:p-2 rounded-md transition-colors border text-xs sm:text-base ${
-                        rerollPerkUsed[team.id]
+                        choicesPerkUsed?.[team.id]
                           ? 'bg-gray-400 text-white border-gray-500'
                           : 'bg-brown-900 hover:bg-white/30 text-white border-white/30'
                       } disabled:opacity-50`}

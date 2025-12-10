@@ -202,6 +202,7 @@ if (isLoading) {
         currentTeamTurn={currentTeam}
         onTeamTurnChange={handleTeamTurnChange}
         onEndGame={handleEndGame}
+        teams={liveTeams}
       />
 
       <main className="flex-1 p-4 overflow-hidden bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300">
@@ -259,6 +260,7 @@ return (
       currentTeamTurn={currentTeam}
       onTeamTurnChange={handleTeamTurnChange}
       onEndGame={handleEndGame}
+      teams={liveTeams}
     />
 
     {/* Game Board - Takes remaining height */}

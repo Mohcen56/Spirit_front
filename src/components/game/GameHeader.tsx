@@ -8,9 +8,14 @@ interface GameHeaderProps {
   currentTeamTurn: number;
   onTeamTurnChange: () => void;
   onEndGame?: () => void | Promise<void>;
+  teams?: Array<{ id: number; name: string }>;
 }
 
-export default function GameHeader({ onBackToBoard, currentTeamTurn, onTeamTurnChange, onEndGame }: GameHeaderProps) {
+export default function GameHeader({ onBackToBoard, currentTeamTurn, onTeamTurnChange, onEndGame, teams }: GameHeaderProps) {
+  // Find the current team name based on currentTeamTurn index
+  const currentTeam = teams?.[currentTeamTurn - 1];
+  const teamDisplayName = currentTeam?.name || `Team ${currentTeamTurn}`;
+  
   return (
     <header className="bg-slate-800/90 backdrop-blur-sm w-full">
       <div className="mx-auto max-w-screen-3xl px-2 py-3">
@@ -30,7 +35,7 @@ export default function GameHeader({ onBackToBoard, currentTeamTurn, onTeamTurnC
               className="text-white px-3 py-2 rounded-xl border-2 border-white flex items-center text-xs sm:text-sm transition-colors"
             >
               <span>🎲</span>
-              <span className="hidden sm:inline ml-2">Team Turn: Team {currentTeamTurn}</span>
+              <span className="hidden sm:inline ml-2">Team Turn: {teamDisplayName}</span>
             </button>
           </div>
 

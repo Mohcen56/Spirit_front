@@ -411,6 +411,7 @@ export default function QuestionPage() {
         currentTeamTurn={currentTeam}
         onTeamTurnChange={handleTeamTurnChange}
         onEndGame={handleEndGame}
+        teams={liveTeams}
       />
 
       {/* Main Game Layout */}
