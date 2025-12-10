@@ -2,23 +2,30 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-
+import Image from 'next/image';
+import Link from 'next/link';
 import { authAPI } from '@/lib/api/index';
-import {SignupForm} from '@/components/User/signup-form' // adjust default/export if needed
+import { SignupForm } from '@/components/User/signup-form';
 import { useNotification } from '@/hooks/useNotification';
+
+type SignupData = {
+  email: string;
+  password: string;
+  username: string;
+  confirmPassword: string;
+};
 
 export default function SignupPage() {
   const router = useRouter();
   const notify = useNotification();
 
-  type SignupData = {
-    email: string;
-    password: string;
-    name?: string;
-  };
-
   const handleSignup = async (data: SignupData) => {
-    const response = await authAPI.register(data);
+    const response = await authAPI.register({
+      email: data.email,
+      password: data.password,
+      username: data.username,
+    });
+    
     if (response?.success) {
       localStorage.setItem('authToken', response.token);
       localStorage.setItem('user', JSON.stringify(response.user));
@@ -31,24 +38,36 @@ export default function SignupPage() {
     }
   };
 
-  // wrapper to satisfy an onSubmit prop that may accept either a FormEvent or the form data
-    const handleSignupSubmit = async (payload: unknown) => {
-      // If payload looks like our SignupData, forward it
-      if (payload && typeof payload === 'object' && 'email' in payload) {
-        await handleSignup(payload as SignupData);
-        return;
-      }
-  
-      // If payload is a DOM event, prevent default and no-op (or extract form data if needed)
-      const event = payload as React.FormEvent<HTMLFormElement> | undefined;
-      event?.preventDefault?.();
-      // If your SignupForm doesn't extract and pass SignupData, you can extract fields here from event.target
-    };
-
-   return (
-    <div className="bg-muted flex min-h-screen flex-col items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm md:max-w-6xl">
-        <SignupForm  onSubmit={handleSignupSubmit}/>
+  return (
+    <div className="grid min-h-svh lg:grid-cols-2">
+      <div className="flex flex-col gap-4 p-6">
+        <div className="flex justify-center gap-2 md:justify-start">
+          <Link href="/" className=" flex items-center  gap-2 font-medium">
+            <Image
+              src="/logo/mylogo.svg"
+              alt="Trivia Spirit Logo"
+              width={40}
+              height={40}
+              className="w-15 h-15"
+            />
+          
+          </Link>
+        </div>
+        <div className="flex flex-1 items-center justify-center">
+          <div className="w-full max-w-lg">
+            <SignupForm onSubmit={handleSignup} />
+          </div>
+        </div>
+      </div>
+      <div className="bg-cyan-800 relative hidden lg:block">
+        <Image
+          src="/logo/logo3.svg"
+          alt="Trivia Spirit"
+          fill
+          className="absolute inset-0 object-cover dark:brightness-[0.2] dark:grayscale"
+          sizes="(min-width: 1024px) 50vw, 100vw"
+          priority
+        />
       </div>
     </div>
   )
