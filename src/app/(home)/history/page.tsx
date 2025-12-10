@@ -10,6 +10,7 @@ import { Clock, Play } from 'lucide-react';
 import Image from 'next/image';
 import { useImageError } from '@/hooks/useImageError';
 import { ShinyButton } from '@/components/ui/ShinyButton';
+import BounceLoader from '@/components/ui/loadingscreen';
 
 interface GameCategory {
   id: number;
@@ -79,7 +80,7 @@ export default function HistoryPage() {
   if (isLoading || loading) {
     return (
       <div className="min-h-screen bg-custom-bg flex items-center justify-center">
-        <div className="text-gray-800 text-xl">Loading...</div>
+        <BounceLoader />
       </div>
     );
   }

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Play, History } from 'lucide-react';
 import { useAuthGate } from '@/hooks/useAuthGate';
 import { useHeader } from '@/contexts/HeaderContext';
+import BounceLoader from '@/components/ui/loadingscreen';
 
 export default function HomePage() {
   const { setHeader } = useHeader();
@@ -16,7 +17,7 @@ export default function HomePage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-custom-bg flex items-center justify-center">
-        <div className="text-gray-800 text-xl">Loading...</div>
+        <BounceLoader />
       </div>
     );
   }

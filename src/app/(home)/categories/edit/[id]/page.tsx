@@ -8,6 +8,7 @@ import CategoryFormFields from '@/components/category/CategoryFormFields';
 import CategoryPublicView from '@/components/category/CategoryPublicView';
 import { useHeader } from '@/contexts/HeaderContext';
 import { useAuthGate } from '@/hooks/useAuthGate';
+import BounceLoader from '@/components/ui/loadingscreen';
 import { useCategoryData } from '@/hooks/useCategoryData';
 import { useCategoryActions } from '@/hooks/useCategoryActions';
 
@@ -99,7 +100,7 @@ export default function EditCategoryPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
-        <div className="text-2xl text-gray-800">Loading...</div>
+        <BounceLoader />
       </div>
     );
   }

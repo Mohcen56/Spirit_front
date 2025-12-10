@@ -8,6 +8,7 @@ import {  Play, Plus, Minus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ProcessingButton } from '@/components/ui/button2';
 import Image from 'next/image';
 import { useHeader } from '@/contexts/HeaderContext';
+import BounceLoader from '@/components/ui/loadingscreen';
 
 interface TeamForm {
   name: string;
@@ -40,7 +41,7 @@ export default function TeamsPage() {
     { name: '', avatar: AVAILABLE_AVATARS[0].id },
     { name: '', avatar: AVAILABLE_AVATARS[1].id }
   ]);
-  const [isStarting, setIsStarting] = useState(false);
+  
   const [error, setError] = useState('');
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
   const router = useRouter();
@@ -180,7 +181,7 @@ export default function TeamsPage() {
   if (selectedCategories.length === 0) {
     return (
       <div className="min-h-screen bg-eastern-blue-50 flex items-center justify-center">
-        <div className="text-primary-800 text-xl">Loading...</div>
+        <BounceLoader />
       </div>
     );
   }

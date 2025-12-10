@@ -17,7 +17,7 @@ import { VerifyIcon } from '@/components/ui/verify-badge';
 import { useMembership } from '@/hooks/useMembership';
 import { useHeader } from '@/contexts/HeaderContext';
 import { logger } from '@/lib/utils/logger';
-import CategorySkeleton from '@/components/skeletons/CategorySkeleton';
+import BounceLoader from '@/components/ui/loadingscreen';
 
 export default function AddedCategoriesPage() {
   const [showProfile, setShowProfile] = useState(false);
@@ -169,8 +169,8 @@ export default function AddedCategoriesPage() {
 
   if (authLoading || isLoadingCategories) {
     return (
-      <div className="min-h-screen bg-eastern-blue-50">
-        <CategorySkeleton count={9} showAddButton={true} variant="user" />
+      <div className="min-h-screen bg-eastern-blue-50 flex items-center justify-center">
+        <BounceLoader />
       </div>
     );
   }

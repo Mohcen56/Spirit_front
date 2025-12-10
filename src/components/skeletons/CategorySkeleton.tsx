@@ -28,7 +28,7 @@ export default function CategorySkeleton({
         {/* Collection/Section skeleton */}
         <div className={`${variant === 'user' ? 'bg-eastern-blue-100' : 'bg-cyan-50'} backdrop-blur-md rounded-2xl p-6 mb-8 border border-primary-200 shadow-lg animate-pulse`}>
           {/* Collection Header Skeleton */}
-          <div className="relative flex justify-center -mt-11 mb-4">
+          <div className="relative flex justify-start -mt-11 mb-4">
             <div className={`${variant === 'user' ? 'bg-eastern-blue-700' : 'bg-cyan-700'} text-white px-6 py-2 rounded-full shadow-md`}>
               <div className="h-6 w-48 bg-white/30 rounded"></div>
             </div>
@@ -89,9 +89,9 @@ export default function CategorySkeleton({
                     {/* Top Section (80%) */}
                     <div className="relative h-[80%] bg-gradient-to-br from-cyan-700 to-cyan-800">
                       {/* Info icon skeleton */}
-                      <div className="absolute top-2 right-2 w-7 h-7 bg-white/30 rounded-full"></div>
+                      <div className="absolute top-2 left-2 w-7 h-7 bg-white/30 rounded-full"></div>
                       {/* Percentage badge skeleton */}
-                      <div className="absolute top-2 left-2 bg-gradient-to-br from-cyan-700 to-cyan-800 px-3 py-1">
+                      <div className="absolute top-2 right-0 bg-gradient-to-br from-cyan-700 to-cyan-800 text-white text-xs lg:text-sm font-bold px-2 lg:px-3 py-1  lg:min-w-[45px] text-center z-20">
                         <div className="h-3 w-10 bg-white/30 rounded"></div>
                       </div>
                       
@@ -103,8 +103,7 @@ export default function CategorySkeleton({
                     <div className="relative h-[21%] bg-gradient-to-br from-cyan-700 to-cyan-800 flex items-center justify-center p-4">
                       {/* Category name skeleton */}
                       <div className="h-4 w-24 bg-white/30 rounded"></div>
-                      {/* Selection indicator skeleton */}
-                      <div className="absolute top-2 left-2 w-5 h-5 bg-white/30 rounded-full border-2 border-white/50"></div>
+                     
                     </div>
                   </>
                 )}

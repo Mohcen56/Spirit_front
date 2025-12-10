@@ -5,6 +5,7 @@ import { useAuthGate } from "@/hooks/useAuthGate";
 import { authAPI } from "@/lib/api/auth";
 import { logger } from '@/lib/utils/logger';
 import { useNotification } from '@/hooks/useNotification';
+import BounceLoader from '@/components/ui/loadingscreen';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -98,7 +99,7 @@ export default function ProfilePage() {
   if (isLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center text-zinc-500">
-        Loading profile...
+        <BounceLoader />
       </div>
     );
   }

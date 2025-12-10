@@ -8,6 +8,7 @@ import { logger } from "@/lib/utils/logger";
 import { CreativePricing } from "@/components/ui/creative-pricing";
 import type { PricingTier } from "@/components/ui/creative-pricing";
 import { Pencil, Star } from "lucide-react";
+import BounceLoader from '@/components/ui/loadingscreen';
 
 import Link from "next/link";
 
@@ -83,7 +84,7 @@ export default function HomePage() {
   if (isLoading) {
     return (
       <div className="min-h-dvh grid place-items-center">
-        <div className="opacity-70">Loading…</div>
+        <BounceLoader />
       </div>
     );
   }

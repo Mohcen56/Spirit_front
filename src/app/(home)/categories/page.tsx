@@ -14,7 +14,7 @@ import Image from 'next/image';
 import { useMembership } from '@/hooks/useMembership';
 import { useImageError } from '@/hooks/useImageError';
 import { useHeader } from '@/contexts/HeaderContext';
-import CategorySkeleton from '@/components/skeletons/CategorySkeleton';
+import BounceLoader from '@/components/ui/loadingscreen';
 
 export default function CategoriesPage() {
   const { membership, currentUserId, error, setError } = useMembership();
@@ -185,8 +185,8 @@ export default function CategoriesPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-eastern-blue-50">
-        <CategorySkeleton count={10} showAddButton={false} variant="default" />
+      <div className="min-h-screen bg-eastern-blue-50 flex items-center justify-center">
+        <BounceLoader />
       </div>
     );
   }

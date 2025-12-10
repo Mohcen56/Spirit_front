@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { startGame, switchToNextTeam, awardPoints, setGameQuestions, endGame } from '@/store/gameSlice';
 import { useGameData } from '@/hooks/useGameData';
 import { useSyncTeams } from '@/hooks/useSyncTeams';
+import BounceLoader from '@/components/ui/loadingscreen';
 
 
 
@@ -196,41 +197,8 @@ export default function GameBoardPage() {
 
 if (isLoading) {
   return (
-    <div className="h-screen flex flex-col bg-white overflow-hidden">
-      <GameHeader 
-        onBackToBoard={handleBackToBoard}
-        currentTeamTurn={currentTeam}
-        onTeamTurnChange={handleTeamTurnChange}
-        onEndGame={handleEndGame}
-        teams={liveTeams}
-      />
-
-      <main className="flex-1 p-4 overflow-hidden bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300">
-        <div className="h-full grid grid-cols-3 md:grid-cols-6 gap-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="h-full flex flex-col">
-              <div className="relative h-24 md:h-32 w-full rounded-xl overflow-hidden border-4 border-white shadow mb-3 flex-shrink-0 bg-gray-200 animate-pulse">
-                <div className="absolute bottom-0 left-0 w-full bg-gray-300 py-1 text-center">
-                  <span className="text-gray-500 text-xs md:text-sm font-bold">Loading...</span>
-                </div>
-              </div>
-
-              <div className="flex-1 flex flex-col gap-1 md:gap-2">
-                {Array.from({ length: 6 }).map((_, qIndex) => (
-                  <div
-                    key={qIndex}
-                    className="flex-1 bg-gray-200 animate-pulse rounded-lg"
-                  />
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </main>
-
-      <footer className="bg-gradient-to-r from-amber-400 to-orange-400 py-2 md:py-3 flex items-center justify-center gap-3 md:gap-4 border-t-4 border-amber-500 h-16 md:h-25 flex-shrink-0">
-        <div className="text-gray-600 text-sm">Loading teams...</div>
-      </footer>
+    <div className="min-h-screen bg-custom-bg flex items-center justify-center">
+      <BounceLoader />
     </div>
   );
 }
