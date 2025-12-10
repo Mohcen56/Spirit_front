@@ -69,7 +69,12 @@ export default function QuestionPage() {
           const extras = await gameAPI.prefetchOutsideBoard(numericGameId, 4);
           if (Array.isArray(extras) && extras.length) {
             const existingIds = new Set(data.map((q: any) => q.id));
-            const filtered = extras.filter((q: any) => q && typeof q.id === 'number' && !existingIds.has(q.id));
+            const filtered = extras.filter((q: any) => 
+              q && 
+              typeof q.id === 'number' && 
+              !existingIds.has(q.id) &&
+              !playedQuestions.includes(q.id)
+            );
             dispatch(setBackupQuestions(filtered));
           }
         }
@@ -83,7 +88,7 @@ export default function QuestionPage() {
     return () => {
       cancelled = true;
     };
-  }, [dispatch, gameId, questions.length]);
+  }, [dispatch, gameId, questions.length, playedQuestions]);
 
 
 

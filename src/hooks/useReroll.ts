@@ -56,15 +56,13 @@ export function useReroll(gameId: number | string, currentQuestion?: Question | 
     if (!isTeamsTurn || perksLocked) return;
     if (rerollPerkUsed[teamId]) return;
 
-    // Filter backup questions to exclude already played ones
-    const availableBackups = backupQuestions.filter(q => !playedQuestions.includes(q.id));
-    
-    if (availableBackups.length === 0) {
+    // Check if we have backup questions available
+    if (!backupQuestions || backupQuestions.length === 0) {
       logger.warn('No backup questions available for reroll');
       return;
     }
 
-    const next = availableBackups[0];
+    const next = backupQuestions[0];
     if (!next) return;
 
     // Mark reroll perk as used for this team
@@ -83,7 +81,7 @@ export function useReroll(gameId: number | string, currentQuestion?: Question | 
 
     // Navigate to the new question
     router.push(`/game/${gameId}/question/${next.id}`);
-  }, [teams, currentTeam, perksLocked, rerollPerkUsed, backupQuestions, playedQuestions, dispatch, currentQuestion?.id, router, gameId]);
+  }, [teams, currentTeam, perksLocked, rerollPerkUsed, backupQuestions, dispatch, currentQuestion?.id, router, gameId]);
 
   return { reroll, fetchAndSetBackups };
 }
