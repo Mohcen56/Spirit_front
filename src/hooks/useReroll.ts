@@ -2,7 +2,7 @@
 import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { activateRerollPerk, markQuestionPlayed, pushBackupQuestions, setBackupQuestions } from '@/store/gameSlice';
+import { activateRerollPerk, markQuestionPlayed, pushBackupQuestions, setBackupQuestions, consumeBackupQuestion } from '@/store/gameSlice';
 import { gamesAPI } from '@/lib/api';
 import { Question } from '@/types/game';
 import { logger } from '@/lib/utils/logger';
@@ -77,12 +77,14 @@ export function useReroll(gameId: number | string, currentQuestion?: Question | 
     const next = backups[0];
     if (!next) return;
 
-    // Mark as used, consume one, mark current as played, and navigate
+    // Mark as used, consume the backup question, mark current as played, and navigate
     dispatch(activateRerollPerk({ teamId }));
+    dispatch(consumeBackupQuestion()); // Remove the used backup question from the list
     if (currentQuestion?.id) {
       dispatch(markQuestionPlayed(currentQuestion.id));
     }
-    // Leave picked backup in list until it's resolved (consumed after awarding points)
+    // Mark the new question as played to prevent it from appearing again
+    dispatch(markQuestionPlayed(next.id));
 
     router.push(`/game/${gameId}/question/${next.id}`);
 
