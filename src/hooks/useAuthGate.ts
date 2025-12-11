@@ -2,13 +2,24 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authAPI } from '@/lib/api/auth';
 import { setCurrentUser } from '@/lib/utils/auth-utils';
+import { useAppSelector } from '@/store/hooks';
 import type { User } from '@/types/game';
 import { logger } from '@/lib/utils/logger';
+
+// ✅ REQUEST DEDUPLICATION: Track in-flight profile requests
+let profileFetchInFlight: Promise<{ user: User }> | null = null;
+let cachedProfile: { user: User } | null = null;
+const cacheExpiry = 5 * 60 * 1000; // 5 minutes
+let cacheTimestamp = 0;
 
 export function useAuthGate({ redirectIfGuest }: { redirectIfGuest?: string } = {}) {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setLoading] = useState(true);
+  
+  // ✅ GET USER FROM REDUX STORE (most important!)
+  const reduxUser = useAppSelector((state) => state.auth.user);
+  const reduxIsLoaded = useAppSelector((state) => state.auth.isLoaded);
 
   const fetchUser = async () => {
     if (typeof window === 'undefined') return;
@@ -18,18 +29,42 @@ export function useAuthGate({ redirectIfGuest }: { redirectIfGuest?: string } = 
     // 🔹 Short-circuit safely (don't call API if no token)
     if (!token) {
       logger.log('No token, skipping getCurrentUser');
-      setLoading(false); // ✅ stop loading
+      setLoading(false);
       if (redirectIfGuest) router.replace(redirectIfGuest);
       return;
     }
 
     try {
-         // Fetch full profile; user includes premium fields now
-      const profile = await authAPI.getProfile();
+      // ✅ Check cache first (valid for 5 minutes)
+      const now = Date.now();
+      if (cachedProfile && now - cacheTimestamp < cacheExpiry) {
+        logger.log('Using cached profile');
+        setUser(cachedProfile.user);
+        setLoading(false);
+        return;
+      }
+
+      // ✅ Deduplicate: if request already in flight, reuse that promise
+      if (profileFetchInFlight) {
+        logger.log('Profile request in flight, reusing...');
+        const profile = await profileFetchInFlight;
+        setUser(profile.user);
+        setLoading(false);
+        return;
+      }
+
+      // ✅ Start new request and cache the promise
+      profileFetchInFlight = authAPI.getProfile();
+      const profile = await profileFetchInFlight;
+      
+      cachedProfile = profile;
+      cacheTimestamp = Date.now();
+      profileFetchInFlight = null;
+
       setUser(profile.user);
-         // Persist latest user for other hooks/components
       setCurrentUser(profile.user);
-    } catch {
+    } catch (error) {
+      profileFetchInFlight = null;
       if (redirectIfGuest) router.replace(redirectIfGuest);
     } finally {
       setLoading(false);
@@ -37,17 +72,34 @@ export function useAuthGate({ redirectIfGuest }: { redirectIfGuest?: string } = 
   };
 
   useEffect(() => {
+    // ✅ CRITICAL: If redux already has loaded user, use that instead of fetching!
+    if (reduxIsLoaded && reduxUser) {
+      logger.log('Using user from Redux store');
+      setUser(reduxUser);
+      setLoading(false);
+      return;
+    }
+
+    // ✅ Only fetch if redux doesn't have user yet
     fetchUser();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [reduxIsLoaded, reduxUser]);
 
   const logout = async () => {
     await authAPI.logout();
+    // ✅ Clear cache on logout
+    cachedProfile = null;
+    cacheTimestamp = 0;
+    profileFetchInFlight = null;
     router.replace('/login');
   };
 
   const refetchUser = async () => {
     setLoading(true);
+    // ✅ Clear cache to force fresh fetch
+    cachedProfile = null;
+    cacheTimestamp = 0;
+    profileFetchInFlight = null;
     await fetchUser();
   };
 

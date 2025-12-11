@@ -1,79 +1,10 @@
-"use client";
-
-import { useEffect, useMemo, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useAuthGate } from "@/hooks/useAuthGate";
-import { logger } from "@/lib/utils/logger";
-import { CreativePricing } from "@/components/ui/creative-pricing";
-import type { PricingTier } from "@/components/ui/creative-pricing";
-import { Pencil, Star } from "lucide-react";
-import BounceLoader from '@/components/ui/loadingscreen';
-
 import Link from "next/link";
-
+import HeaderAvatar from "@/components/HeaderAvatar";
+import HeroCTA from "@/components/HeroCTA";
 export default function HomePage() {
-  const router = useRouter();
-
-  const { user, isLoading } = useAuthGate();
-
-  const pricingTiers: PricingTier[] = [
-    {
-      name: "Free",
-      icon: <Pencil className="w-6 h-6" />,
-      price: 0,
-      description: "Try 6 base categories — no cost",
-      color: "blue",
-      href: user ? "/dashboard" : "/login",
-      features: [
-        "Access 6 base categories",
-        "No repeated questions",
-        "Create & play your own category",
-      ],
-    },
-    {
-      name: "Lifetime Premium",
-      icon: <Star className="w-6 h-6" />,
-      price: 40,
-      originalPrice: 50,
-      description: "Unlock ALL content now and ALL future updates",
-      color: "yellow",
-      href: user ? "/plans" : "/login",
-      features: [
-        "No ads",
-        "All current categories unlocked",
-        "All future categories and game updates included",
-        "Access all community categories",
-        "Early Supporter Badge",
-      ],
-      popular: true,
-    },
-  ];
-
-
-  const avatarSrc = useMemo(() => {
-    if (!user?.avatar || user.avatar === "/avatars/thumbs.svg") {
-      return "/avatars/thumbs.svg";
-    }
-    return user.avatar;
-  }, [user?.avatar]);
 
  
-  const handleHeroCTA = () => {
-    if (user) {
-      router.push("/dashboard");
-      return;
-    }
-    router.push("/login");
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-dvh grid place-items-center">
-        <BounceLoader />
-      </div>
-    );
-  }
   
   return (
     <>
@@ -81,18 +12,7 @@ export default function HomePage() {
         {/* Header */}
       <header className="relative z-10 backdrop-blur-md">
   <div className="container mx-auto flex items-center px-3 py-3 relative">
-
-    <div className="absolute top-6 left-6 lg:top-8 lg:left-8">
-      <div className="relative w-16 h-16 lg:w-20 lg:h-20 rounded-full overflow-hidden border-2 border-white">
-        <Image
-          src={avatarSrc}
-          alt="Profile"
-          width={80}
-          height={80}
-          className="object-cover w-full h-full"
-        />
-      </div>
-    </div>
+    <HeaderAvatar />
   </div>
 </header>
 
@@ -121,6 +41,7 @@ export default function HomePage() {
         width={650}
         height={650}
         className="mx-auto relative z-50"
+        priority
       />
     </div>
 
@@ -132,25 +53,7 @@ export default function HomePage() {
       Enjoy your time with Trivia — the knowledge and challenge game that brings everyone together.
     </p>
     <div className="mt-8 flex justify-center">
-      <button
-        onClick={handleHeroCTA}
-        className="group/button relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-md bg-indianred px-15 py-3 md:px-30 md:py-5 text-xs font-normal text-white transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-red-500/30"
-      >
-        <span className="flex h-8 w-8 items-center justify-center rounded text-white">
-          <svg
-            aria-hidden="true"
-            className="h-8 w-8"
-            viewBox="0 0 12 12"
-            fill="currentColor"
-          >
-            <path d="M4 3.065v5.87a.4.4 0 0 0 .623.331l4.268-2.935a.4.4 0 0 0 0-.662L4.623 2.064A.4.4 0 0 0 4 2.395Z" />
-          </svg>
-        </span>
-        <span className=" text-lg md:text-xl font-bold">Start playing</span>
-        <div className="absolute inset-0 flex h-full  w-full justify-center [transform:skew(-13deg)_translateX(-100%)] group-hover/button:duration-1000 group-hover/button:[transform:skew(-13deg)_translateX(100%)]">
-          <div className="relative h-full w-8 bg-white/20" />
-        </div>
-      </button>
+      <HeroCTA />
     </div>
   </div>
 </div>

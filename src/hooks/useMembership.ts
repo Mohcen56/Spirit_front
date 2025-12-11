@@ -1,10 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { authAPI } from "@/lib/api/auth";
-import { getCurrentUser as getUserFromStorage } from "@/lib/utils/auth-utils";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { setCredentials, markLoaded } from "@/store/authSlice";
+import { useAppSelector } from "@/store/hooks";
 
 interface MembershipLike {
   is_premium: boolean;
@@ -13,70 +9,9 @@ interface MembershipLike {
 }
 
 export function useMembership() {
-  const dispatch = useAppDispatch();
+  // ✅ ONLY read from Redux - do NOT make API calls here!
+  // useAuthGate handles all API calls
   const { user: reduxUser, isLoaded } = useAppSelector((state) => state.auth);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Always fetch fresh user data if we have a token (don't trust persisted state)
-    const bootstrap = async () => {
-      try {
-        if (typeof window === "undefined") return;
-
-        const token = localStorage.getItem("authToken");
-
-        // Try to fetch fresh user when authenticated
-        if (token) {
-          try {
-            const profile = await authAPI.getProfile();
-            const user = profile.user;
-            if (user) {
-              dispatch(setCredentials({ token, user }));
-              // For backward compatibility, keep updating localStorage key (can be removed later)
-              const ml: MembershipLike = {
-                is_premium: !!user.is_premium,
-                user: user.id ? { id: user.id } : undefined,
-                expiry_date: (user as any).premium_expiry ?? null,
-              };
-              localStorage.setItem("membership", JSON.stringify(ml));
-              return;
-            }
-          } catch {
-            // fall through to localStorage
-          }
-        }
-
-        // Fallback: derive from stored user
-        const storedUser = getUserFromStorage();
-        if (storedUser) {
-          dispatch(setCredentials({ token, user: storedUser }));
-          return;
-        }
-        
-        // No user found - mark as loaded anyway
-        dispatch(markLoaded());
-      } catch {
-        setError("An error occurred while loading membership data");
-        dispatch(markLoaded());
-      }
-    };
-
-    bootstrap();
-
-    // Stay in sync with localStorage updates from other parts of the app
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === "user" && e.newValue) {
-        try {
-          const user = JSON.parse(e.newValue);
-          const token = localStorage.getItem("authToken");
-          dispatch(setCredentials({ token, user }));
-        } catch {}
-      }
-    };
-
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, [dispatch, isLoaded, reduxUser]);
 
   // Derive membership from redux user (trust backend validation)
   const membership: MembershipLike | null = reduxUser ? {
@@ -87,5 +22,5 @@ export function useMembership() {
 
   const currentUserId = reduxUser?.id ?? null;
 
-  return { membership, currentUserId, error, setError, isLoaded };
+  return { membership, currentUserId, isLoaded };
 }
