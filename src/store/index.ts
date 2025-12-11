@@ -2,8 +2,9 @@ import { configureStore } from '@reduxjs/toolkit';
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import gameReducer from './gameSlice';
+import authReducer from './authSlice';
 
-const persistConfig = {
+const gamePersistConfig = {
   key: 'trivia-spirit-game',
   storage,
   whitelist: [
@@ -20,11 +21,19 @@ const persistConfig = {
   ],
 };
 
-const persistedGameReducer = persistReducer(persistConfig, gameReducer);
+const authPersistConfig = {
+  key: 'trivia-spirit-auth',
+  storage,
+  whitelist: ['token', 'user'],
+};
+
+const persistedGameReducer = persistReducer(gamePersistConfig, gameReducer);
+const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);
 
 export const store = configureStore({
   reducer: {
     game: persistedGameReducer,
+    auth: persistedAuthReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
