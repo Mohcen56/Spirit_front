@@ -85,7 +85,9 @@ export function useMembership() {
     const flag = !!user?.is_premium;
     const expiry: string | null | undefined = user?.premium_expiry ?? null;
     if (!flag) return false;
-    if (!expiry) return false; // no expiry means not premium
+    // If premium flag is set but no expiry, trust backend (lifetime/perpetual premium)
+    if (!expiry) return true;
+    // If expiry exists, validate it's a future date
     try {
       const exp = new Date(expiry);
       return !isNaN(exp.getTime()) && exp.getTime() > Date.now();
