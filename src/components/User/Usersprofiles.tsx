@@ -24,7 +24,7 @@ interface UserProfileProps {
 
 export default function UserProfile({ user, onBack }: UserProfileProps) {
   const router = useRouter();
-  const { membership } = useMembership(); // ✅ get membership info
+  const { membership, isLoaded } = useMembership(); // ✅ get membership info
   const { userCategories, isLoadingCategories, approvedCategoriesCount, creatorBadge } = useUserCategories(user.id);
   const [formData] = useState({
     username: user.username,
@@ -84,7 +84,7 @@ export default function UserProfile({ user, onBack }: UserProfileProps) {
           </h2>
           <div className="flex items-center space-x-2">
           {/* Premium Badge */}
-          {(membership?.is_premium || user?.is_premium) && (
+          {isLoaded && (membership?.is_premium || user?.is_premium) && (
             <div className="mt-2">
               {/* Smaller on mobile, full on md+ */}
               <div className="sm:hidden">

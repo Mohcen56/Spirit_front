@@ -47,7 +47,7 @@ const Icon = {
 
 export default function UserDropdown({ align = "left" } ) {
   const { user, isLoading, logout } = useAuthGate();
-  const { membership } = useMembership(); // ✅ get membership info
+  const { membership, isLoaded } = useMembership(); // ✅ get membership info
 
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -70,7 +70,7 @@ export default function UserDropdown({ align = "left" } ) {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  if (isLoading) return null;
+  if (isLoading || !isLoaded) return null;
 
   const sideClass = align === "left" ? "left-0" : "right-0";
   const arrowSide = align === "left" ? "left-4" : "right-4";

@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { authAPI } from "@/lib/api/auth";
 import { getCurrentUser as getUserFromStorage } from "@/lib/utils/auth-utils";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setCredentials, markLoaded } from "@/store/authSlice";
 
 interface MembershipLike {
   is_premium: boolean;
@@ -11,11 +13,14 @@ interface MembershipLike {
 }
 
 export function useMembership() {
-  const [membership, setMembership] = useState<MembershipLike | null>(null);
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const dispatch = useAppDispatch();
+  const { user: reduxUser, isLoaded } = useAppSelector((state) => state.auth);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Skip if already loaded AND we have user data
+    if (isLoaded && reduxUser) return;
+
     const bootstrap = async () => {
       try {
         if (typeof window === "undefined") return;
@@ -28,16 +33,15 @@ export function useMembership() {
             const profile = await authAPI.getProfile();
             const user = profile.user;
             if (user) {
+              dispatch(setCredentials({ token, user }));
+              // For backward compatibility, keep updating localStorage key (can be removed later)
               const ml: MembershipLike = {
                 is_premium: !!user.is_premium,
                 user: user.id ? { id: user.id } : undefined,
                 expiry_date: (user as any).premium_expiry ?? null,
               };
-              setMembership(ml);
-              setCurrentUserId(user.id ?? null);
-              // For backward compatibility, keep updating localStorage key (can be removed later)
               localStorage.setItem("membership", JSON.stringify(ml));
-              return; // Use fresh data if available
+              return;
             }
           } catch {
             // fall through to localStorage
@@ -47,26 +51,15 @@ export function useMembership() {
         // Fallback: derive from stored user
         const storedUser = getUserFromStorage();
         if (storedUser) {
-          const ml: MembershipLike = {
-            is_premium: !!storedUser.is_premium,
-            user: storedUser.id ? { id: storedUser.id } : undefined,
-            expiry_date: (storedUser as any).premium_expiry ?? null,
-          };
-          setMembership(ml);
-          setCurrentUserId(storedUser.id ?? null);
+          dispatch(setCredentials({ token, user: storedUser }));
           return;
         }
-        // Fallback to legacy localStorage membership if present
-        const legacy = localStorage.getItem("membership");
-        if (legacy) {
-          try {
-            const membershipData = JSON.parse(legacy);
-            setMembership(membershipData);
-            if (membershipData.user?.id) setCurrentUserId(membershipData.user.id);
-          } catch {}
-        }
+        
+        // No user found - mark as loaded anyway
+        dispatch(markLoaded());
       } catch {
         setError("An error occurred while loading membership data");
+        dispatch(markLoaded());
       }
     };
 
@@ -77,20 +70,24 @@ export function useMembership() {
       if (e.key === "user" && e.newValue) {
         try {
           const user = JSON.parse(e.newValue);
-          const ml: MembershipLike = {
-            is_premium: !!user.is_premium,
-            user: user.id ? { id: user.id } : undefined,
-            expiry_date: user.premium_expiry ?? null,
-          };
-          setMembership(ml);
-          if (user.id) setCurrentUserId(user.id);
+          const token = localStorage.getItem("authToken");
+          dispatch(setCredentials({ token, user }));
         } catch {}
       }
     };
 
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
-  }, []);
+  }, [dispatch, isLoaded, reduxUser]);
 
-  return { membership, currentUserId, error, setError };
+  // Derive membership from redux user
+  const membership: MembershipLike | null = reduxUser ? {
+    is_premium: !!reduxUser.is_premium,
+    user: reduxUser.id ? { id: reduxUser.id } : undefined,
+    expiry_date: (reduxUser as { premium_expiry?: string | null }).premium_expiry ?? null,
+  } : null;
+
+  const currentUserId = reduxUser?.id ?? null;
+
+  return { membership, currentUserId, error, setError, isLoaded };
 }

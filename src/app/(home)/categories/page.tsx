@@ -17,7 +17,7 @@ import { useHeader } from '@/contexts/HeaderContext';
 import BounceLoader from '@/components/ui/loadingscreen';
 
 export default function CategoriesPage() {
-  const { membership, currentUserId, error, setError } = useMembership();
+  const { membership, currentUserId, error, setError, isLoaded } = useMembership();
   const notify = useNotification();
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   const [infoModal, setInfoModal] = useState<{ open: boolean; category: Category | null }>({ open: false, category: null });
@@ -183,7 +183,7 @@ export default function CategoriesPage() {
     return true;
   };
 
-  if (isLoading) {
+  if (isLoading || !isLoaded) {
     return (
       <div className="min-h-screen bg-eastern-blue-50 flex items-center justify-center">
         <BounceLoader />
