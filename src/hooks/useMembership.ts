@@ -80,25 +80,9 @@ export function useMembership() {
     return () => window.removeEventListener("storage", onStorage);
   }, [dispatch, isLoaded, reduxUser]);
 
-  // Helper to validate premium status with expiry check
-  const computeIsPremium = (user: { is_premium?: boolean; premium_expiry?: string | null } | null): boolean => {
-    const flag = !!user?.is_premium;
-    const expiry: string | null | undefined = user?.premium_expiry ?? null;
-    if (!flag) return false;
-    // If premium flag is set but no expiry, trust backend (lifetime/perpetual premium)
-    if (!expiry) return true;
-    // If expiry exists, validate it's a future date
-    try {
-      const exp = new Date(expiry);
-      return !isNaN(exp.getTime()) && exp.getTime() > Date.now();
-    } catch {
-      return false;
-    }
-  };
-
-  // Derive membership from redux user with expiry validation
+  // Derive membership from redux user (trust backend validation)
   const membership: MembershipLike | null = reduxUser ? {
-    is_premium: computeIsPremium(reduxUser),
+    is_premium: !!reduxUser.is_premium,
     user: reduxUser.id ? { id: reduxUser.id } : undefined,
     expiry_date: (reduxUser as { premium_expiry?: string | null }).premium_expiry ?? null,
   } : null;
