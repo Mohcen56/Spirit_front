@@ -152,9 +152,9 @@ export const AnimatedBadge = ({
         className={`rounded-full p-[1px] bg-gradient-to-r from-transparent ${borderColor} to-transparent [background-size:400%_100%] ${shadowColor} ${className}`}
         style={{ animation: "move-bg 8s linear infinite" }}
       >
-        <div className="inline-flex items-center gap-2 rounded-full bg-white dark:bg-[#0a091e] px-4 py-1.5 text-sm text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-transparent">
+        <div className="inline-flex justify-center items-center gap-2 rounded-full bg-white dark:bg-[#0a091e] px-3 py-2 text-sm text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-transparent">
           {icon}
-          <span>{text}</span>
+          {text ? <span>{text}</span> : null}
         </div>
       </div>
     </>
@@ -191,7 +191,7 @@ export default function AnimatedBadgeView(): React.ReactElement {
         className="relative flex w-full items-center justify-center overflow-hidden p-4 font-sans antialiased bg-white dark:bg-black"
       >
         <div className="z-10 flex flex-col items-center gap-8">
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex flex-col items-center gap-2">
             {animatedGradientColors.map((colorClass, index) => (
               <AnimatedBadge
                 key={index}

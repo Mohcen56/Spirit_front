@@ -30,8 +30,20 @@ export default function UserProfile({ user, onBack }: UserProfileProps) {
     username: user.username,
     avatar: user.avatar,
   });
+  const [showBadgeLabel, setShowBadgeLabel] = useState(true);
   
   const [avatarPreview, setAvatarPreview] = useState(user.avatar || '/avatars/thumbs.svg');
+
+  // Auto-detect screen size and toggle badge label
+  React.useEffect(() => {
+    const handleResize = () => {
+      setShowBadgeLabel(window.innerWidth >= 640); // sm breakpoint is 640px
+    };
+
+    handleResize(); // Set initial value
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4">
@@ -85,30 +97,17 @@ export default function UserProfile({ user, onBack }: UserProfileProps) {
           <div className="flex items-center space-x-2">
           {/* Premium Badge */}
           {isLoaded && (membership?.is_premium || user?.is_premium) && (
-            <div className="mt-2">
-              {/* Smaller on mobile, full on md+ */}
-              <div className="sm:hidden">
-                <VerifyBadge type="premium" size="sm" showLabel={false} />
-              </div>
-              <div className="hidden sm:block">
-                <VerifyBadge type="premium" size="md" showLabel={true} />
-              </div>
-            </div>
+            <VerifyBadge type="premium" size="md" showLabel={showBadgeLabel} />
           )}
 
             {/* Creator Level - Animated Badge based on approved categories */}
             {approvedCategoriesCount > 0 && (
-              <div className="mt-2 flex">
-                {/* Slightly scale down on mobile */}
-                <div className="scale-90 md:scale-100 origin-left">
-                  <AnimatedBadge
-                    text={`${creatorBadge.level} · ${creatorBadge.count}`}
-                    icon={creatorBadge.icon}
-                    borderColor={creatorBadge.borderColor}
-                    shadowColor={creatorBadge.shadowColor}
-                  />
-                </div>
-              </div>
+              <AnimatedBadge
+                text={showBadgeLabel ? `${creatorBadge.level} · ${creatorBadge.count}` : ''}
+                icon={creatorBadge.icon}
+                borderColor={creatorBadge.borderColor}
+                shadowColor={creatorBadge.shadowColor}
+              />
             )}
         </div></div>
 
