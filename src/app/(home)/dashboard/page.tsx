@@ -7,17 +7,15 @@ import { useAuthGate } from '@/hooks/useAuthGate';
 import { useHeader } from '@/contexts/HeaderContext';
 import AdUnit from '@/components/ads/AdUnit';
 import BounceLoader from '@/components/ui/loadingscreen';
+import { useMembership } from '@/hooks/useMembership';
 
-type AuthUser = {
-  is_premium?: boolean;
-  profile?: {
-    is_premium?: boolean;
-  };
-};
+
+
 
 export default function HomePage() {
   const { setHeader } = useHeader();
   const { user, isLoading } = useAuthGate({ redirectIfGuest: '/login' });
+  const { membership } = useMembership();
 
   useEffect(() => {
     setHeader({ title: "", backHref: "/" });
@@ -84,11 +82,7 @@ export default function HomePage() {
         </div>
       </main>
       {/* Show ads only for non-premium users */}
-      {(() => {
-        const u = user as AuthUser | null;
-        const isPremium = !!(u?.is_premium || u?.profile?.is_premium);
-        return !isPremium ? <AdUnit slot="1464710541" className="my-10" /> : null;
-      })()}
+      {!membership?.is_premium && <AdUnit slot="1464710541" className="my-10" />}
     </div>
   );
 }
