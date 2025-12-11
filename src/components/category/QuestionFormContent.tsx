@@ -6,6 +6,7 @@ import { logger } from '@/lib/utils/logger';
 import { Mic, Video, Image as ImageIcon, Lock, X, Check } from "lucide-react";
 import ImageCropModal from "@/components/utils/ImageCropModal";
 import { useNotification } from '@/hooks/useNotification';
+import { ShinyButton } from '@/components/ui/ShinyButton';
 
 interface QuestionFormContentProps {
   categoryId: string | number;
@@ -241,250 +242,239 @@ export default function QuestionFormContent({ categoryId, questionId, mode }: Qu
         />
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-6">
+       
+
         {/* Question Section */}
-        <div className="space-y-4">
-          <label className="block text-gray-900 text-xl font-bold">
-            the question:
-          </label>
+        <div className="rounded-2xl p-6 bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 shadow-md">
+          <div className="space-y-4">
+            <label className="block text-gray-900 text-sm font-semibold uppercase tracking-wide">
+              Question
+            </label>
 
-          {/* Question Input */}
-          <textarea
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            className="w-full px-6 py-4 rounded-2xl border-2 border-blue-300 text-gray-900 placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-base"
-            placeholder="write the question ..."
-            rows={2}
-            required
-          />
+            {/* Question Input */}
+            <textarea
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-base hover:border-blue-300 transition-colors"
+              placeholder="write the question ..."
+              rows={2}
+              required
+            />
 
-          {/* Multiple Choice Toggle (Future Feature) */}
-          <button
-            type="button"
-            className="flex items-center gap-3 px-5 py-3 rounded-2xl text-gray-900 border-2 border-blue-300 bg-white hover:bg-blue-50 transition-colors"
-            title="multiple choices (soon)"
-          >
-            <div className="w-6 h-6 rounded-full bg-blue-200 border-2 border-blue-400"></div>
-            <span className="font-medium">multiple choices (soon)</span>
-          </button>
+            {/* Question Image Preview */}
+            {questionImage && (
+              <div className="relative w-full items-center justify-center max-w-50 mx-auto">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  key={questionImage}
+                  src={questionImage}
+                  alt="Question preview"
+                  className=" object-cover rounded-lg border-2 items-center justify-center border-blue-400"
+                />
+                <button
+                  type="button"
+                  onClick={removeQuestionImage}
+                  className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-lg transition-colors"
+                  title="Remove image"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            )}
 
-          {/* Question Image Preview */}
-          {questionImage && (
-            <div className="relative w-full max-w-xs mx-auto">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                key={questionImage}
-                src={questionImage}
-                alt="Question preview"
-                className="w-full h-48 object-cover rounded-xl border-2 border-primary-600"
-              />
+            {/* Question Media Buttons */}
+            <div className="flex gap-3 justify-center flex-wrap">
+              {/* Audio Button */}
               <button
                 type="button"
-                onClick={removeQuestionImage}
-                className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-black rounded-full p-1.5 shadow-lg transition-colors"
-                title="Remove image"
+                className="relative flex flex-col items-center justify-center w-24 h-24 rounded-2xl bg-white border-3 border-amber-400 hover:bg-amber-50 transition-colors shadow-sm"
+                title="add an audio"
               >
-                <X className="h-4 w-4" />
+                <Mic className="h-7 w-7 text-gray-900 mb-1" />
+                <span className="text-xs text-gray-900 font-bold">audio</span>
+                <Lock className="absolute top-1 right-1 h-4 w-4 text-amber-500" />
               </button>
+
+              {/* Video Button */}
+              <button
+                type="button"
+                className="relative flex flex-col items-center justify-center w-24 h-24 rounded-2xl bg-white border-3 border-amber-400 hover:bg-amber-50 transition-colors shadow-sm"
+                title="add a video"
+              >
+                <Video className="h-7 w-7 text-gray-900 mb-1" />
+                <span className="text-xs text-gray-900 font-bold">video</span>
+                <Lock className="absolute top-1 right-1 h-4 w-4 text-amber-500" />
+              </button>
+
+              {/* Image Button */}
+              <button
+                type="button"
+                onClick={() => questionImageInputRef.current?.click()}
+                className="relative flex flex-col items-center justify-center w-24 h-24 rounded-2xl  border-3 border-gray-300 hover:scale-105 transition-colors shadow-sm"
+                title="add an image"
+              >
+                <ImageIcon className="h-7 w-7 text-gray-900 mb-1" />
+                <span className="text-xs text-gray-900 font-bold">image</span>
+                {questionImage && (
+                  <Check className="absolute top-1 right-1 h-4 w-4 text-green-500 bg-white rounded-full" />
+                )}
+              </button>
+
+              {/* Hidden file input for question image */}
+              <input
+                ref={questionImageInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleQuestionImageSelect}
+                aria-label="Upload question image"
+              />
             </div>
-          )}
-
-          {/* Question Media Buttons */}
-          <div className="flex gap-4 justify-center">
-            {/* Audio Button */}
-            <button
-              type="button"
-              className="relative flex flex-col items-center justify-center w-32 h-32 rounded-3xl bg-white border-4 border-amber-400 hover:bg-amber-50 transition-colors shadow-md"
-              title="add an audio"
-            >
-              <Mic className="h-10 w-10 text-gray-900 mb-2" />
-              <span className="text-sm text-gray-900 font-medium">audio</span>
-              <div className="absolute -bottom-3 px-3 py-1 bg-amber-400 text-gray-900 text-xs font-bold rounded-full">
-                premium
-              </div>
-              <Lock className="absolute top-2 right-2 h-5 w-5 text-amber-500" />
-            </button>
-
-            {/* Video Button */}
-            <button
-              type="button"
-              className="relative flex flex-col items-center justify-center w-32 h-32 rounded-3xl bg-white border-4 border-amber-400 hover:bg-amber-50 transition-colors shadow-md"
-              title="add a video"
-            >
-              <Video className="h-10 w-10 text-gray-900 mb-2" />
-              <span className="text-sm text-gray-900 font-medium">video</span>
-              <div className="absolute -bottom-3 px-3 py-1 bg-amber-400 text-gray-900 text-xs font-bold rounded-full">
-                premium
-              </div>
-              <Lock className="absolute top-2 right-2 h-5 w-5 text-amber-500" />
-            </button>
-
-            {/* Image Button */}
-            <button
-              type="button"
-              onClick={() => questionImageInputRef.current?.click()}
-              className="relative flex flex-col items-center justify-center w-32 h-32 rounded-3xl bg-gray-200 border-4 border-gray-300 hover:bg-gray-300 transition-colors shadow-md"
-              title="add an image"
-            >
-              <ImageIcon className="h-10 w-10 text-gray-900 mb-2" />
-              <span className="text-sm text-gray-900 font-medium">image</span>
-              {questionImage && (
-                <Check className="absolute top-2 right-2 h-5 w-5 text-green-500" />
-              )}
-            </button>
-
-            {/* Hidden file input for question image */}
-            <input
-              ref={questionImageInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleQuestionImageSelect}
-              aria-label="Upload question image"
-            />
           </div>
         </div>
 
         {/* Answer Section */}
-        <div className="space-y-4">
-          <label className="block text-gray-900 text-xl font-bold">
-            the answer
-          </label>
+        <div className="rounded-2xl p-6 bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 shadow-md">
+          <div className="space-y-4">
+            <label className="block text-gray-900 text-sm font-semibold uppercase tracking-wide">
+              Answer
+            </label>
 
-          {/* Answer Input */}
-          <textarea
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
-            className="w-full px-6 py-4 rounded-2xl border-2 border-blue-300 text-gray-900 placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-base"
-            placeholder="write the answere here ..."
-            rows={2}
-            required
-          />
+            {/* Answer Input */}
+            <textarea
+              value={answer}
+              onChange={(e) => setAnswer(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-base hover:border-blue-300 transition-colors"
+              placeholder="write the answer here ..."
+              rows={2}
+              required
+            />
 
-          {/* Answer Image Preview */}
-          {answerImage && (
-            <div className="relative w-full max-w-xs mx-auto">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                key={answerImage}
-                src={answerImage}
-                alt="Answer preview"
-                className="w-full h-48 object-cover rounded-xl border-2 border-slate-600"
-              />
+            {/* Answer Image Preview */}
+            {answerImage && (
+              <div className="relative w-full max-w-50 mx-auto">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  key={answerImage}
+                  src={answerImage}
+                  alt="Answer preview"
+                  className=" object-cover rounded-lg border-2 border-green-400"
+                />
+                <button
+                  type="button"
+                  onClick={removeAnswerImage}
+                  className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-lg transition-colors"
+                  title="Remove image"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+
+            {/* Answer Media Buttons */}
+            <div className="flex gap-3 justify-center flex-wrap">
+              {/* Audio Button */}
               <button
                 type="button"
-                onClick={removeAnswerImage}
-                className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-black rounded-full p-1.5 shadow-lg transition-colors"
-                title="Remove image"
+                className="relative flex flex-col items-center justify-center w-24 h-24 rounded-2xl bg-white border-3 border-amber-400 hover:bg-amber-50 transition-colors shadow-sm"
+                title="add an audio"
               >
-                <X className="h-4 w-4" />
+                <Mic className="h-7 w-7 text-gray-900 mb-1" />
+                <span className="text-xs text-gray-900 font-bold">audio</span>
+                <Lock className="absolute top-1 right-1 h-4 w-4 text-amber-500" />
               </button>
+
+              {/* Video Button */}
+              <button
+                type="button"
+                className="relative flex flex-col items-center justify-center w-24 h-24 rounded-2xl bg-white border-3 border-amber-400 hover:bg-amber-50 transition-colors shadow-sm"
+                title="add a video"
+              >
+                <Video className="h-7 w-7 text-gray-900 mb-1" />
+                <span className="text-xs text-gray-900 font-bold">video</span>
+                <Lock className="absolute top-1 right-1 h-4 w-4 text-amber-500" />
+              </button>
+
+              {/* Image Button */}
+              <button
+                type="button"
+                onClick={() => answerImageInputRef.current?.click()}
+                className="relative flex flex-col items-center justify-center w-24 h-24 rounded-2xl  border-3 border-gray-300 hover:scale-105  transition-colors shadow-sm"
+                title="add an image"
+              >
+                <ImageIcon className="h-7 w-7 text-gray-900 mb-1" />
+                <span className="text-xs text-gray-900 font-bold">image</span>
+                {answerImage && (
+                  <Check className="absolute top-1 right-1 h-4 w-4 text-green-500 bg-white rounded-full" />
+                )}
+              </button>
+
+              {/* Hidden file input for answer image */}
+              <input
+                ref={answerImageInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAnswerImageSelect}
+                aria-label="Upload answer image"
+              />
             </div>
-          )}
-
-          {/* Answer Media Buttons */}
-          <div className="flex gap-4 justify-center">
-            {/* Audio Button */}
-            <button
-              type="button"
-              className="relative flex flex-col items-center justify-center w-32 h-32 rounded-3xl bg-white border-4 border-amber-400 hover:bg-amber-50 transition-colors shadow-md"
-              title="add an audio"
-            >
-              <Mic className="h-10 w-10 text-gray-900 mb-2" />
-              <span className="text-sm text-gray-900 font-medium">audio</span>
-              <div className="absolute -bottom-3 px-3 py-1 bg-amber-400 text-gray-900 text-xs font-bold rounded-full">
-                premium
-              </div>
-              <Lock className="absolute top-2 right-2 h-5 w-5 text-amber-500" />
-            </button>
-
-            {/* Video Button */}
-            <button
-              type="button"
-              className="relative flex flex-col items-center justify-center w-32 h-32 rounded-3xl bg-white border-4 border-amber-400 hover:bg-amber-50 transition-colors shadow-md"
-              title="add a video"
-            >
-              <Video className="h-10 w-10 text-gray-900 mb-2" />
-              <span className="text-sm text-gray-900 font-medium">video</span>
-              <div className="absolute -bottom-3 px-3 py-1 bg-amber-400 text-gray-900 text-xs font-bold rounded-full">
-                premium
-              </div>
-              <Lock className="absolute top-2 right-2 h-5 w-5 text-amber-500" />
-            </button>
-
-            {/* Image Button */}
-            <button
-              type="button"
-              onClick={() => answerImageInputRef.current?.click()}
-              className="relative flex flex-col items-center justify-center w-32 h-32 rounded-3xl bg-gray-200 border-4 border-gray-300 hover:bg-gray-300 transition-colors shadow-md"
-              title="add an image "
-            >
-              <ImageIcon className="h-10 w-10 text-gray-900 mb-2" />
-              <span className="text-sm text-gray-900 font-medium">Image</span>
-              {answerImage && (
-                <Check className="absolute top-2 right-2 h-5 w-5 text-green-500" />
-              )}
-            </button>
-
-            {/* Hidden file input for answer image */}
-            <input
-              ref={answerImageInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleAnswerImageSelect}
-              aria-label="Upload answer image"
-            />
           </div>
+          
         </div>
 
-        {/* Points Section */}
-        <div className="space-y-4">
-          <label className="block text-gray-900 text-xl font-bold">
-            points:
+        {/* Choose Points */}
+        <div className="rounded-2xl p-6 bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 shadow-md">
+          <label className="block text-gray-900 text-sm font-semibold uppercase tracking-wide">
+            Choose Points
           </label>
-          <div className="flex gap-4 justify-center flex-wrap">
+          <div className="mt-3 flex justify-center gap-3 flex-wrap">
             {[200, 400, 600].map((p) => (
               <button
                 key={p}
                 type="button"
                 onClick={() => setPoints(p)}
-                className={`px-12 py-4 rounded-2xl font-bold text-2xl transition-all shadow-md ${
+                className={`rounded-xl font-bold text-base transition-all transform ${
                   points === p
-                    ? 'bg-amber-400 text-gray-900 scale-105 border-2 border-amber-500'
-                    : 'bg-blue-300 text-gray-900 hover:bg-blue-400 border-2 border-blue-400'
+                    ? 'bg-gradient-to-br from-cyan-700 to-cyan-800 text-white px-6 py-3 shadow-lg scale-105'
+                    : 'bg-cyan-500 text-white px-6 py-3 hover:bg-cyan-600 hover:scale-105'
                 }`}
               >
-                {p}
+                {p} pts
               </button>
             ))}
           </div>
         </div>
-
         {error && (
-          <div className="bg-red-500/20 border border-red-500 rounded-xl p-4">
-            <p className="text-red-300 text-center">{error}</p>
+          <div className="rounded-2xl p-5 bg-red-50 border-2 border-red-300 shadow-md">
+            <p className="text-red-700 text-center font-medium">{error}</p>
           </div>
         )}
 
-        {/* Submit Button */}
-        <div className="flex gap-6 pt-4">
-          <button
+        {/* Submit / Cancel */}
+        <div className="flex gap-4 pt-2">
+          <ShinyButton
             type="submit"
             disabled={loading || loadingQuestion || !question.trim() || !answer.trim()}
-            className="w-full bg-slate-700 hover:bg-slate-800 disabled:bg-slate-400 disabled:cursor-not-allowed py-5 rounded-2xl font-bold text-xl text-white shadow-lg transition-all transform hover:scale-[1.02] disabled:scale-100"
+            bgColor="bg-cyan-600"
+            hoverColor="hover:bg-cyan-700"
+            shadowColor="hover:shadow-cyan-500/30"
+            className="flex-1"
           >
-            {loading ? (isEditMode ? "Updating..." : "Saving...") : (isEditMode ? "Update ✓" : "Save ✓")}
-          </button>
+            {loading ? (isEditMode ? 'Updating…' : 'Saving…') : (isEditMode ? 'Update ' : 'Save ')}
+          </ShinyButton>
 
-          {/* Cancel Button */}
-          <button
+          <ShinyButton
             type="button"
             onClick={() => router.push(`/categories/edit/${categoryId}`)}
-            className="w-full bg-red-400 hover:bg-red-500 py-5 rounded-2xl font-bold text-xl text-white shadow-lg transition-all transform hover:scale-[1.02]"
+            bgColor="bg-red-500"
+            hoverColor="hover:bg-red-600"
+            shadowColor="hover:shadow-red-500/30"
+            className="flex-1"
           >
             Cancel
-          </button>
+          </ShinyButton>
         </div>
       </form>
     </>
