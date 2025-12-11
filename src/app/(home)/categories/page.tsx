@@ -17,7 +17,8 @@ import { useHeader } from '@/contexts/HeaderContext';
 import BounceLoader from '@/components/ui/loadingscreen';
 
 export default function CategoriesPage() {
-  const { membership, currentUserId, error, setError, isLoaded } = useMembership();
+  const { membership, currentUserId, isLoaded } = useMembership();
+  const [error, setError] = useState<string>('');
   const notify = useNotification();
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   const [infoModal, setInfoModal] = useState<{ open: boolean; category: Category | null }>({ open: false, category: null });
