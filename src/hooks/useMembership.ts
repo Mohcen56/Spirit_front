@@ -18,9 +18,7 @@ export function useMembership() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Skip if already loaded AND we have user data
-    if (isLoaded && reduxUser) return;
-
+    // Always fetch fresh user data if we have a token (don't trust persisted state)
     const bootstrap = async () => {
       try {
         if (typeof window === "undefined") return;
