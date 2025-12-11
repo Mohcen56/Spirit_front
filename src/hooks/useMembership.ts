@@ -80,9 +80,23 @@ export function useMembership() {
     return () => window.removeEventListener("storage", onStorage);
   }, [dispatch, isLoaded, reduxUser]);
 
-  // Derive membership from redux user
+  // Helper to validate premium status with expiry check
+  const computeIsPremium = (user: { is_premium?: boolean; premium_expiry?: string | null } | null): boolean => {
+    const flag = !!user?.is_premium;
+    const expiry: string | null | undefined = user?.premium_expiry ?? null;
+    if (!flag) return false;
+    if (!expiry) return false; // no expiry means not premium
+    try {
+      const exp = new Date(expiry);
+      return !isNaN(exp.getTime()) && exp.getTime() > Date.now();
+    } catch {
+      return false;
+    }
+  };
+
+  // Derive membership from redux user with expiry validation
   const membership: MembershipLike | null = reduxUser ? {
-    is_premium: !!reduxUser.is_premium,
+    is_premium: computeIsPremium(reduxUser),
     user: reduxUser.id ? { id: reduxUser.id } : undefined,
     expiry_date: (reduxUser as { premium_expiry?: string | null }).premium_expiry ?? null,
   } : null;
