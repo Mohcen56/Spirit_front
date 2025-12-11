@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authAPI } from '@/lib/api/auth';
 import { setCurrentUser } from '@/lib/utils/auth-utils';
-import { useAppSelector } from '@/store/hooks';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import { setCredentials, logout as logoutAction } from '@/store/authSlice';
 import type { User } from '@/types/game';
 import { logger } from '@/lib/utils/logger';
 
@@ -14,6 +15,7 @@ let cacheTimestamp = 0;
 
 export function useAuthGate({ redirectIfGuest }: { redirectIfGuest?: string } = {}) {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setLoading] = useState(true);
   
@@ -63,6 +65,10 @@ export function useAuthGate({ redirectIfGuest }: { redirectIfGuest?: string } = 
 
       setUser(profile.user);
       setCurrentUser(profile.user);
+      
+      // ✅ CRITICAL: Dispatch to Redux so useMembership can read it
+      const token = localStorage.getItem('authToken');
+      dispatch(setCredentials({ token: token || undefined, user: profile.user }));
     } catch (error) {
       profileFetchInFlight = null;
       if (redirectIfGuest) router.replace(redirectIfGuest);
@@ -87,10 +93,15 @@ export function useAuthGate({ redirectIfGuest }: { redirectIfGuest?: string } = 
 
   const logout = async () => {
     await authAPI.logout();
+    
+    // ✅ Clear Redux state (important for account switching)
+    dispatch(logoutAction());
+    
     // ✅ Clear cache on logout
     cachedProfile = null;
     cacheTimestamp = 0;
     profileFetchInFlight = null;
+    
     router.replace('/login');
   };
 

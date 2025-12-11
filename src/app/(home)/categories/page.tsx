@@ -12,11 +12,15 @@ import { ProcessingButton } from '@/components/ui/button2';
 import { useNotification } from '@/hooks/useNotification';
 import Image from 'next/image';
 import { useMembership } from '@/hooks/useMembership';
+import { useAuthGate } from '@/hooks/useAuthGate';
 import { useImageError } from '@/hooks/useImageError';
 import { useHeader } from '@/contexts/HeaderContext';
 import BounceLoader from '@/components/ui/loadingscreen';
 
 export default function CategoriesPage() {
+  // ✅ CRITICAL: Fetch user profile to populate Redux (this triggers the profile API call)
+  useAuthGate({ redirectIfGuest: '/login' });
+  
   const { membership, currentUserId, isLoaded } = useMembership();
   const [error, setError] = useState<string>('');
   const notify = useNotification();

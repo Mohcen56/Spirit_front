@@ -46,6 +46,22 @@ export const store = configureStore({
 export const persistor = persistStore(store);
 
 /**
+ * ✅ CRITICAL: Clear auth persistence when logout action is dispatched
+ * Prevents old user data from being restored when switching accounts
+ */
+store.subscribe(() => {
+  const state = store.getState();
+  const authState = state.auth;
+  
+  // When logout happens (user and token are null), purge auth persistence
+  // This ensures redux-persist doesn't restore old user data after logout
+  if (!authState.user && !authState.token && authState.isLoaded) {
+    // Use storage.removeItem directly to clear only the auth key
+    storage.removeItem('persist:trivia-spirit-auth');
+  }
+});
+
+/**
  * Listen for game end actions and purge persisted storage
  * Keeps questions/playedQuestions in memory during active game (for reload resilience)
  * but wipes them from localStorage after game ends (for cleanup)
