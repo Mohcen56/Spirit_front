@@ -239,8 +239,8 @@ return (
           return (
             <div key={category.id} className="h-full flex flex-col">
             
-            {/* Category image + name - Fixed height */}
-            <div className="relative h-24 md:h-50  w-full rounded-xl overflow-hidden border-4 border-white shadow mb-3 flex-shrink-0">
+            {/* Category image + name - Takes remaining height */}
+            <div className="relative flex-1 w-full rounded-xl overflow-hidden border-4 border-white shadow mb-3 flex-shrink-0">
               {category.image && !hasImageError(category.name) ? (
                 <Image
                   src={category.image}
@@ -259,8 +259,8 @@ return (
               </div>
             </div>
 
-            {/* Questions - Takes remaining height */}
-            <div className="flex-1 flex flex-col gap-1 md:gap-2">
+            {/* Questions - Fixed height */}
+            <div className="h-[60%] flex flex-col gap-1 md:gap-2">
               {questionGrid.map((slot: QuestionSlot) => (
                 <button
                   key={`${category.id}-${slot.question.id}`}
@@ -292,7 +292,7 @@ return (
     </main>
 
     {/* Footer / Scoreboard - Fixed height (uses Redux liveTeams) */}
-    <footer className="bg-gradient-to-r from-brown-600 to-brown-800 py-2 md:py-4 flex items-center justify-center gap-1 md:gap-4 border-t-4 border-2 border-amber-500 h-15 md:h-23 flex-shrink-0">
+    <footer className="bg-gradient-to-r from-brown-600 to-brown-800 py-2 md:py-4 flex items-center justify-center gap-1 md:gap-4 border-t-4 border-2 border-amber-500 h-15 md:h-25 flex-shrink-0">
       {liveTeams && liveTeams.length > 0 ? (
         liveTeams.map((team) => (
           <div key={team.id} className="bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 p-[1px] rounded-2xl" dir="ltr">

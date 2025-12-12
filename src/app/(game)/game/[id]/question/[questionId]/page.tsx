@@ -14,10 +14,11 @@ import TeamsSidebar from '@/components/game/TeamsSidebar';
 import { getFullImageUrl } from '@/lib/utils/imageUtils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { switchToNextTeam, awardPoints, clearActivePerk, setGameQuestions, setBackupQuestions, markQuestionPlayed, endGame, activateChoicesPerk, lockPerks, unlockPerks, setRerollBuffer } from '@/store/gameSlice';
-import { Loader, Play, Pause, RotateCcw } from 'lucide-react';
+import {  Play, Pause, RotateCcw } from 'lucide-react';
 import { useGameData } from '@/hooks/useGameData';
 import { useSyncTeams } from '@/hooks/useSyncTeams';
 import { consumeBackupQuestion } from '@/store/gameSlice';
+import BounceLoader from '@/components/ui/loadingscreen';
 
 export default function QuestionPage() {
   const params = useParams();
@@ -380,9 +381,11 @@ export default function QuestionPage() {
   }, [questions, teams, playedQuestions, rerollBuffer, questionId, dispatch]);
 
   if (isLoading) {
-    return (
-      <Loader />
-    );
+     return (
+        <div className="min-h-screen bg-eastern-blue-50 flex items-center justify-center">
+          <BounceLoader />
+        </div>
+      );
   }
 
   if (error) {
