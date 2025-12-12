@@ -8,6 +8,7 @@ import { VerifyBadge } from '@/components/ui/verify-badge';
 import { AnimatedBadge } from '@/components/ui/animatedbadge';
 import { useUserCategories } from '@/hooks/useUserCategories';
 import { useMembership } from '@/hooks/useMembership';
+import { getFullImageUrl } from '@/lib/utils/imageUtils';
 
 interface User {
   id: number;

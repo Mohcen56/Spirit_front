@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { gameAPI } from '@/lib/api';
 import { Question } from '@/types/game';
 import Image from 'next/image';
+import { getFullImageUrl } from '@/lib/utils/imageUtils';
 import GameHeader from '@/components/game/GameHeader';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { startGame, switchToNextTeam, awardPoints, setGameQuestions, endGame } from '@/store/gameSlice';
@@ -243,7 +244,7 @@ return (
             <div className="relative flex-1 w-full rounded-xl overflow-hidden border-4 border-white shadow mb-3 flex-shrink-0">
               {category.image && !hasImageError(category.name) ? (
                 <Image
-                  src={category.image}
+                  src={getFullImageUrl(category.image) || ''}
                   alt={category.name}
                   fill
                   className="object-cover"
