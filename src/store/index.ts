@@ -8,16 +8,23 @@ const gamePersistConfig = {
   key: 'trivia-spirit-game',
   storage,
   whitelist: [
+    // Game progress & metadata (persisted on refresh)
     'currentTeam',
     'gameId',
     'totalTeams',
     'isGameActive',
-    'teams',
+    'teams', // scores + team data only
     'doublePerkActiveTeamId',
     'doublePerkUsed',
     'rerollPerkUsed',
-    'questions',
+    'choicesPerkUsed',
     'playedQuestions',
+    'rerollBuffer',
+    // EXCLUDED (fetched fresh on game resume):
+    // - questions (fetched from React Query)
+    // - backupQuestions (computed on reroll)
+    // - loading, error (UI state)
+    // - perksLocked (computed)
   ],
 };
 
