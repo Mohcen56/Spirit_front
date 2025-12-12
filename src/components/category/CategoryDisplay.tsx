@@ -26,16 +26,14 @@ function CategoryDisplay({
       {/* Image */}
       <div className="w-60 h-60 bg-gray-100 border   rounded-xl overflow-hidden flex items-center justify-center">
         {categoryImage ? (
-         
-          <Image
-          src={getFullImageUrl(categoryImage) || ''}
-          alt={categoryName}
-          width={240}
-          height={240}
-          className="object-cover w-full h-full"
-          unoptimized={true}
-          onError={() => {/* fallback UI */}}
-        />
+          /* Use plain img to avoid Next optimization/proxy on signed URLs */
+          <img
+            src={getFullImageUrl(categoryImage) || ''}
+            alt={categoryName}
+            width={240}
+            height={240}
+            className="object-cover w-full h-full"
+          />
         ) : (
           <ImagePlus className="h-12 w-12 text-gray-400" />
         )}
