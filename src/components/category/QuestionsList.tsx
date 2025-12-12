@@ -124,11 +124,11 @@ export default function QuestionsList({
           }
         `}
       </style>
-    <div className="rounded-xl shadow-xl p-6 w-full  bg-white mb-6">
+    <div className="rounded-xl shadow-xl p-4 w-full  bg-white mb-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="bg-blue-500 text-white px-4 py-2 rounded-full font-bold text-lg">
+          <div className="bg-blue-500 text-white px-4 py-2 rounded-full font-bold  text-sm sm:text-lg">
             Questions: {filteredAndSortedQuestions.length}
           </div>
         </div>
@@ -136,10 +136,10 @@ export default function QuestionsList({
           <button
             type="button"
             onClick={onAddQuestion}
-            className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-4 py-2 rounded-lg shadow-md transition-all transform hover:scale-105 font-bold"
+            className="flex  items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-3 sm:px-4 py-2 rounded-lg shadow-md transition-all transform hover:scale-105 font-bold"
           >
             <PlusCircle className="h-5 w-5" />
-            <span>+ Add Question</span>
+            <span className='text-sm sm:text-lg'>Add Question</span>
           </button>
         )}
       </div>
@@ -223,59 +223,22 @@ export default function QuestionsList({
             key={question.id}
             className="relative rounded-2xl p-5 bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 hover:border-blue-400 hover:shadow-xl transition-all duration-300 mb-6 group"
           >
-            <div className="flex items-start justify-between gap-4">
-              {/* Points Badge */}
-              <div className="absolute -top-3 -left-3 flex-shrink-0 bg-gradient-to-br from-cyan-500 to-cyan-600 text-white px-4 py-2 rounded-xl font-bold text-base shadow-lg">
-                {question.points}
-              </div>
+            {/* Points Badge */}
+            <div className="absolute -top-4 left-2 flex-shrink-0 bg-gradient-to-br from-cyan-500 to-cyan-600 text-white px-4 py-2 rounded-xl font-bold text-base shadow-lg">
+              {question.points}
+            </div>
 
-              {/* Question Content */}
-              <div className="flex-1 mt-2">
-                <div className="mb-3">
-                  <span className="text-gray-600 text-sm font-semibold uppercase tracking-wide">Question</span>
-                  <p className="text-gray-900 text-lg font-medium mt-1 leading-relaxed">
-                    {question.text}
-                  </p>
-                </div>
-
-                {/* Images indicators */}
-                <div className="mt-3 flex gap-2 flex-wrap">
-                  {question.image && (
-                    <div
-                      className="rounded-full p-[1px] bg-gradient-to-r from-transparent via-blue-500 to-transparent [background-size:400%_100%]"
-                      style={{ animation: "move-bg 8s linear infinite" }}
-                    >
-                      <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs text-blue-600 border border-blue-200 shadow-sm">
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-                        </svg>
-                        <span className="font-semibold">Question Image</span>
-                      </div>
-                    </div>
-                  )}
-                  {question.answer_image && (
-                    <div
-                      className="rounded-full p-[1px] bg-gradient-to-r from-transparent via-green-500 to-transparent [background-size:400%_100%]"
-                      style={{ animation: "move-bg 8s linear infinite" }}
-                    >
-                      <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs text-green-600 border border-green-200 shadow-sm">
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-                        </svg>
-                        <span className="font-semibold">Answer Image</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
+            {/* Question Header with Label and Buttons */}
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <span className="text-gray-600 text-sm font-semibold uppercase tracking-wide">Question</span>
+              
               {/* Action Buttons */}
-              <div className="flex-shrink-0 flex items-center gap-2 mt-2">
+              <div className="flex items-center gap-2">
                 {onEditQuestion && (
                   <button
                     type="button"
                     onClick={() => onEditQuestion(question.id)}
-                    className="text-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-all p-2.5 rounded-lg group-hover:scale-110 duration-200"
+                    className="text-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-all p-2.5 rounded-lg hover:scale-110 duration-200"
                     title="Edit question"
                   >
                     <Edit className="h-5 w-5" />
@@ -289,11 +252,48 @@ export default function QuestionsList({
                         onDeleteQuestion(question.id);
                       }
                     }}
-                    className="text-red-500 hover:text-red-600 hover:bg-red-50 transition-all p-2.5 rounded-lg group-hover:scale-110 duration-200"
+                    className="text-red-500 hover:text-red-600 hover:bg-red-50 transition-all p-2.5 rounded-lg hover:scale-110 duration-200"
                     title="Delete question"
                   >
                     <Trash2 className="h-5 w-5" />
                   </button>
+                )}
+              </div>
+            </div>
+
+            {/* Question Content */}
+            <div>
+              <p className="text-gray-900 text-xs sm:text-lg font-medium leading-relaxed">
+                {question.text}
+              </p>
+
+              {/* Images indicators */}
+              <div className="mt-3 flex gap-2 flex-wrap">
+                {question.image && (
+                  <div
+                    className="rounded-full p-[1px] bg-gradient-to-r from-transparent via-blue-500 to-transparent [background-size:400%_100%]"
+                    style={{ animation: "move-bg 8s linear infinite" }}
+                  >
+                    <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs text-blue-600 border border-blue-200 shadow-sm">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                      </svg>
+                      <span className="font-semibold">Question Image</span>
+                    </div>
+                  </div>
+                )}
+                {question.answer_image && (
+                  <div
+                    className="rounded-full p-[1px] bg-gradient-to-r from-transparent via-green-500 to-transparent [background-size:400%_100%]"
+                    style={{ animation: "move-bg 8s linear infinite" }}
+                  >
+                    <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs text-green-600 border border-green-200 shadow-sm">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                      </svg>
+                      <span className="font-semibold">Answer Image</span>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>

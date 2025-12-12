@@ -86,7 +86,7 @@ export default function CategoryFormFields({
           />
 
           {/* Action buttons */}
-          <div className="flex justify-end gap-4 mt-6">
+          <div className="flex  md:justify-end gap-4 mt-6">
             <button
               type="button"
               onClick={() => setIsEditing(true)}
