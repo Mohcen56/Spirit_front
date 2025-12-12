@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
         hostname: 'f7ac1437b17c329ca5dcbd482f634410.r2.cloudflarestorage.com',
         pathname: '/**',
       },
+      {
+      protocol: "https",
+      hostname: "cdn.triviaspirit.com",
+    },
       // Local Django backend (development only)
       {
         protocol: 'http',
