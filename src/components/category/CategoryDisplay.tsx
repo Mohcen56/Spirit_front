@@ -32,6 +32,7 @@ function CategoryDisplay({
           width={240}
           height={240}
           className="object-cover w-full h-full"
+          unoptimized
           onError={() => {/* fallback UI */}}
         />
         ) : (

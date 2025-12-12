@@ -396,8 +396,8 @@ export default function CategoriesPage() {
                             style={{ objectFit: 'cover', borderRadius: '0 rem' }}
                             loading="lazy"
                             quality={85}
+                            unoptimized
                             onError={() => handleImageError(category.name)}
-                            unoptimized={(category.image_url || category.image || '').includes('r2.dev')}
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">

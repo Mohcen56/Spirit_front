@@ -248,6 +248,7 @@ return (
                   alt={category.name}
                   fill
                   className="object-cover"
+                  unoptimized
                   onError={() => handleImageError(category.name)}
                 />
               ) : (

@@ -134,6 +134,7 @@ export default function UserProfile({ user, onBack, onSave }: UserProfileProps) 
                   width={128}
                   height={128}
                   className="w-full h-full object-cover"
+                  unoptimized
                   onError={() => {
                     setAvatarPreview('/avatars/thumbs.svg');
                   }}
