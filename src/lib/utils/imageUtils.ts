@@ -3,8 +3,6 @@
  */
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-const CDN_HOST = 'cdn.triviaspirit.com';
-const R2_HOST_SUFFIX = '.r2.cloudflarestorage.com';
 
 /**
  * Converts a potentially relative image URL to an absolute URL
@@ -16,26 +14,23 @@ export function getFullImageUrl(imageUrl: string | null | undefined): string | n
     return null;
   }
 
-  // If it's already an absolute URL, optionally rewrite to CDN
-  if (imageUrl.startsWith('http')) {
-    try {
-      const url = new URL(imageUrl);
-      // Rewrite Cloudflare R2 host to CDN host if detected
-      if (url.hostname.endsWith(R2_HOST_SUFFIX)) {
-        url.hostname = CDN_HOST;
-        return url.toString();
-      }
-      return imageUrl;
-    } catch {
-      return imageUrl;
-    }
+  // If it's already an absolute URL, return as-is to avoid breaking signed or cached URLs
+  if (/^https?:\/\//i.test(imageUrl)) {
+    return imageUrl;
   }
 
   // If it's a relative URL (starts with /), prepend the API base URL
   if (imageUrl.startsWith('/')) {
+    // Guard against missing base URL
+    if (!API_BASE_URL) {
+      return imageUrl;
+    }
     return `${API_BASE_URL}${imageUrl}`;
   }
 
   // If it's a relative path without leading slash, add it
+  if (!API_BASE_URL) {
+    return `/${imageUrl}`;
+  }
   return `${API_BASE_URL}/${imageUrl}`;
 }

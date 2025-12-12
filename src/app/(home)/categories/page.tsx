@@ -384,7 +384,7 @@ export default function CategoriesPage() {
                       <div className="absolute top-2 right-0 bg-gradient-to-br from-cyan-700 to-cyan-800 text-white text-xs lg:text-sm font-bold px-2 lg:px-3 py-1  lg:min-w-[45px] text-center z-20">
                         {playedPercent}%
                       </div>
-                      {/* Category Illustration */}
+                      {/* Category image */}
                       <div className={`h-full w-full bg-cyan-100 ${(!canSelect ? 'grayscale' : '')}`}>
                         {((category.image_url || category.image || getLocalIllustration(category.name))) && !hasImageError(category.name) ? (
                           <Image
