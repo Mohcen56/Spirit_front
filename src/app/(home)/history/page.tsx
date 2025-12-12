@@ -9,6 +9,7 @@ import { useHeader } from '@/contexts/HeaderContext';
 import { Clock, Play } from 'lucide-react';
 import Image from 'next/image';
 import { useImageError } from '@/hooks/useImageError';
+import { getFullImageUrl } from '@/lib/utils/imageUtils';
 import { ShinyButton } from '@/components/ui/ShinyButton';
 import BounceLoader from '@/components/ui/loadingscreen';
 
@@ -147,7 +148,7 @@ export default function HistoryPage() {
                     <div className="h-full w-full">
                       {category.image_url && !hasImageError(category.name) ? (
                         <Image
-                          src={category.image_url}
+                          src={getFullImageUrl(category.image_url) || ''}
                           alt={category.name}
                           className="w-full h-full object-cover"
                           fill

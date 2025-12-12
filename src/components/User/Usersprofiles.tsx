@@ -133,9 +133,9 @@ export default function UserProfile({ user, onBack }: UserProfileProps) {
                 >
                   {/* Category Image */}
                   <div className="h-4/5 relative">
-                    {category.image_url || category.image ? (
-                      <Image
-                        src={(category.image_url || category.image)!}
+                      {category.image_url || category.image ? (
+                        <Image
+                          src={getFullImageUrl(category.image_url || category.image) || ''}
                         alt={category.name}
                         fill
                         className="object-cover group-hover:brightness-110 transition-all"

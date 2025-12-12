@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { logger } from '@/lib/utils/logger';
 import { ChevronLeft, Camera, Eye, EyeOff, Check, Lock } from 'lucide-react';
 import Image from 'next/image';
+import { getFullImageUrl } from '@/lib/utils/imageUtils';
 import { ProcessingButton } from '@/components/ui/button2';
 import { useNotification } from '@/hooks/useNotification';
 import { VerifyBadge } from '@/components/ui/verify-badge';
@@ -128,7 +129,7 @@ export default function UserProfile({ user, onBack, onSave }: UserProfileProps) 
             <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200 border-4 border-white shadow-lg">
               {avatarPreview && avatarPreview !== '/avatars/thumbs.svg' ? (
                 <Image
-                  src={avatarPreview}
+                  src={getFullImageUrl(avatarPreview) || ''}
                   alt="Profile Avatar"
                   width={128}
                   height={128}

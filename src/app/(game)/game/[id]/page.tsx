@@ -7,6 +7,7 @@ import { logger } from '@/lib/utils/logger';
 import { Game, Category, Team } from '@/types/game';
 import Header from '@/components/Header';
 import Image from 'next/image';
+import { getFullImageUrl } from '@/lib/utils/imageUtils';
 import { ProcessingButton } from '@/components/ui/button2';
 import BounceLoader from '@/components/ui/loadingscreen';
 
@@ -121,7 +122,7 @@ export default function GamePage() {
                         {category.image_url || category.image ? (
                           <div className="w-15 h-15 relative rounded-full overflow-hidden border-3 border-cyan-500 flex-shrink-0">
                             <Image
-                              src={(category.image_url || category.image) as string}
+                              src={getFullImageUrl((category.image_url || category.image) as string) || ''}
                               alt={category.name}
                               fill
                               sizes="40px"
