@@ -157,7 +157,7 @@ export default function HistoryPage() {
                           loading="lazy"
                           quality={85}
                           onError={() => handleImageError(category.name)}
-                          unoptimized={category.image_url.includes('r2.dev')}
+                          unoptimized={true}
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-eastern-blue-200 to-eastern-blue-300">

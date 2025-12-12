@@ -143,7 +143,7 @@ export default function GameResultsPage() {
                           width={80}
                           height={64}
                           className="w-full h-full object-cover"
-                          unoptimized
+                          unoptimized={true}
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-gray-200">

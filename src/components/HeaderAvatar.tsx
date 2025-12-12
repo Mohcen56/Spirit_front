@@ -19,7 +19,7 @@ export default function HeaderAvatar() {
           width={80}
           height={80}
           className="object-cover w-full h-full"
-          unoptimized
+          unoptimized={true}
         />
       </div>
     </div>

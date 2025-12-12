@@ -358,12 +358,13 @@ export default function AddedCategoriesPage() {
                             aria-label="View creator profile"
                           >
                             <Image
-                              src={category.created_by_avatar || '/avatars/thumbs.svg'}
+                              src={getFullImageUrl(category.created_by_avatar) || '/avatars/thumbs.svg'}
                               alt="Creator Profile"
                               width={32}
                               height={32}
                               className="w-full h-full object-cover rounded-full"
                               loading="lazy"
+                              unoptimized={true}
                               quality={75}
                             />
                           </button>
@@ -388,7 +389,7 @@ export default function AddedCategoriesPage() {
                               sizes="(max-width: 768px) 80vw, 33vw"
                               loading="lazy"
                               quality={85}
-                              unoptimized
+                              unoptimized={true}
                               onError={() => handleImageError(category.id)}
                             />
                           ) : (

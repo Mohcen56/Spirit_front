@@ -248,7 +248,7 @@ return (
                   alt={category.name}
                   fill
                   className="object-cover"
-                  unoptimized
+                  unoptimized={true}
                   onError={() => handleImageError(category.name)}
                 />
               ) : (
@@ -309,7 +309,7 @@ return (
                     width={40} 
                     height={40} 
                     className="w-full h-full object-cover" 
-                    unoptimized
+                    unoptimized={true}
                   />
                 </div>
               </div>

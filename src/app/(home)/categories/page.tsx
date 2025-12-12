@@ -396,7 +396,7 @@ export default function CategoriesPage() {
                             style={{ objectFit: 'cover', borderRadius: '0 rem' }}
                             loading="lazy"
                             quality={85}
-                            unoptimized
+                            unoptimized={true}
                             onError={() => handleImageError(category.name)}
                           />
                         ) : (

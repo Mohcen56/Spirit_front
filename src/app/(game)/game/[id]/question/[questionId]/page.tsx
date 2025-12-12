@@ -469,7 +469,7 @@ export default function QuestionPage() {
                           width={800}
                           height={400}
                           className="w-full max-h-40 md:max-h-75 object-contain mx-auto"
-                          unoptimized
+                          unoptimized={true}
                           onLoadingComplete={() => setQuestionImageStatus('loaded')}
                           onError={() => setQuestionImageStatus('error')}
                         />

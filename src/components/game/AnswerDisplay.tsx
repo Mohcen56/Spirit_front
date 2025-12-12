@@ -48,7 +48,7 @@ function AnswerDisplay({ question, onShowQuestion, onShowTeamSelector }: AnswerD
              width={800}
              height={400}
              className="w-full max-h-50 md:max-h-75 object-contain mx-auto"
-             unoptimized
+             unoptimized={true}
              onLoadingComplete={() => setAnswerImageStatus('loaded')}
              onError={() => setAnswerImageStatus('error')}
            />

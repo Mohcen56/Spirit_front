@@ -89,7 +89,7 @@ export default function UserDropdown({ align = "left" } ) {
           width={80}
           height={80}
           className="object-cover w-full h-full"
-          unoptimized
+          unoptimized={true}
           onError={(e) =>
             ((e.target as HTMLImageElement).src = "/avatars/thumbs.svg")
           }
@@ -115,7 +115,7 @@ export default function UserDropdown({ align = "left" } ) {
                     width={80}
                     height={80}
                     className="object-cover w-full h-full rounded-full"
-                    unoptimized
+                    unoptimized={true}
                     onError={(e) =>
                       ((e.target as HTMLImageElement).src =
                         "/avatars/thumbs.svg")

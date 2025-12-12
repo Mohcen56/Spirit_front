@@ -84,7 +84,7 @@ export default function TeamsSidebar({
                         width={48}
                         height={48}
                         className="w-full h-full object-cover"
-                        unoptimized
+                        unoptimized={true}
                       />
                     ) : (
                       <span className="text-white text-base sm:text-lg font-bold">

@@ -59,7 +59,7 @@ export default function TeamSelector({
                     width={64}
                     height={64}
                     className="w-full h-full object-cover rounded-full"
-                    unoptimized
+                    unoptimized={true}
                   />
                 ) : (
                   <Users className="h-8 w-8 text-slate-600" />

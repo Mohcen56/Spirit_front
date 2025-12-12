@@ -75,7 +75,7 @@ export default function UserProfile({ user, onBack }: UserProfileProps) {
                   width={128}
                   height={128}
                   className="w-full h-full object-cover"
-                  unoptimized
+                  unoptimized={true}
                   onError={() => {
                     setAvatarPreview('/avatars/thumbs.svg');
                   }}
@@ -140,7 +140,7 @@ export default function UserProfile({ user, onBack }: UserProfileProps) {
                           src={getFullImageUrl(category.image_url || category.image) || ''}
                         alt={category.name}
                         fill
-                        unoptimized
+                        unoptimized={true}
                         className="object-cover group-hover:brightness-110 transition-all"
                         sizes="(max-width: 768px) 50vw, 33vw"
                       />
