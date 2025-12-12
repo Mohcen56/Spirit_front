@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   },
 
   images: {
+    unoptimized: true,
     remotePatterns: [
       // Cloudflare R2 Storage (production)
       {
