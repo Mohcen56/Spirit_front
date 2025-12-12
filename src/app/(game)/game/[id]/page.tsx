@@ -127,6 +127,7 @@ export default function GamePage() {
                               fill
                               sizes="40px"
                               className="object-cover"
+                              unoptimized={true}
                             />
                           </div>
                         ) : (
