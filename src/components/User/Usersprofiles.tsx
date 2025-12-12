@@ -70,7 +70,7 @@ export default function UserProfile({ user, onBack }: UserProfileProps) {
             <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200 border-4 border-white shadow-lg">
               {avatarPreview && avatarPreview !== '/avatars/thumbs.svg' ? (
                 <Image
-                  src={avatarPreview}
+                  src={getFullImageUrl(avatarPreview) || ''}
                   alt="Profile Avatar"
                   width={128}
                   height={128}
@@ -140,6 +140,7 @@ export default function UserProfile({ user, onBack }: UserProfileProps) {
                           src={getFullImageUrl(category.image_url || category.image) || ''}
                         alt={category.name}
                         fill
+                        unoptimized
                         className="object-cover group-hover:brightness-110 transition-all"
                         sizes="(max-width: 768px) 50vw, 33vw"
                       />

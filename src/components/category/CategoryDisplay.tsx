@@ -2,6 +2,7 @@
 import Image from 'next/image';
 import React from 'react';
 import { ImagePlus } from 'lucide-react';
+import { getFullImageUrl } from '@/lib/utils/imageUtils';
 
 interface CategoryDisplayProps {
   categoryName: string;
@@ -27,7 +28,7 @@ function CategoryDisplay({
         {categoryImage ? (
          
           <Image
-          src={categoryImage}
+          src={getFullImageUrl(categoryImage) || ''}
           alt={categoryName}
           width={240}
           height={240}

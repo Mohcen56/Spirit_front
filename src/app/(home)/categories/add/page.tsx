@@ -18,6 +18,7 @@ import { useMembership } from '@/hooks/useMembership';
 import { useHeader } from '@/contexts/HeaderContext';
 import { logger } from '@/lib/utils/logger';
 import BounceLoader from '@/components/ui/loadingscreen';
+import { getFullImageUrl } from '@/lib/utils/imageUtils';
 
 export default function AddedCategoriesPage() {
   const [showProfile, setShowProfile] = useState(false);
@@ -380,13 +381,14 @@ export default function AddedCategoriesPage() {
                         <div className="relative h-full w-full">
                           {(category.image_url || category.image) && !hasImageError(category.id) ? (
                             <Image
-                              src={(category.image_url || category.image)!}
+                              src={getFullImageUrl(category.image_url || category.image) || ''}
                               alt={category.name}
                               className="w-full h-full object-cover"
                               fill
                               sizes="(max-width: 768px) 80vw, 33vw"
                               loading="lazy"
                               quality={85}
+                              unoptimized
                               onError={() => handleImageError(category.id)}
                             />
                           ) : (
