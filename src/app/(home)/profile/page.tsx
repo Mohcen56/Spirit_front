@@ -6,11 +6,21 @@ import { authAPI } from "@/lib/api/auth";
 import { logger } from '@/lib/utils/logger';
 import { useNotification } from '@/hooks/useNotification';
 import BounceLoader from '@/components/ui/loadingscreen';
+import { useAppDispatch } from '@/store/hooks';
+import { setCredentials } from '@/store/authSlice';
 
 export default function ProfilePage() {
   const router = useRouter();
   const { user, setUser, isLoading } = useAuthGate({ redirectIfGuest: '/login' });
   const notify = useNotification();
+  const dispatch = useAppDispatch();
+
+  // Helper to update both local state and Redux store
+  const updateUserEverywhere = (updatedUser: any) => {
+    setUser(updatedUser);
+    const token = localStorage.getItem('authToken');
+    dispatch(setCredentials({ token: token || undefined, user: updatedUser }));
+  };
 
   const handleSave = async (data: {
     username: string;
@@ -21,6 +31,8 @@ export default function ProfilePage() {
     currentPassword?: string;
   }): Promise<boolean> => {
     try {
+      let profileUpdated = false;
+
       // 1) Update basic profile fields if changed
       if (
         (data.username && data.username !== user!.username) ||
@@ -45,7 +57,10 @@ export default function ProfilePage() {
           }
           return false; // Return false to prevent success notification
         }
-        if (res.user) setUser(res.user);
+        if (res.user) {
+          updateUserEverywhere(res.user);
+          profileUpdated = true;
+        }
       }
 
       // 2) Update avatar if a new file was selected
@@ -65,7 +80,10 @@ export default function ProfilePage() {
           }
           return false; // Return false to prevent success notification
         }
-        if (res.user) setUser(res.user);
+        if (res.user) {
+          updateUserEverywhere(res.user);
+          profileUpdated = true;
+        }
       }
 
       // 3) Change password if provided
@@ -84,6 +102,19 @@ export default function ProfilePage() {
             notify.error('Password Change Failed', errorMsg);
           }
           return false; // Return false to prevent success notification
+        }
+      }
+
+      // Refetch user profile to ensure all changes are synced (including Redux)
+      if (profileUpdated || data.avatarFile || data.password) {
+        try {
+          const currentUser = await authAPI.getUserProfile();
+          if (currentUser) {
+            updateUserEverywhere(currentUser);
+          }
+        } catch (error) {
+          logger.warn('Failed to refetch user profile after save', error);
+          // Don't fail the entire operation if refetch fails
         }
       }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { logger } from '@/lib/utils/logger';
 import { ChevronLeft, Camera, Eye, EyeOff, Check, Lock } from 'lucide-react';
 import Image from 'next/image';
@@ -41,6 +41,13 @@ export default function UserProfile({ user, onBack, onSave }: UserProfileProps) 
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(user.avatar || '/avatars/thumbs.svg');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+
+  // Sync avatarPreview when user.avatar changes (after successful save)
+  useEffect(() => {
+    if (user.avatar && !avatarFile) {
+      setAvatarPreview(user.avatar);
+    }
+  }, [user.avatar, avatarFile]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -93,6 +100,8 @@ export default function UserProfile({ user, onBack, onSave }: UserProfileProps) 
       const success = await onSave(saveData);
       if (success) {
         notify.profileUpdated();
+        // Reset avatar file state after successful save
+        setAvatarFile(null);
       }
       return success;
     } catch (error) {
@@ -129,7 +138,7 @@ export default function UserProfile({ user, onBack, onSave }: UserProfileProps) 
             <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200 border-4 border-white shadow-lg">
               {avatarPreview && avatarPreview !== '/avatars/thumbs.svg' ? (
                 <Image
-                  src={getFullImageUrl(avatarPreview) || ''}
+                  src={avatarPreview.startsWith('data:') ? avatarPreview : (getFullImageUrl(avatarPreview) || '')}
                   alt="Profile Avatar"
                   width={128}
                   height={128}
