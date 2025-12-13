@@ -108,9 +108,9 @@ export default function ProfilePage() {
       // Refetch user profile to ensure all changes are synced (including Redux)
       if (profileUpdated || data.avatarFile || data.password) {
         try {
-          const currentUser = await authAPI.getUserProfile();
-          if (currentUser) {
-            updateUserEverywhere(currentUser);
+          const result = await authAPI.getProfile();
+          if (result.user) {
+            updateUserEverywhere(result.user);
           }
         } catch (error) {
           logger.warn('Failed to refetch user profile after save', error);
