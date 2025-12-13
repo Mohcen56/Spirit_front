@@ -35,11 +35,11 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-custom-bg">
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto">
+      <main className="container  mx-auto px-4 pt-20">
+        <div className="max-w-6xl mx-auto">
           {/* Welcome Section */}
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">
+            <h2 className="text-5xl font-bold text-gray-800 mb-4">
               Welcome to Trivia Spirit
             </h2>
             <p className="text-xl text-gray-600">
@@ -82,7 +82,7 @@ export default function HomePage() {
         </div>
       </main>
       {/* Show ads only for non-premium users */}
-      {!membership?.is_premium && <AdUnit slot="1464710541" className="my-10" />}
+   
     </div>
   );
 }

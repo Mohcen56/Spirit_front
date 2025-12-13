@@ -106,21 +106,21 @@ export default function GamePage() {
      
 
         {/* Game Info */}
-        <div className="max-w-4xl mx-auto  mt-8">
+        <div className="max-w-6xl 2xl:max-w-screen-2xl mx-auto  mt-8 2xl:mt-15">
           <div className="bg-eastern-blue-100 backdrop-blur-md  rounded-2xl p-8 shadow-lg border border-primary-200 mb-8">
  
             
                 {/* Categories */}
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-primary-800 mb-3">Categories:</h3>
-                  <div className="flex gap-2 flex-wrap justify-start w-full">
+                  <h3 className="text-black text-2xl 2xl:text-4xl  font-bold uppercase tracking-wide mb-5 2xl:mb-10">Categories:</h3>
+                  <div className="flex gap-2 flex-wrap justify-start w-full mb-5">
                     {game.categories.map((category: Category) => (
                       <div
                         key={category.id}
-                        className="flex  justify-start items-center gap-2 bg-white/90 backdrop-blur-sm rounded-full px-2 pr-6 py-2 border border-primary-200 shadow-sm"
+                        className="flex  justify-start items-center gap-2 bg-white/90 backdrop-blur-sm rounded-full px-2 2xl:pr-10 pr-6 py-2 border border-primary-200 shadow-sm"
                       >
                         {category.image_url || category.image ? (
-                          <div className="w-15 h-15 relative rounded-full overflow-hidden border-3 border-cyan-500 flex-shrink-0">
+                          <div className="w-15 h-15 2xl:w-20 2xl:h-20 relative rounded-full overflow-hidden border-3 border-cyan-500 flex-shrink-0">
                             <Image
                               src={getFullImageUrl((category.image_url || category.image) as string) || ''}
                               alt={category.name}
@@ -131,11 +131,11 @@ export default function GamePage() {
                             />
                           </div>
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 flex items-center justify-start text-white font-bold text-sm">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 flex items-center justify-start text-white font-bold text-sm 2xl:text-xl">
                             {category.name.charAt(0)}
                           </div>
                         )}
-                        <span className="text-primary-800 font-medium text-sm">{category.name}</span>
+                        <span className="text-primary-800 font-medium text-sm 2xl:text-xl">{category.name}</span>
                       </div>
                     ))}
                   </div>
@@ -143,8 +143,8 @@ export default function GamePage() {
 
             {/* Teams */}
             {game.teams && game.teams.length > 0 && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-primary-800 mb-3">Teams:</h3>
+              <div className="mb-20 mt-15">
+                <h3 className="text-black text-2xl 2xl:text-4xl  font-bold uppercase tracking-wide mb-5 2xl:mb-10">Teams:</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {game.teams.map((team: Team) => {
                     // Use the same avatar pattern as the question page footer
@@ -156,18 +156,18 @@ export default function GamePage() {
                         className="bg-white/90 backdrop-blur-sm rounded-2xl p-3 flex items-center justify-between border border-primary-200 shadow-md"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-full overflow-hidden bg-white/20 border-3 border-amber-500 flex-shrink-0">
+                          <div className="w-12 h-12 2xl:w-20 2xl:h-20  rounded-full overflow-hidden bg-white/20 border-3 border-amber-500 flex-shrink-0">
                             <Image
                               src={avatarSrc}
                               alt={team.name}
-                              width={48}
-                              height={48}
-                              className="object-cover"
+                              width={80}
+                              height={80}
+                              className="fill"
                               unoptimized={true}
                             />
                           </div>
                           <div>
-                            <div className="text-primary-800 font-semibold">{team.name}</div>
+                            <div className="text-primary-800 font-semibold pl-3 2xl:pl-5text-md 2xl:text-2xl">{team.name}</div>
                           </div>
                         </div>
 

@@ -191,8 +191,8 @@ export default function TeamsPage() {
      
       
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-7xl mx-auto space-y-8">
+      <main className="container mx-auto px-4 py-8 lg:pt-15 2xl:pt-25">
+        <div className="2xl:max-w-[1500px] mx-auto space-y-8">
           
           {/* Selected Categories and Number of Teams - Side by Side */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
