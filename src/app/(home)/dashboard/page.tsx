@@ -35,14 +35,14 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-custom-bg">
       {/* Main Content */}
-      <main className="container  mx-auto px-4 pt-20">
-        <div className="max-w-6xl mx-auto">
+      <main className="container  mx-auto px-4 pt-20 2xl:pt-30 ">
+        <div className="max-w-6xl 2xl:max-w-screen-2xl mx-auto">
           {/* Welcome Section */}
-          <div className="text-center mb-12">
-            <h2 className="text-5xl font-bold text-gray-800 mb-4">
+          <div className="text-center mb-12 2xl:mb-20">
+            <h2 className="text-5xl 2xl:text-7xl font-bold text-gray-800 mb-4 2xl:mb-6">
               Welcome to Trivia Spirit
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl 2xl:text-2xl text-gray-600">
               Test your knowledge and have fun with your friends
             </p>
           </div>
