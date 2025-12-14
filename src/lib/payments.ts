@@ -5,7 +5,6 @@
 import { api } from "./api/base";
 
 export interface CheckoutRequest {
-  variant_id: string;
   plan?: string;
 }
 
@@ -36,15 +35,14 @@ export interface PaymentHistoryResponse {
 
 /**
  * Create a checkout session and get redirect URL
+ * Backend will use server-configured variant_id
  */
 export async function createCheckout(
-  variantId: string,
   plan: string = "premium"
 ): Promise<CheckoutResponse> {
   const response = await api.post<CheckoutResponse>(
     "/api/payments/checkout/",
     {
-      variant_id: variantId,
       plan,
     }
   );

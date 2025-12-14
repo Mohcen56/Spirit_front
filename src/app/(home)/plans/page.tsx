@@ -85,17 +85,8 @@ export default function PlansPage() {
     setIsProcessing(true);
 
     try {
-      // Get variant ID from environment variable
-      const variantId = process.env.NEXT_PUBLIC_LEMONSQUEEZY_VARIANT_ID;
-      
-      if (!variantId) {
-        alert("⚠️ Payment system configuration missing.\n\nPlease add NEXT_PUBLIC_LEMONSQUEEZY_VARIANT_ID to your .env.local file.\n\nSee backend/LEMON_SQUEEZY_SETUP.md for setup instructions.");
-        setIsProcessing(false);
-        return;
-      }
-
-      // Create checkout session
-      const { checkout_url } = await createCheckout(variantId, "premium");
+      // Create checkout session (backend will use server-configured variant_id)
+      const { checkout_url } = await createCheckout("premium");
       
       // Redirect to Lemon Squeezy checkout
       redirectToCheckout(checkout_url);
