@@ -156,4 +156,29 @@ export const authAPI = {
       };
     }
   },
+
+  googleOAuth: async (googleToken: string) => {
+    try {
+      const response = await api.post('/api/auth/google-oauth/', {
+        token: googleToken,
+      });
+      
+      return {
+        success: true,
+        token: response.data.token,
+        user: response.data.user,
+        is_new: response.data.is_new,
+      };
+    } catch (error: unknown) {
+      let errorMessage = 'Google login failed';
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const err = error as { response?: { data?: { error?: string } } };
+        errorMessage = err.response?.data?.error || errorMessage;
+      }
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  },
 };

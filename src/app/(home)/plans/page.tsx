@@ -36,13 +36,13 @@ const sampleTiers: PricingTier[] = [
     originalPrice: 50,    
     description: "Unlock ALL content now and ALL future updates",
     color: "yellow",
-    features: [
-      "No ads",
-      "All current categories unlocked",
-      "All future categories and game updates included",
-      "Access all community categories",
-      "Early Supporter Badge",
-    ],
+   features: [
+  "Unlimited access to all current trivia categories",
+  "All future categories & game updates included forever",
+  "Full access to community-created categories",
+  "Early Supporter badge (profile & lobby)",
+  "Free access to the upcoming Solo Game Mode",
+],
     popular: true,
   },
   // {

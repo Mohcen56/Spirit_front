@@ -7,6 +7,7 @@ import { QueryProvider } from "@/providers/QueryProvider";
 import ErrorBoundary from "@/components/utils/ErrorBoundary";
 import { NotificationProvider } from "@/providers/NotificationProvider";
 import { Analytics } from '@vercel/analytics/next';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 import Script from "next/script";
 const geistSans = Geist({
@@ -195,16 +196,18 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning={true}
       >
-        <QueryProvider>
-          <ReduxProvider>
-            <ErrorBoundary>
-              <NotificationProvider>
-                {children}<SpeedInsights />
-                 <Analytics />
-              </NotificationProvider>
-            </ErrorBoundary>
-          </ReduxProvider>
-        </QueryProvider>
+        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID || ""}>
+          <QueryProvider>
+            <ReduxProvider>
+              <ErrorBoundary>
+                <NotificationProvider>
+                  {children}<SpeedInsights />
+                   <Analytics />
+                </NotificationProvider>
+              </ErrorBoundary>
+            </ReduxProvider>
+          </QueryProvider>
+        </GoogleOAuthProvider>
       </body>
     </html>
   );
