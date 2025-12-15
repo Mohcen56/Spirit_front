@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import HeaderAvatar from "@/components/HeaderAvatar";
 import HeroCTA from "@/components/HeroCTA";
+import { Timer,GalleryHorizontalEnd  } from "lucide-react";
+
 export default function HomePage() {
 
  
@@ -119,40 +121,73 @@ export default function HomePage() {
 <section id="how-to-play" className="py-20 text-center bg-[#f4f6fd]">
   <h2 className="text-4xl font-bold  mb-20">How to Play?</h2>
 
-  <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto mt-10">
+  <div className="flex flex-wrap justify-center gap-6 max-w-7xl mx-auto mb-6 mt-10">
     {/* Teams */}
-    <div className="bg-cyan-100 rounded-2xl shadow-sm p-6 w-56">
-      <div className="text-cyan-600 text-4xl mb-3">👥</div>
+    <div className="rounded-2xl bg-blue-50 shadow-lg max-w-[16rem] p-8">
+      <div className="flex justify-center mb-4">
+        <div className="bg-blue-500 text-white p-3   rounded-full">
+          <Image src="/icons/people.svg" alt="People icon" width={24} height={24} className="w-6 h-6" />
+        </div>
+      </div>
       <h3 className="text-xl font-semibold mb-2 text-gray-800">Teams</h3>
-      <p className="text-gray-600 text-sm">Two teams compete against each other.</p>
+      <p className="text-gray-600">
+        Two teams compete against each other.
+      </p>
     </div>
 
     {/* Choose Categories */}
-    <div className="bg-cyan-100 rounded-2xl shadow-sm p-6 w-56">
-      <div className="text-cyan-600 text-4xl mb-3">📲</div>
+    <div className="rounded-2xl bg-purple-50  shadow-lg max-w-[16rem] p-8">
+      <div className="flex justify-center mb-4">
+        <div className="bg-purple-500 text-white p-3 rounded-full">
+          <GalleryHorizontalEnd  width={24} height={24} className="w-6 h-6" />
+        </div>
+      </div>
       <h3 className="text-xl font-semibold mb-2 text-gray-800">Choose Categories</h3>
-      <p className="text-gray-600 text-sm">Each team selects 3 categories.</p>
+      <p className="text-gray-600">
+        Each team selects 3 categories.
+      </p>
     </div>
 
     {/* Team Turn */}
-    <div className="bg-cyan-100 rounded-2xl shadow-sm p-6 w-56">
-      <div className="text-cyan-600 text-4xl mb-3">↔️</div>
+    <div className="rounded-2xl bg-green-50 shadow-lg max-w-[16rem] p-8">
+      <div className="flex justify-center mb-4">
+        <div className="bg-green-500 text-white p-3 rounded-full">
+          <Image src="/icons/arrow-change.svg" alt="Turn icon" width={24} height={24} className="w-6 h-6" />
+        </div>
+      </div>
       <h3 className="text-xl font-semibold mb-2 text-gray-800">Team Turn</h3>
-      <p className="text-gray-600 text-sm">Teams take turns choosing questions.</p>
+      <p className="text-gray-600">
+        Teams take turns choosing questions.
+      </p>
     </div>
 
     {/* Time */}
-    <div className="bg-cyan-100 rounded-2xl shadow-sm p-6 w-56">
-      <div className="text-cyan-600 text-4xl mb-3">⏱️</div>
+    <div className="rounded-2xl bg-orange-50 shadow-lg max-w-[16rem] p-8">
+      <div className="flex justify-center mb-4">
+        <div className="bg-orange-500 text-white p-3 rounded-full">
+          <Timer width={24} height={24} className="w-6 h-6" />
+        </div>
+      </div>
       <h3 className="text-xl font-semibold mb-2 text-gray-800">Time</h3>
-      <p className="text-gray-600 text-sm">60 seconds for Team 1, 30 seconds for Team 2.</p>
-    </div>
+      <p className="text-gray-600">
+        60 seconds for Team 1, 30 seconds for Team 2.
+      </p>
+    
 
-    {/* Winning */}
-    <div className="bg-cyan-100 rounded-2xl shadow-sm p-6 w-56">
-      <div className="text-cyan-600 text-4xl mb-3">🏆</div>
+  </div>
+  
+  {/* Winning Card - Centered Below */}
+ 
+    <div className="rounded-2xl bg-yellow-50 p-8  shadow-lg max-w-[16rem]">
+      <div className="flex justify-center mb-4">
+        <div className="bg-yellow-500 text-white p-3 rounded-full">
+          <Image src="/icons/cup-reward.svg" alt="Reward cup icon" width={24} height={24} className="w-6 h-6" />
+        </div>
+      </div>
       <h3 className="text-xl font-semibold mb-2 text-gray-800">Winning</h3>
-      <p className="text-gray-600 text-sm">The team with the highest score wins!</p>
+      <p className="text-gray-600">
+        The team with the highest score wins!
+      </p>
     </div>
   </div>
 </section>

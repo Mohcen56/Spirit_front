@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 import React from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Trophy } from 'lucide-react';
 
 interface GameHeaderProps {
   onBackToBoard: () => void;
@@ -50,8 +50,9 @@ function GameHeader({ onBackToBoard, currentTeamTurn, onTeamTurnChange, onEndGam
               onClick={onEndGame}
               className="text-white px-3 sm:px-4 py-2 rounded-xl border-2 border-white flex items-center transition-colors text-xs sm:text-sm"
             >
-              <span className="hidden sm:inline mr-2">End the Game</span>
-              <span>🏆</span>
+              <Trophy className='w-4 h-4 text-yellow-100'/>
+              <span className="hidden sm:inline ml-2">End the Game</span>
+             
             </button>
             <button
               onClick={onBackToBoard}

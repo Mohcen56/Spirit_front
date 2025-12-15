@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { logger } from '@/lib/utils/logger';
 import { useRouter } from 'next/navigation';
 import { gameAPI } from '@/lib/api/index';
-import { ImagePlus, Lock } from 'lucide-react';
+import { ImagePlus, Lock, Globe } from 'lucide-react';
 import ImageCropModal from '@/components/utils/ImageCropModal';
 import { useHeader } from '@/contexts/HeaderContext';
 import { useQueryClient } from '@tanstack/react-query';
@@ -206,7 +206,7 @@ export default function CreateCategoryPage() {
           <button
             type="button"
             disabled={!isPremium}
-            className={`flex-1 py-3 rounded-l-lg font-bold text-lg relative ${
+            className={`flex-1 py-3 rounded-l-lg font-bold text-lg relative flex items-center justify-center gap-2 ${
               privacy === 'private' 
                 ? 'bg-blue-600 text-white' 
                 : isPremium 
@@ -216,18 +216,17 @@ export default function CreateCategoryPage() {
             onClick={() => isPremium && setPrivacy('private')}
             title={!isPremium ? 'Premium feature' : 'Only you can see and play'}
           >
-            {!isPremium && (
-              <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2" />
-            )}
-            🔒 Private {!isPremium && '(Premium)'}
+            <Lock className="w-5 h-5" />
+            Private {!isPremium && '(Premium)'}
           </button>
           <button
             type="button"
-            className={`flex-1 py-3 rounded-r-lg font-bold text-lg ${privacy === 'public' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-900'} transition-all`}
+            className={`flex-1 py-3 rounded-r-lg font-bold text-lg flex items-center justify-center gap-2 ${privacy === 'public' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-900'} transition-all`}
             onClick={() => setPrivacy('public')}
             title="Everyone can see and play"
           >
-            🌍 Public
+            <Globe className="w-5 h-5" />
+            Public
           </button>
         </div>
       </div>

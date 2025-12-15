@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 import React from 'react';
-import { ImagePlus } from 'lucide-react';
+import { Globe, ImagePlus, Lock } from 'lucide-react';
 import { getFullImageUrl } from '@/lib/utils/imageUtils';
 
 interface CategoryDisplayProps {
@@ -52,12 +52,23 @@ function CategoryDisplay({
         
         {/* Privacy Badge */}
         <div className="flex mb-6 ">
-          <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
+          <span className={`px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 ${
             privacy === 'public' 
-              ? 'bg-green-100 text-green-800' 
+              ? 'bg-cyan-100 text-cyan-800' 
               : 'bg-gray-100 text-gray-800'
           }`}>
-            {privacy === 'public' ? '🌐 Public' : '🔒 Private'}
+            {privacy === 'public' 
+            ? (
+              <>
+                <Globe className="w-4 h-4" />
+                Public
+              </>)
+             : (
+              <>
+                <Lock className="w-4 h-4" />
+                Private
+              </>
+            )}
           </span>
         </div>
         
