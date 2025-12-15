@@ -138,6 +138,24 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         
         {/* Structured Data for Google */}
+        {/* Organization Schema for Logo Display */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "Trivia Spirit",
+              "url": "https://www.triviaspirit.com",
+              "logo": "https://www.triviaspirit.com/logo/mylogo.webp",
+              "sameAs": [
+                "https://www.instagram.com/triviaspirit",
+                "https://twitter.com/triviaspirit"
+              ]
+            })
+          }}
+        />
+        {/* WebApplication Schema */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
