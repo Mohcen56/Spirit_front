@@ -71,6 +71,10 @@ export default function TeamsSidebar({
       <div className="flex lg:flex-col gap-1 lg:gap-1 justify-center items-stretch max-w-2xl lg:max-w-none w-full">
         {teams.slice(0, 4).map((team, index) => {
           const isTeamsTurn = teams.findIndex(t => t.id === team.id) === (currentTeam - 1);
+          const isDoubleUsed = !!doublePerkUsed[team.id];
+          const isRerollUsed = !!rerollPerkUsed[team.id];
+          const isChoicesUsed = !!(choicesPerkUsed?.[team.id]);
+          const isDisabledGeneric = !!(perksLocked || !isTeamsTurn);
           return (
             <div key={team.id} className="mt-1 lg:max-w-none lg:mb-0">
               <div className="bg-brown-800  border-brown-900 text-white rounded-xl p-2 lg:p-4 flex flex-col lg:flex-row items-center lg:space-x-4 space-y-1 lg:space-y-0">
@@ -106,12 +110,12 @@ export default function TeamsSidebar({
                     <button
                       onClick={() => dispatch(activateDoublePerk({ teamId: team.id }))}
                       disabled={
-                        !!doublePerkUsed[team.id] ||
+                        isDoubleUsed ||
                         doublePerkActiveTeamId !== null ||
                         isPerkDisabled(team.id)
                       }
                       title={
-                        doublePerkUsed[team.id]
+                        isDoubleUsed
                           ? 'Perk already used'
                           : doublePerkActiveTeamId !== null
                             ? 'Another perk is active'
@@ -120,10 +124,12 @@ export default function TeamsSidebar({
                               : 'Use Double Points once'
                       }
                       className={`p-1 sm:p-2 rounded-md transition-colors border text-xs sm:text-base ${
-                        doublePerkActiveTeamId === team.id
-                          ? 'bg-green-500 text-white border-green-600'
-                          : 'bg-brown-900 hover:bg-white/30 text-white border-white/30'
-                      } disabled:opacity-50`}
+                        isDoubleUsed
+                          ? 'bg-brown-900 text-white border-white/30 opacity-30'
+                          : doublePerkActiveTeamId === team.id
+                            ? 'bg-brown-900 text-white border-white/30 opacity-30'
+                            : 'bg-brown-900 hover:bg-white/30 text-white border-white/30'
+                      } ${isDisabledGeneric && !isDoubleUsed && doublePerkActiveTeamId !== team.id ? 'opacity-50' : ''}`}
                     >
                       <Image src="/icons/Untitled design.svg" alt="multiplier icon" width={25} height={25} className="w-5 h-5" />
                     </button>
@@ -131,19 +137,19 @@ export default function TeamsSidebar({
                     {/* Reroll Question Perk */}
                     <button
                       onClick={() => handleReroll(team.id)}
-                      disabled={!!rerollPerkUsed[team.id] || isPerkDisabled(team.id)}
+                      disabled={isRerollUsed || isPerkDisabled(team.id)}
                       title={
-                        rerollPerkUsed[team.id]
+                        isRerollUsed
                           ? 'Reroll already used'
                           : !isTeamsTurn
                             ? "You can only reroll on your team's turn"
                             : 'Change to a random new question'
                       }
                       className={`p-1 sm:p-2 rounded-md transition-colors border text-xs sm:text-base ${
-                        rerollPerkUsed[team.id]
-                          ? 'bg-gray-400 text-white border-gray-500'
+                        isRerollUsed
+                          ? 'bg-brown-900 text-white border-white/30 opacity-30'
                           : 'bg-brown-900 hover:bg-white/30 text-white border-white/30'
-                      } disabled:opacity-50`}
+                      } ${isDisabledGeneric && !isRerollUsed ? 'opacity-50' : ''}`}
                     >
                       <Image src="/icons/arrow-change.svg" alt="refresh icon" width={25} height={25} className="w-5 h-5" />
                     </button>
@@ -151,19 +157,19 @@ export default function TeamsSidebar({
                     {/* Show Choices Button */}
                     <button
                       onClick={onShowChoices}
-                      disabled={(choicesPerkUsed?.[team.id] ?? false) || isPerkDisabled(team.id)}
+                      disabled={isChoicesUsed || isPerkDisabled(team.id)}
                       title={
-                        choicesPerkUsed?.[team.id]
+                        isChoicesUsed
                           ? 'Choices already used'
                           : !isTeamsTurn
                             ? "You can only use on your team's turn"
                             : 'Show answer choices'
                       }
                       className={`p-1 sm:p-2 rounded-md transition-colors border text-xs sm:text-base ${
-                        choicesPerkUsed?.[team.id]
-                          ? 'bg-gray-400 text-white border-gray-500'
+                        isChoicesUsed
+                          ? 'bg-brown-900 text-white border-white/30 opacity-30'
                           : 'bg-brown-900 hover:bg-white/30 text-white border-white/30'
-                      } disabled:opacity-50`}
+                      } ${isDisabledGeneric && !isChoicesUsed ? 'opacity-50' : ''}`}
                     >
                       <Image src="/icons/clover-48-regular.svg" alt="multiplier icon" width={25} height={25} className="w-5 h-5" />
                     </button>
