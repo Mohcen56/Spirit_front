@@ -1,25 +1,16 @@
 'use client';
 
-import { useEffect } from 'react';
 import Link from 'next/link';
 import { Play, History } from 'lucide-react';
 import { useAuthGate } from '@/hooks/useAuthGate';
-import { useHeader } from '@/contexts/HeaderContext';
-import AdUnit from '@/components/ads/AdUnit';
+
 import BounceLoader from '@/components/ui/loadingscreen';
-import { useMembership } from '@/hooks/useMembership';
-
-
-
 
 export default function HomePage() {
-  const { setHeader } = useHeader();
-  const { user, isLoading } = useAuthGate({ redirectIfGuest: '/login' });
-  const { membership } = useMembership();
+  
+  const {isLoading } = useAuthGate({ redirectIfGuest: '/login' });
+ 
 
-  useEffect(() => {
-    setHeader({ title: "", backHref: "/" });
-  }, [setHeader]);
   if (isLoading) {
     return (
       <div className="min-h-screen bg-custom-bg flex items-center justify-center">
@@ -28,9 +19,7 @@ export default function HomePage() {
     );
   }
 
-  if (!user) {
-    return null; // Will redirect to login
-  }
+ 
 
   return (
     <div className="min-h-screen bg-custom-bg">
