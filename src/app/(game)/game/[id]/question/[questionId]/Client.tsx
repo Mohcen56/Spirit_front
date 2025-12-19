@@ -316,7 +316,7 @@ export default function Client() {
       />
 
       <main className="container max-w-screen mt-2 mx-auto px-2 flex-1 flex items-center">
-        <div className="flex flex-col max-md:landscape:flex-row lg:flex-row gap-2 max-md:landscape:gap-2 lg:gap-2 max-w-screen mx-auto w-full ">
+        <div className="flex flex-col lg:flex-row gap-2 lg:gap-2 max-w-screen mx-auto w-full ">
           <div className="flex-1 flex flex-col">
             {currentView === 'question' ? (
               <div className="relative">
@@ -348,7 +348,7 @@ export default function Client() {
                   <div
                     className={`text-center mb-4 max-md:landscape:mb-6 lg:mb-8 mt-4 max-md:landscape:mt-5 lg:mt-6 ${shouldCenterQuestionText ? 'flex min-h-[12rem] max-md:landscape:min-h-[14rem] lg:min-h-[18rem] items-center justify-center' : ''}`}
                   >
-                    <h1 className="select-none text-gray-800 text-xl md:text-3xl font-bold leading-relaxed" dir="ltr">
+                    <h1 className="select-none text-gray-800 text-xl max-md:landscape:text-xl md:text-3xl font-bold leading-relaxed" dir="ltr">
                       {question.text}
                     </h1>
                   </div>
@@ -361,7 +361,7 @@ export default function Client() {
                           alt="Question image"
                           width={800}
                           height={400}
-                          className="w-full max-h-40 md:max-h-75 object-contain mx-auto"
+                          className="w-full max-h-32 max-md:landscape:max-h-32 md:max-h-75 object-contain mx-auto"
                           unoptimized={true}
                           onLoadingComplete={() => setQuestionImageStatus('loaded')}
                           onError={() => setQuestionImageStatus('error')}
@@ -370,10 +370,10 @@ export default function Client() {
                     </div>
                   )}
 
-                  <div className="absolute -bottom-6 left-26 transform -translate-x-1/2">
+                  <div className="absolute -bottom-4 max-md:landscape:-bottom-4 lg:-bottom-6 left-26 transform -translate-x-1/2">
                     <button
                       onClick={handleShowAnswer}
-                      className="bg-brown-800 hover:bg-brown-700 text-white font-bold py-2 px-4 md:py-3 md:px-8 rounded-xl  shadow-lg transition-all duration-200 text-md"
+                      className="bg-brown-800 hover:bg-brown-700 text-white font-bold py-1.5 max-md:landscape:py-1.5 md:py-3 px-3 max-md:landscape:px-3 md:px-8 rounded-xl shadow-lg transition-all duration-200 text-sm max-md:landscape:text-sm md:text-md"
                     >
                       Answer
                     </button>
