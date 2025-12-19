@@ -316,23 +316,23 @@ export default function Client() {
       />
 
       <main className="container max-w-screen mt-2 mx-auto px-2 flex-1 flex items-center">
-        <div className="flex flex-col lg:flex-row gap-4 lg:gap-2 max-w-screen mx-auto w-full ">
+        <div className="flex flex-col landscape:flex-row lg:flex-row gap-2 landscape:gap-2 lg:gap-2 max-w-screen mx-auto w-full ">
           <div className="flex-1 flex flex-col">
             {currentView === 'question' ? (
               <div className="relative">
                 <GameCard question={question}>
                   <div
-                    className="absolute -top-6 left-1/2  transform -translate-x-1/2 \
-                                  bg-slate-800 text-white px-6 py-2 lg:px-8 rounded-full flex items-center space-x-3"
+                    className="absolute -top-4 landscape:-top-5 lg:-top-6 left-1/2 transform -translate-x-1/2 \
+                                  bg-slate-800 text-white px-4 landscape:px-6 lg:px-8 py-1.5 landscape:py-2 lg:py-2 rounded-full flex items-center space-x-2 landscape:space-x-3"
                   >
                     <button
                       onClick={toggleChronometer}
                       className="text-white hover:text-gray-300 transition-colors"
                       aria-label={isChronoRunning ? 'Pause timer' : 'Start timer'}
                     >
-                      {isChronoRunning ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                      {isChronoRunning ? <Pause className="w-4 h-4 landscape:w-5 landscape:h-5" /> : <Play className="w-4 h-4 landscape:w-5 landscape:h-5" />}
                     </button>
-                    <span className="text-xl font-mono font-bold">{formatTime(elapsedTime)}</span>
+                    <span className="text-lg landscape:text-xl font-mono font-bold">{formatTime(elapsedTime)}</span>
                     <button
                       onClick={() => {
                         setElapsedTime(0);
@@ -341,14 +341,14 @@ export default function Client() {
                       className="text-white hover:text-gray-300 transition-colors"
                       aria-label="Reset timer"
                     >
-                      <RotateCcw className="w-5 h-5" />
+                      <RotateCcw className="w-4 h-4 landscape:w-5 landscape:h-5" />
                     </button>
                   </div>
 
                   <div
-                    className={`text-center mb-8 mt-6 ${shouldCenterQuestionText ? 'flex min-h-[18rem] items-center justify-center' : ''}`}
+                    className={`text-center mb-4 landscape:mb-6 lg:mb-8 mt-4 landscape:mt-5 lg:mt-6 ${shouldCenterQuestionText ? 'flex min-h-[12rem] landscape:min-h-[14rem] lg:min-h-[18rem] items-center justify-center' : ''}`}
                   >
-                    <h1 className="select-none text-gray-800 text-2xl md:text-3xl font-bold leading-relaxed" dir="ltr">
+                    <h1 className="select-none text-gray-800 text-xl landscape:text-2xl md:text-3xl font-bold leading-relaxed" dir="ltr">
                       {question.text}
                     </h1>
                   </div>
@@ -361,7 +361,7 @@ export default function Client() {
                           alt="Question image"
                           width={800}
                           height={400}
-                          className="w-full max-h-40 md:max-h-75 object-contain mx-auto"
+                          className="w-full max-h-32 landscape:max-h-40 md:max-h-75 object-contain mx-auto"
                           unoptimized={true}
                           onLoadingComplete={() => setQuestionImageStatus('loaded')}
                           onError={() => setQuestionImageStatus('error')}
@@ -370,10 +370,10 @@ export default function Client() {
                     </div>
                   )}
 
-                  <div className="absolute -bottom-6 left-26 transform -translate-x-1/2">
+                  <div className="absolute -bottom-4 landscape:-bottom-5 lg:-bottom-6 left-26 transform -translate-x-1/2">
                     <button
                       onClick={handleShowAnswer}
-                      className="bg-brown-800 hover:bg-brown-700 text-white font-bold py-2 px-4 md:py-3 md:px-8 rounded-xl  shadow-lg transition-all duration-200 text-md"
+                      className="bg-brown-800 hover:bg-brown-700 text-white font-bold py-1.5 landscape:py-2 md:py-3 px-3 landscape:px-4 md:px-8 rounded-xl shadow-lg transition-all duration-200 text-sm landscape:text-base md:text-md"
                     >
                       Answer
                     </button>
