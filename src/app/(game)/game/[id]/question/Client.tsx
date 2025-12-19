@@ -209,12 +209,12 @@ export default function Client() {
       />
 
       <main className="flex-1 p-2 overflow-hidden bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300">
-        <div className="h-full grid grid-cols-3 landscape:grid-cols-6 md:grid-cols-6 gap-2 landscape:gap-2 md:gap-3">
+        <div className="h-full grid grid-cols-3 max-md:landscape:grid-cols-6 md:grid-cols-6 gap-2 max-md:landscape:gap-2 md:gap-3">
           {game.categories.map((category) => {
             const questionGrid = createQuestionGrid(category.id);
             return (
               <div key={category.id} className="h-full flex flex-col">
-                <div className="relative flex-1 w-full rounded-xl overflow-hidden border-2 landscape:border-2 md:border-4 border-white shadow mb-2 landscape:mb-2 md:mb-3 flex-shrink-0">
+                <div className="relative flex-1 w-full rounded-xl overflow-hidden border-2 max-md:landscape:border-2 md:border-4 border-white shadow mb-2 max-md:landscape:mb-2 md:mb-3 flex-shrink-0">
                   {category.image && !hasImageError(category.name) ? (
                     <Image
                       src={getFullImageUrl(category.image) || ''}
@@ -229,8 +229,8 @@ export default function Client() {
                       <span className="text-gray-600 text-xl md:text-2xl">🎯</span>
                     </div>
                   )}
-                  <div className="absolute bottom-0 left-0 h-6 landscape:h-7 md:h-10 w-full bg-black/70 py-0.5 landscape:py-1 md:py-1 text-center flex items-center justify-center">
-                    <span className="text-white text-xs landscape:text-sm md:text-lg font-bold truncate px-1">{category.name}</span>
+                  <div className="absolute bottom-0 left-0 h-6 max-md:landscape:h-7 md:h-10 w-full bg-black/70 py-0.5 max-md:landscape:py-1 md:py-1 text-center flex items-center justify-center">
+                    <span className="text-white text-xs max-md:landscape:text-sm md:text-lg font-bold truncate px-1">{category.name}</span>
                   </div>
                 </div>
 
@@ -261,12 +261,12 @@ export default function Client() {
         </div>
       </main>
 
-      <footer className="bg-gradient-to-r from-brown-600 to-brown-800 py-1.5 landscape:py-2 md:py-4 flex items-center justify-center gap-1 landscape:gap-2 md:gap-4 border-t-2 landscape:border-t-3 md:border-t-4 border-amber-500 flex-shrink-0">
+      <footer className="bg-gradient-to-r from-brown-600 to-brown-800 py-2 md:py-4 flex items-center justify-center gap-1 md:gap-4 border-t-4 border-2 border-amber-500 h-15 md:h-25 flex-shrink-0">
         {liveTeams && liveTeams.length > 0 ? (
           liveTeams.map((team) => (
             <div key={team.id} className="bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 p-[1px] rounded-2xl" dir="ltr">
-              <div className="w-full h-full bg-orange-200/95 rounded-xl landscape:rounded-2xl md:rounded-2xl px-1.5 landscape:px-2 md:px-4 py-1 flex flex-row landscape:flex-row md:flex-row items-center shadow-md">
-                <div className="w-6 h-6 landscape:w-8 landscape:h-8 md:w-15 md:h-15 rounded-full items-center justify-center overflow-hidden mr-1 landscape:mr-2 md:mr-3 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 p-[2px] hidden landscape:flex md:flex">
+              <div className="w-full h-full bg-orange-200/95 rounded-xl max-md:landscape:rounded-2xl md:rounded-2xl px-1.5 max-md:landscape:px-2 md:px-4 py-1 flex flex-row items-center shadow-md">
+                <div className="w-6 h-6 max-md:landscape:w-8 max-md:landscape:h-8 md:w-15 md:h-15 rounded-full items-center justify-center overflow-hidden mr-1 max-md:landscape:mr-2 md:mr-3 bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 p-[2px] hidden max-md:landscape:flex md:flex">
                   <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
                     <Image
                       src={`/avatars/${team.avatar}.png`}
@@ -279,23 +279,23 @@ export default function Client() {
                   </div>
                 </div>
 
-                <span className="text-orange-900 font-bold text-[10px] landscape:text-xs md:text-sm mr-1 landscape:mr-2 md:mr-3 min-w-[30px] landscape:min-w-[40px] md:min-w-[60px] text-center w-auto landscape:w-auto md:w-auto">
+                <span className="text-orange-900 font-bold text-[10px] max-md:landscape:text-xs md:text-sm mr-1 max-md:landscape:mr-2 md:mr-3 min-w-[30px] max-md:landscape:min-w-[40px] md:min-w-[60px] text-center w-auto">
                   {team.name}
                 </span>
 
-                <div className="flex items-center justify-center gap-1 landscape:gap-1.5 md:gap-3 w-auto landscape:w-auto md:w-auto">
+                <div className="flex items-center justify-center gap-1 max-md:landscape:gap-1.5 md:gap-3 w-auto">
                   <button
                     onClick={() => updateTeamScore(team.id, -100)}
-                    className="bg-amber-700 hover:bg-amber-800 text-white rounded-md w-5 h-5 landscape:w-6 landscape:h-6 md:w-8 md:h-8 flex items-center justify-center text-xs landscape:text-sm md:text-lg font-bold transition-all duration-200 shadow-sm"
+                    className="bg-amber-700 hover:bg-amber-800 text-white rounded-md w-5 h-5 max-md:landscape:w-6 max-md:landscape:h-6 md:w-8 md:h-8 flex items-center justify-center text-xs max-md:landscape:text-sm md:text-lg font-bold transition-all duration-200 shadow-sm"
                   >
                     -
                   </button>
-                  <span className="text-orange-900 font-extrabold text-sm landscape:text-base md:text-xl min-w-[20px] landscape:min-w-[30px] md:min-w-[50px] text-center">
+                  <span className="text-orange-900 font-extrabold text-sm max-md:landscape:text-base md:text-xl min-w-[20px] max-md:landscape:min-w-[30px] md:min-w-[50px] text-center">
                     {team.score ?? 0}
                   </span>
                   <button
                     onClick={() => updateTeamScore(team.id, 100)}
-                    className="bg-amber-700 hover:bg-amber-800 text-white rounded-md w-5 h-5 landscape:w-6 landscape:h-6 md:w-8 md:h-8 flex items-center justify-center text-xs landscape:text-sm md:text-lg font-bold transition-all duration-200 shadow-sm"
+                    className="bg-amber-700 hover:bg-amber-800 text-white rounded-md w-5 h-5 max-md:landscape:w-6 max-md:landscape:h-6 md:w-8 md:h-8 flex items-center justify-center text-xs max-md:landscape:text-sm md:text-lg font-bold transition-all duration-200 shadow-sm"
                   >
                     +
                   </button>

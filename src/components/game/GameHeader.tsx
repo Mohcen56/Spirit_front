@@ -35,7 +35,7 @@ function GameHeader({ onBackToBoard, currentTeamTurn, onTeamTurnChange, onEndGam
               className="text-white px-3 py-2 rounded-xl border-2 border-white flex items-center text-xs sm:text-sm transition-colors"
             >
               <span>🎲</span>
-              <span className="hidden landscape:hidden sm:inline ml-2">Team Turn: {teamDisplayName}</span>
+              <span className="hidden md:inline ml-2">Team Turn: {teamDisplayName}</span>
             </button>
           </div>
 
@@ -51,14 +51,14 @@ function GameHeader({ onBackToBoard, currentTeamTurn, onTeamTurnChange, onEndGam
               className="text-white px-3 sm:px-4 py-2 rounded-xl border-2 border-white flex items-center transition-colors text-xs sm:text-sm"
             >
               <Trophy className='w-4 h-4 text-yellow-100'/>
-              <span className="hidden landscape:hidden sm:inline ml-2">End the Game</span>
+              <span className="hidden md:inline ml-2">End the Game</span>
              
             </button>
             <button
               onClick={onBackToBoard}
               className="text-white px-3 sm:px-4 py-2 rounded-xl border-2 border-white flex items-center transition-colors text-xs sm:text-sm"
             >
-              <span className="hidden landscape:hidden sm:inline mr-2">Exit</span>
+              <span className="hidden md:inline mr-2">Exit</span>
               <ArrowRight className="h-4 w-4" />
             </button>
           </div>
