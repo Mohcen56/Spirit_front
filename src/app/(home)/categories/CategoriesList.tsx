@@ -46,7 +46,10 @@ export default function CategoriesList({ initialData }: Props) {
     queryKey: ['allCategoryData'],
     queryFn: categoriesAPI.getAllCategoryData,
     initialData: initialData || undefined,
-    staleTime: 5 * 60 * 1000, // 5 minutes - cache data but still respond to invalidations
+    staleTime: 0, // always considered stale so we refetch with user auth
+    refetchOnMount: 'always',
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: false,
   });
 
   const isLoading = queryLoading || !data;

@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { logger } from '@/lib/utils/logger';
 import { useParams, useRouter } from 'next/navigation';
-import { Question } from '@/types/game';
+import { Game, Question } from '@/types/game';
 import Image from 'next/image';
 import { getFullImageUrl } from '@/lib/utils/imageUtils';
 import GameHeader from '@/components/game/GameHeader';
@@ -17,6 +17,11 @@ interface QuestionSlot {
   isSolved: boolean;
   index: number;
 }
+
+type FullGamePayload = Game & {
+  available_questions?: Question[];
+  outside_board_questions?: Question[];
+};
 
 export default function GameBoardPage() {
   const params = useParams();
@@ -53,7 +58,7 @@ export default function GameBoardPage() {
         if (!Number.isFinite(numericGameId)) {
           throw new Error('Invalid game id');
         }
-        const gameData: any = await gameAPI.getGame(numericGameId);
+        const gameData: FullGamePayload = await gameAPI.getGame(numericGameId);
         dispatch(
           hydrateFullGameState({
             game: gameData,
@@ -64,7 +69,6 @@ export default function GameBoardPage() {
       } catch (err) {
         logger.exception(err, { where: 'game.[id].question.loadGame' });
         setHydrateError('Failed to load game');
-        hasFetched.current = false; // allow retry on re-render
       } finally {
         setIsHydrating(false);
       }

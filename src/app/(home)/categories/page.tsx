@@ -1,9 +1,6 @@
-import { categoriesAPI } from '@/lib/api';
-
 import CategoriesList from './CategoriesList';
 
-export default async function CategoriesPage() {
-  const initialData = await categoriesAPI.getAllCategoryData();
-
-  return <CategoriesList initialData={initialData} />;
+// Fetch categories client-side so auth token from localStorage is included.
+export default function CategoriesPage() {
+  return <CategoriesList initialData={null} />;
 }
