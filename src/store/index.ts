@@ -13,6 +13,10 @@ const gamePersistConfig = {
     'gameId',
     'totalTeams',
     'isGameActive',
+    'isLoaded',
+    'game',
+    'questions',
+    'backupQuestions',
     'teams', // scores + team data only
     'doublePerkActiveTeamId',
     'doublePerkUsed',

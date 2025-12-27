@@ -26,8 +26,6 @@ import {
   consumeBackupQuestion,
 } from '@/store/gameSlice';
 import { Play, Pause, RotateCcw } from 'lucide-react';
-import { useSyncTeams } from '@/hooks/useSyncTeams';
-import BounceLoader from '@/components/ui/loadingscreen';
 
 export default function Client() {
   const params = useParams();
@@ -63,8 +61,6 @@ export default function Client() {
   const isLoading = !isLoaded;
   const error = !game && isLoaded ? 'Game not found' : null;
 
-  useSyncTeams(game?.teams, liveTeams);
-  
   // Questions and backup questions already loaded from hydrateFullGameState in game/[id] page
   // No need to fetch here
 
@@ -244,14 +240,6 @@ export default function Client() {
       dispatch(setRerollBuffer({ entries }));
     }
   }, [questions, teams, playedQuestions, rerollBuffer, questionId, dispatch]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-eastern-blue-50 flex items-center justify-center">
-        <BounceLoader />
-      </div>
-    );
-  }
 
   if (error) {
     return (
