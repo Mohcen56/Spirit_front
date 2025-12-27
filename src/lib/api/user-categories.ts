@@ -154,18 +154,6 @@ export const userCategoriesAPI = {
   },
 
   /**
-   * Add a category to user's collection (alias for saveCategory)
-   */
-  addCategoryToCollection: async (categoryId: number) => {
-    try {
-      const response = await api.post(`/api/content/user-categories/${categoryId}/add_to_collection/`, {});
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  /**
    * Create a new category (alias for createUserCategory)
    */
   createCategory: async (formData: FormData) => {

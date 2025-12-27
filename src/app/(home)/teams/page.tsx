@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { logger } from '@/lib/utils/logger';
 import { useRouter } from 'next/navigation';
 import { gameAPI } from '@/lib/api/index';
-import {  Play, Plus, Minus, ChevronLeft, ChevronRight } from 'lucide-react';
+import {   Plus, Minus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ProcessingButton } from '@/components/ui/button2';
 import Image from 'next/image';
 import { useHeader } from '@/contexts/HeaderContext';

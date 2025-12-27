@@ -103,19 +103,6 @@ export const gamesAPI = {
     }
   },
 
-  /**
-   * Alias: getBackupQuestions — semantically identical to prefetchOutsideBoard
-   * Used by reroll hook to keep intent clear.
-   */
-  getBackupQuestions: async (gameId: number, count = 4) => {
-    return await (async () => {
-      try {
-        const response = await api.get(`/api/gameplay/games/${gameId}/prefetch_outside_board/?count=${count}`);
-        return response.data; // Question[]
-      } catch (error) {
-        logger.exception(error, { where: 'games.getBackupQuestions' });
-        return [];
-      }
-    })();
-  },
+
+
 };

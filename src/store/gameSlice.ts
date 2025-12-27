@@ -1,11 +1,13 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { Team, Question } from '@/types/game';
+import type { Team, Question, Game } from '@/types/game';
 
 interface GameState {
   currentTeam: number;
   gameId: string | null;
   totalTeams: number;
   isGameActive: boolean;
+  isLoaded: boolean;
+  game: Game | null;
   teams: Team[];
   doublePerkActiveTeamId: number | null;
   doublePerkUsed: Record<number, boolean>;
@@ -25,6 +27,8 @@ const initialState: GameState = {
   gameId: null,
   totalTeams: 2,
   isGameActive: false,
+  isLoaded: false,
+  game: null,
   teams: [],
   doublePerkActiveTeamId: null,
   doublePerkUsed: {},
@@ -49,26 +53,13 @@ const gameSlice = createSlice({
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
-    startGame: (state, action: PayloadAction<{ gameId: string; totalTeams: number }>) => {
-      const { gameId, totalTeams } = action.payload;
-      state.gameId = gameId;
-      state.totalTeams = totalTeams;
-      state.isGameActive = true;
-      state.currentTeam = Math.floor(Math.random() * Math.max(totalTeams, 1)) + 1;
-      // Clear backup questions from previous game
-      state.backupQuestions = [];
-      state.playedQuestions = [];
-    },
+  
     switchToNextTeam: (state) => {
       if (state.isGameActive && state.totalTeams > 0) {
         state.currentTeam = (state.currentTeam % state.totalTeams) + 1;
       }
     },
-    setCurrentTeam: (state, action: PayloadAction<number>) => {
-      if (state.isGameActive && action.payload >= 1 && action.payload <= state.totalTeams) {
-        state.currentTeam = action.payload;
-      }
-    },
+   
     setTeams: (state, action: PayloadAction<Team[]>) => {
       state.teams = action.payload.map((team) => ({ ...team, score: team.score ?? 0 }));
       state.totalTeams = action.payload.length || state.totalTeams;
@@ -95,16 +86,8 @@ const gameSlice = createSlice({
         team.score = Math.max(0, nextScore);
       }
     },
-    setTeamScore: (state, action: PayloadAction<{ teamId: number; score: number }>) => {
-      const { teamId, score } = action.payload;
-      const team = state.teams.find((t) => t.id === teamId);
-      if (team) {
-        team.score = Math.max(0, score);
-      }
-    },
-    resetScores: (state) => {
-      state.teams = state.teams.map((team) => ({ ...team, score: 0 }));
-    },
+  
+  
     endGame: (state) => {
       state.isGameActive = false;
       state.gameId = null;
@@ -128,11 +111,7 @@ const gameSlice = createSlice({
     clearActivePerk: (state) => {
       state.doublePerkActiveTeamId = null;
     },
-    resetPerks: (state) => {
-      state.doublePerkActiveTeamId = null;
-      state.doublePerkUsed = {};
-      state.rerollPerkUsed = {};
-    },
+  
     activateRerollPerk: (state, action: PayloadAction<{ teamId: number }>) => {
       const { teamId } = action.payload;
       const currentIndex = Math.max(0, state.currentTeam - 1);
@@ -166,6 +145,45 @@ const gameSlice = createSlice({
       for (const teamId of Object.keys(state.rerollBuffer)) {
         state.rerollBuffer[Number(teamId)] = null;
       }
+    },
+    hydrateFullGameState: (
+      state,
+      action: PayloadAction<{ game: Game; available_questions: Question[]; outside_board_questions: Question[] }>
+    ) => {
+      const { game, available_questions, outside_board_questions } = action.payload;
+
+      state.game = game;
+      state.gameId = game.id ? String(game.id) : state.gameId;
+      state.totalTeams = game.teams?.length ?? state.totalTeams;
+      state.isGameActive = true;
+      state.isLoaded = true;
+
+      // Normalize teams and ensure scores exist
+      const teams = game.teams || [];
+      state.teams = teams.map((team) => ({ ...team, score: team.score ?? 0 }));
+
+      // Reset perk state for new game context
+      state.doublePerkActiveTeamId = null;
+      state.doublePerkUsed = {};
+      state.rerollPerkUsed = {};
+      state.choicesPerkUsed = {};
+      state.perksLocked = false;
+      state.rerollBuffer = {};
+
+      state.questions = available_questions || [];
+      state.backupQuestions = outside_board_questions || [];
+      state.playedQuestions = [];
+    },
+    swapQuestion: (state, action: PayloadAction<{ oldQuestionId: number }>) => {
+      if (!state.backupQuestions.length) return;
+      const nextQuestion = state.backupQuestions[0];
+      const index = state.questions.findIndex((q) => q.id === action.payload.oldQuestionId);
+      if (index === -1) return;
+
+      // Replace the old question with the next backup
+      state.questions[index] = nextQuestion;
+      // Remove the used backup question from the queue
+      state.backupQuestions = state.backupQuestions.slice(1);
     },
     // New: backup questions buffer explicitly for reroll perk
     setBackupQuestions: (state, action: PayloadAction<Question[]>) => {
@@ -209,22 +227,23 @@ const gameSlice = createSlice({
       state.playedQuestions = [];
       state.rerollBuffer = {};
       state.backupQuestions = [];
+      state.game = null;
+      state.isLoaded = false;
     },
   },
 });
 
 export const {
-  startGame,
+ 
   switchToNextTeam,
-  setCurrentTeam,
+ 
   setTeams,
   awardPoints,
-  setTeamScore,
-  resetScores,
+ 
   endGame,
   activateDoublePerk,
   clearActivePerk,
-  resetPerks,
+ 
   activateRerollPerk,
   activateChoicesPerk,
   lockPerks,
@@ -232,6 +251,8 @@ export const {
   setRerollBuffer,
   consumeRerollBuffer,
   setGameQuestions,
+  hydrateFullGameState,
+  swapQuestion,
   setBackupQuestions,
   pushBackupQuestions,
   consumeBackupQuestion,

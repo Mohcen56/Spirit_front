@@ -1,18 +1,16 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import { logger } from '@/lib/utils/logger';
 import { useParams, useRouter } from 'next/navigation';
-import { gameAPI } from '@/lib/api';
 import { Question } from '@/types/game';
 import Image from 'next/image';
 import { getFullImageUrl } from '@/lib/utils/imageUtils';
 import GameHeader from '@/components/game/GameHeader';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { startGame, switchToNextTeam, awardPoints, setGameQuestions, endGame } from '@/store/gameSlice';
-import { useGameData } from '@/hooks/useGameData';
+import { switchToNextTeam, awardPoints, endGame } from '@/store/gameSlice';
 import { useSyncTeams } from '@/hooks/useSyncTeams';
 import BounceLoader from '@/components/ui/loadingscreen';
+import { gameAPI } from '@/lib/api';
 
 interface QuestionSlot {
   points: number;
@@ -28,52 +26,25 @@ export default function Client() {
   const dispatch = useAppDispatch();
   const {
     currentTeam,
-    isGameActive,
-    gameId: currentGameId,
     teams: liveTeams,
     questions,
     playedQuestions,
+    game,
+    isLoaded,
   } = useAppSelector((state) => state.game);
 
-  const { game, isLoading, error } = useGameData(gameId);
   useSyncTeams(game?.teams, liveTeams);
 
-  useEffect(() => {
-    if (!game || questions.length > 0) return;
-
-    const numericGameId = Number(gameId);
-    if (!Number.isFinite(numericGameId)) return;
-
-    let cancelled = false;
-
-    const loadQuestions = async () => {
-      try {
-        const data = await gameAPI.getAvailableQuestions(numericGameId);
-        if (!cancelled) {
-          dispatch(setGameQuestions(data));
-        }
-      } catch (err) {
-        logger.exception(err, { where: 'game.[id].question.loadAvailable' });
-      }
-    };
-
-    loadQuestions();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [dispatch, game, gameId, questions.length]);
+  // No longer fetch - data is already in Redux from the game/[id] page hydration
+  const isLoading = !isLoaded;
+  const error = !game && isLoaded ? 'Game not found' : null;
 
   useEffect(() => {
-    if (game && (!isGameActive || currentGameId !== gameId)) {
-      dispatch(
-        startGame({
-          gameId: gameId,
-          totalTeams: game.teams.length,
-        }),
-      );
-    }
-  }, [game, gameId, isGameActive, currentGameId, dispatch]);
+    if (!game || !isLoaded) return;
+
+    // Game is already active from hydrateFullGameState, no need to startGame again
+    // Questions are already in Redux from hydrateFullGameState
+  }, [game, isLoaded]);
 
   const handleTeamTurnChange = () => {
     dispatch(switchToNextTeam());

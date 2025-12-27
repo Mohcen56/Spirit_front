@@ -1,10 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useDispatch, useSelector } from 'react-redux';
 import { gameAPI } from '@/lib/api/index';
 import { logger } from '@/lib/utils/logger';
-import { Game, Category, Team } from '@/types/game';
+import { Game, Category, Team, Question } from '@/types/game';
+import { hydrateFullGameState } from '@/store/gameSlice';
+import { RootState } from '@/store';
 import Header from '@/components/Header';
 import Image from 'next/image';
 import { getFullImageUrl } from '@/lib/utils/imageUtils';
@@ -14,11 +17,41 @@ import BounceLoader from '@/components/ui/loadingscreen';
 export default function GamePage() {
   const { id } = useParams();
   const router = useRouter();
-  const [game, setGame] = useState<Game | null>(null);
+  const dispatch = useDispatch();
+  const hasHydratedRef = useRef(false);
+  
+  // Check if Redux already has this game loaded
+  const reduxGame = useSelector((state: RootState) => state.game.game);
+  const isLoadedInRedux = useSelector((state: RootState) => state.game.isLoaded);
+  const reduxGameId = reduxGame?.id ? String(reduxGame.id) : null;
+  
+  type FullGamePayload = Game & {
+    available_questions?: Question[];
+    outside_board_questions?: Question[];
+  };
+
+  const [game, setGame] = useState<FullGamePayload | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
+    // Skip if already loaded this game in Redux
+    if (isLoadedInRedux && reduxGameId === id) {
+      logger.log('Game already loaded in Redux, skipping fetch');
+      setGame(reduxGame as FullGamePayload);
+      setIsLoading(false);
+      return;
+    }
+
+    // Prevent duplicate fetches in React Strict Mode
+    if (hasHydratedRef.current) {
+      logger.log('Already hydrating, skipping duplicate fetch');
+      return;
+    }
+
+    // Mark as hydrating BEFORE starting the async call
+    hasHydratedRef.current = true;
+
     const loadGame = async () => {
       if (!id) return;
       
@@ -26,19 +59,30 @@ export default function GamePage() {
         setIsLoading(true);
         logger.log('Loading game with ID:', id);
         
-        const gameData = await gameAPI.getGame(Number(id));
+        const gameData: FullGamePayload = await gameAPI.getGame(Number(id));
         logger.log('Game loaded:', gameData);
         setGame(gameData);
+
+        // Hydrate the Redux store with the full game payload (metadata + questions)
+        dispatch(
+          hydrateFullGameState({
+            game: gameData,
+            available_questions: gameData.available_questions || [],
+            outside_board_questions: gameData.outside_board_questions || [],
+          })
+        );
       } catch (error) {
         logger.exception(error, { where: 'game.[id].loadGame' });
         setError('Failed to load game');
+        // Reset ref on error so user can retry
+        hasHydratedRef.current = false;
       } finally {
         setIsLoading(false);
       }
     };
 
     loadGame();
-  }, [id]);
+  }, [dispatch, id, isLoadedInRedux, reduxGameId, reduxGame]);
 
   const handleStartGame = async () => {
     if (game) {

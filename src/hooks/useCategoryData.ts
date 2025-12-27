@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { logger } from '@/lib/utils/logger';
 import { gameAPI } from '@/lib/api';
 
@@ -54,12 +54,23 @@ export function useCategoryData(categoryId: string): UseCategoryDataReturn {
   const [savesCount, setSavesCount] = useState<number>(0);
   const [likesCount, setLikesCount] = useState<number>(0);
   const [isLiked, setIsLiked] = useState<boolean>(false);
+  const hasLoadedRef = useRef(false);
 
   useEffect(() => {
     logger.log('🖼️ categoryImage changed:', categoryImage ? `${categoryImage.substring(0, 50)}...` : 'null');
   }, [categoryImage]);
 
   useEffect(() => {
+    if (!categoryId) return;
+
+    // Prevent duplicate fetches in React Strict Mode
+    if (hasLoadedRef.current) {
+      logger.log('Category already loading/loaded, skipping duplicate fetch');
+      return;
+    }
+
+    hasLoadedRef.current = true;
+
     const loadCategory = async () => {
       try {
         logger.log('🔍 Loading category:', categoryId);
@@ -94,12 +105,12 @@ export function useCategoryData(categoryId: string): UseCategoryDataReturn {
         logger.exception(err, { where: 'useCategoryData.loadCategory', categoryId });
         setError('Failed to load category');
         setIsLoading(false);
+        // Reset ref on error to allow retry
+        hasLoadedRef.current = false;
       }
     };
 
-    if (categoryId) {
-      loadCategory();
-    }
+    loadCategory();
   }, [categoryId]);
 
   return {

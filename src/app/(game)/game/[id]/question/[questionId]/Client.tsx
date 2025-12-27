@@ -17,8 +17,6 @@ import {
   switchToNextTeam,
   awardPoints,
   clearActivePerk,
-  setGameQuestions,
-  setBackupQuestions,
   markQuestionPlayed,
   endGame,
   activateChoicesPerk,
@@ -28,7 +26,6 @@ import {
   consumeBackupQuestion,
 } from '@/store/gameSlice';
 import { Play, Pause, RotateCcw } from 'lucide-react';
-import { useGameData } from '@/hooks/useGameData';
 import { useSyncTeams } from '@/hooks/useSyncTeams';
 import BounceLoader from '@/components/ui/loadingscreen';
 
@@ -50,6 +47,8 @@ export default function Client() {
     questions,
     playedQuestions,
     teams: liveTeams,
+    game,
+    isLoaded,
   } = useAppSelector((state) => state.game);
   const [awardError, setAwardError] = useState('');
   const [awardSuccess, setAwardSuccess] = useState('');
@@ -59,43 +58,15 @@ export default function Client() {
   const [isChoicesDialogOpen, setIsChoicesDialogOpen] = useState(false);
   const [selectedQuestionForChoices, setSelectedQuestionForChoices] = useState<QuestionType | null>(null);
   const [questionImageStatus, setQuestionImageStatus] = useState<'idle' | 'loading' | 'loaded' | 'error'>('idle');
-  const { game, isLoading, error } = useGameData(gameId);
+  
+  // Read from Redux - data already hydrated from game/[id] page
+  const isLoading = !isLoaded;
+  const error = !game && isLoaded ? 'Game not found' : null;
 
   useSyncTeams(game?.teams, liveTeams);
-  useEffect(() => {
-    if (questions.length > 0) return;
-
-    const numericGameId = Number(gameId);
-    if (!Number.isFinite(numericGameId)) return;
-
-    let cancelled = false;
-
-    const loadQuestions = async () => {
-      try {
-        const data = await gameAPI.getAvailableQuestions(numericGameId);
-        if (!cancelled) {
-          dispatch(setGameQuestions(data));
-          const extras = await gameAPI.prefetchOutsideBoard(numericGameId, 4);
-          if (Array.isArray(extras) && extras.length) {
-            const existingIds = new Set(data.map((q: any) => q.id));
-            const filtered = extras.filter(
-              (q: any) =>
-                q && typeof q.id === 'number' && !existingIds.has(q.id) && !playedQuestions.includes(q.id),
-            );
-            dispatch(setBackupQuestions(filtered));
-          }
-        }
-      } catch (err) {
-        logger.exception(err, { where: 'game.[id].question.[questionId].loadAvailable' });
-      }
-    };
-
-    loadQuestions();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [dispatch, gameId, questions.length, playedQuestions]);
+  
+  // Questions and backup questions already loaded from hydrateFullGameState in game/[id] page
+  // No need to fetch here
 
   const backupQuestions = useAppSelector((s) => s.game.backupQuestions);
   const question = questions.find((q) => q.id === questionId) || backupQuestions.find((q) => q.id === questionId);

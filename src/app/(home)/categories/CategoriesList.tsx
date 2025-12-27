@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { categoriesAPI } from '@/lib/api';
 import { Category, Collection } from '@/types/game';
 import { logger } from '@/lib/utils/logger';
 import { Crown, Lock, Eye, Pencil, Info, Search, ChevronDown } from 'lucide-react';
@@ -12,12 +11,22 @@ import { ProcessingButton } from '@/components/ui/button2';
 import { useNotification } from '@/hooks/useNotification';
 import Image from 'next/image';
 import { useMembership } from '@/hooks/useMembership';
-
+import { categoriesAPI } from '@/lib/api';
 import { useImageError } from '@/hooks/useImageError';
 import { useHeader } from '@/contexts/HeaderContext';
 import BounceLoader from '@/components/ui/loadingscreen';
 
-export default function Client() {
+type AllCategoryData = {
+  collections: Collection[];
+  saved_categories: Category[];
+  fallback_categories: Category[];
+};
+
+type Props = {
+  initialData: AllCategoryData | null;
+};
+
+export default function CategoriesList({ initialData }: Props) {
   const { membership, currentUserId, isLoaded } = useMembership();
   const [error, setError] = useState<string>('');
   const notify = useNotification();
@@ -31,12 +40,16 @@ export default function Client() {
   const [selectedCollectionId, setSelectedCollectionId] = useState<number | 'all'>('all');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
-  // Fetch all category data using React Query
-  const { data, isLoading, error: queryError } = useQuery({
+
+  // Use React Query with server-side initialData
+  const { data, isLoading: queryLoading, error: queryError } = useQuery({
     queryKey: ['allCategoryData'],
     queryFn: categoriesAPI.getAllCategoryData,
+    initialData: initialData || undefined,
+    staleTime: 5 * 60 * 1000, // 5 minutes - cache data but still respond to invalidations
   });
+
+  const isLoading = queryLoading || !data;
 
   // Build collections array with added categories
   const collections = useMemo(() => {
@@ -71,7 +84,7 @@ export default function Client() {
       categories: (col.categories || []).filter((cat: Category) => {
         if (!lower) return true;
         const name = (cat.name || '').toString().toLowerCase();
-  const creator = (cat.created_by_username || '').toString().toLowerCase();
+        const creator = (cat.created_by_username || '').toString().toLowerCase();
         return name.includes(lower) || creator.includes(lower);
       }),
     }));
@@ -85,6 +98,13 @@ export default function Client() {
   useEffect(() => {
     setHeader({ title: "Categories", backHref: "/dashboard" });
   }, [setHeader]);
+
+  useEffect(() => {
+    if (queryError) {
+      logger.exception('Failed to load category data', { where: 'categories.page.loadAll', error: queryError });
+      setError('Failed to load categories');
+    }
+  }, [queryError]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -103,14 +123,6 @@ export default function Client() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [infoModal.open]);
-
-  // Handle query errors
-  useEffect(() => {
-    if (queryError) {
-      logger.exception(queryError, { where: 'categories.page.loadAll' });
-      setError('Failed to load categories');
-    }
-  }, [queryError, setError]);
 
   // Function to get played percentage for a category (user-specific)
   const getPlayedPercentage = (category: Category) => {
@@ -275,7 +287,7 @@ export default function Client() {
             {filteredCollections.map((collection) => (
               <div key={collection.id} className="bg-cyan-50 backdrop-blur-md rounded-2xl p-6  mb-8 border border-primary-200 shadow-lg">
                 {/* Collection Header */}
-                <div className="relative flex items-center justify-between  -mt-11 mb-4">
+                <div className="relative flex itemscenter justify-between  -mt-11 mb-4">
                   <div className="bg-cyan-700 text-white px-2 md:px-6 py-2  rounded-full shadow-md">
                     <h3 className=" text-xs md:text-xl font-bold text-start md:text-center">{collection.name}</h3>
                   </div>
