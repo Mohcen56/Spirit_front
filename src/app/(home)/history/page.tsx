@@ -148,7 +148,7 @@ export default function HistoryPage() {
                         className="relative w-full aspect-[3/4] min-h-[180px] sm:min-h-[220px] overflow-hidden border-5 border-eastern-blue-500 rounded-4xl"
                       >
                         {/* Top Section - Category Image */}
-                        <div className="relative h-[75%]">
+                        <div className="relative h-[80%]">
                           <div className="h-full w-full">
                             {category.image_url && !hasImageError(category.name) ? (
                               <Image
@@ -164,7 +164,7 @@ export default function HistoryPage() {
                                 unoptimized={category.image_url.includes('r2.dev')}
                               />
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-eastern-blue-200 to-eastern-blue-300">
+                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-cyan-700 to-cyan-800">
                                 <div className="w-20 h-20 bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg transform rotate-3">
                                   {category.name.charAt(0)}
                                 </div>
