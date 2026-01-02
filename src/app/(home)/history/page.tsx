@@ -141,10 +141,10 @@ export default function HistoryPage() {
               {game.categories.map((category) => (
                 <div
                   key={category.id}
-                  className="relative w-full aspect-[3/4] min-h-[180px] sm:min-h-[220px] overflow-hidden border-5 border-eastern-blue-500 rounded-4xl"
+                  className="relative w-full aspect-[3/4] min-h-[180px] sm:min-h-[220px] overflow-hidden border-5 border-cyan-700 rounded-4xl"
                 >
                   {/* Top Section - Category Image */}
-                  <div className="relative h-[75%]">
+                  <div className="relative h-[80%]">
                     <div className="h-full w-full">
                       {category.image_url && !hasImageError(category.name) ? (
                         <Image
@@ -170,7 +170,7 @@ export default function HistoryPage() {
                   </div>
 
                   {/* Bottom Section - Category Name */}
-                  <div className="relative h-[25%] bg-gradient-to-br from-eastern-blue-500 to-eastern-blue-700 flex items-center justify-center p-4">
+                  <div className="relative h-[21%] bg-gradient-to-br from-cyan-700 to-cyan-800 flex items-center justify-center p-4">
                     <h3 className="text-white items-center font-bold text-sm lg:text-lg text-center leading-tight">
                       {category.name}
                     </h3>
