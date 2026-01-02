@@ -182,6 +182,7 @@ export default function HistoryPage() {
                       </div>
                     ))}
                   </div>
+                  
 
                   {/* Play Again Button */}
                
