@@ -64,9 +64,9 @@ store.subscribe(() => {
   const state = store.getState();
   const authState = state.auth;
   
-  // When logout happens (user and token are null), purge auth persistence
+  // When logout happens (user is null), purge auth persistence
   // This ensures redux-persist doesn't restore old user data after logout
-  if (!authState.user && !authState.token && authState.isLoaded) {
+  if (!authState.user && authState.isLoaded) {
     // Use storage.removeItem directly to clear only the auth key
     storage.removeItem('persist:trivia-spirit-auth');
   }
