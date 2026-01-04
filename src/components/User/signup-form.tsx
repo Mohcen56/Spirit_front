@@ -12,6 +12,7 @@ import { useState } from "react"
 import { useGoogleLogin } from "@react-oauth/google"
 import { handleGoogleOAuth } from "@/lib/utils/google-oauth"
 import { useRouter } from "next/navigation"
+import { logger } from "@/lib/utils/logger"
 
 type SignupData = {
   email: string
@@ -95,7 +96,7 @@ export function SignupForm({
     },
     onError: (error) => {
       setError("Google signup cancelled or failed")
-      console.error("Google signup error:", error)
+      logger.exception(error, { where: "signup-form.googleSignup" })
     },
     flow: "implicit",
   })

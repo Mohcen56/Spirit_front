@@ -2,7 +2,7 @@
  * Lemon Squeezy Payment API Client
  */
 
-import { api } from "./api/base";
+import { api } from "../api/base";
 
 export interface CheckoutRequest {
   plan?: string;

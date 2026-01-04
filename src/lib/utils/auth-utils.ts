@@ -1,23 +1,56 @@
 /**
  * Centralized authentication utilities
- * Reduces redundant localStorage access across the application
+ * 
+ * SECURITY: Tokens are stored ONLY in HttpOnly cookies.
+ * The token is set/cleared via /api/auth/set-cookie route.
+ * Client code should NOT access or store tokens directly.
  */
 
 import type { User } from '@/types/game';
+import { logger } from './logger';
 
-export const getAuthToken = (): string | null => {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('authToken');
+/**
+ * Check if user is authenticated by calling a server endpoint.
+ * The actual token is in an HttpOnly cookie - not accessible to JS.
+ */
+export const checkAuth = async (): Promise<boolean> => {
+  try {
+    const res = await fetch('/api/auth/check', { method: 'GET' });
+    return res.ok;
+  } catch {
+    return false;
+  }
 };
 
-export const setAuthToken = (token: string): void => {
+/**
+ * Sets the auth token in HttpOnly cookie via server route.
+ * Token is NEVER stored in localStorage.
+ */
+export const setAuthToken = async (token: string): Promise<void> => {
   if (typeof window === 'undefined') return;
-  localStorage.setItem('authToken', token);
+
+  try {
+    await fetch('/api/auth/set-cookie', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+  } catch (err) {
+    logger.exception(err, { where: 'setAuthToken' });
+  }
 };
 
-export const removeAuthToken = (): void => {
+/**
+ * Clears the auth token from HttpOnly cookie.
+ */
+export const removeAuthToken = async (): Promise<void> => {
   if (typeof window === 'undefined') return;
-  localStorage.removeItem('authToken');
+
+  try {
+    await fetch('/api/auth/set-cookie', { method: 'DELETE' });
+  } catch (err) {
+    logger.exception(err, { where: 'removeAuthToken' });
+  }
 };
 
 export const getCurrentUser = (): User | null => {
@@ -43,9 +76,9 @@ export const removeMembership = (): void => {
   localStorage.removeItem('membership');
 };
 
-export const clearAuthData = (): void => {
+export const clearAuthData = async (): Promise<void> => {
   if (typeof window === 'undefined') return;
-  removeAuthToken();
+  await removeAuthToken();
   removeCurrentUser();
   removeMembership();
 };

@@ -12,6 +12,7 @@ import { useState } from "react"
 import { useGoogleLogin } from "@react-oauth/google"
 import { handleGoogleOAuth } from "@/lib/utils/google-oauth"
 import { useRouter } from "next/navigation"
+import { logger } from "@/lib/utils/logger"
 
 type LoginData = {
   email: string
@@ -80,7 +81,7 @@ export function LoginForm({
     },
     onError: (error) => {
       setError("Google login cancelled or failed")
-      console.error("Google login error:", error)
+      logger.exception(error, { where: "login-form.googleLogin" })
     },
     flow: "implicit",
   })

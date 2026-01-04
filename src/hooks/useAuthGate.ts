@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authAPI } from '@/lib/api/auth';
-import { setCurrentUser } from '@/lib/utils/auth-utils';
+import { checkAuth, setCurrentUser } from '@/lib/utils/auth-utils';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { setCredentials, logout as logoutAction } from '@/store/authSlice';
 import type { User } from '@/types/game';
@@ -26,11 +26,12 @@ export function useAuthGate({ redirectIfGuest }: { redirectIfGuest?: string } = 
   const fetchUser = async () => {
     if (typeof window === 'undefined') return;
 
-    const token = localStorage.getItem('authToken');
+    // ✅ SECURITY: Check auth via server endpoint (cookie-based)
+    const isAuthenticated = await checkAuth();
 
-    // 🔹 Short-circuit safely (don't call API if no token)
-    if (!token) {
-      logger.log('No token, skipping getCurrentUser');
+    // 🔹 Short-circuit safely (don't call API if no auth)
+    if (!isAuthenticated) {
+      logger.log('No auth cookie, skipping getCurrentUser');
       setLoading(false);
       if (redirectIfGuest) router.replace(redirectIfGuest);
       return;
@@ -67,9 +68,8 @@ export function useAuthGate({ redirectIfGuest }: { redirectIfGuest?: string } = 
       setCurrentUser(profile.user);
       
       // ✅ CRITICAL: Dispatch to Redux so useMembership can read it
-      const token = localStorage.getItem('authToken');
-      dispatch(setCredentials({ token: token || undefined, user: profile.user }));
-    } catch (error) {
+      dispatch(setCredentials({ user: profile.user }));
+    } catch {
       profileFetchInFlight = null;
       if (redirectIfGuest) router.replace(redirectIfGuest);
     } finally {

@@ -38,13 +38,11 @@ export default function GameBoardPage() {
   } = useAppSelector((state) => state.game);
 
   const [hydrateError, setHydrateError] = useState<string>('');
-  const [isHydrating, setIsHydrating] = useState(false);
   const hasFetched = useRef(false);
 
   useSyncTeams(game?.teams, liveTeams);
 
-  // No longer fetch - data is already in Redux from the game/[id] page hydration
-  const isLoading = isHydrating || !isLoaded;
+  // Derive error state (loading UI could be added here if needed)
   const error = hydrateError || (!game && isLoaded ? 'Game not found' : null);
 
   useEffect(() => {
@@ -53,7 +51,6 @@ export default function GameBoardPage() {
 
     const loadGame = async () => {
       try {
-        setIsHydrating(true);
         const numericGameId = Number(gameId);
         if (!Number.isFinite(numericGameId)) {
           throw new Error('Invalid game id');
@@ -69,8 +66,6 @@ export default function GameBoardPage() {
       } catch (err) {
         logger.exception(err, { where: 'game.[id].question.loadGame' });
         setHydrateError('Failed to load game');
-      } finally {
-        setIsHydrating(false);
       }
     };
 

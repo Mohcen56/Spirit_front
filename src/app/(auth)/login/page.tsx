@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { authAPI } from '@/lib/api'
 import { LoginForm } from '@/components/User/login-form'
 import { useNotification } from '@/hooks/useNotification'
+import { setAuthToken, setCurrentUser } from '@/lib/utils/auth-utils'
 
 type LoginData = {
   email: string
@@ -21,8 +22,8 @@ export default function LoginPage() {
     const response = await authAPI.login(data.email, data.password)
     
     if (response.success) {
-      localStorage.setItem('authToken', response.token)
-      localStorage.setItem('user', JSON.stringify(response.user))
+      await setAuthToken(response.token)
+      setCurrentUser(response.user)
       notify.success('Login Successful', 'Welcome back!', 2000)
       router.push('/dashboard')
     } else {

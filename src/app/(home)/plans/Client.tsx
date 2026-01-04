@@ -5,12 +5,13 @@ import { CreativePricing } from "@/components/ui/creative-pricing";
 import type { PricingTier } from "@/components/ui/creative-pricing";
 import { Pencil, Star } from "lucide-react";
 import { useHeader } from "@/contexts/HeaderContext";
-import { createCheckout, redirectToCheckout } from "@/lib/payments";
+import { createCheckout, redirectToCheckout } from "@/lib/utils/payments";
 import { useRouter } from "next/navigation";
 import { useMembership } from "@/hooks/useMembership";
 import { useAuthGate } from "@/hooks/useAuthGate";
 import { PremiumDashboard } from "@/components/Premium/PremiumDashboard";
 import Link from "next/link";
+import { logger } from "@/lib/utils/logger";
  
 
 const sampleTiers: PricingTier[] = [
@@ -92,7 +93,7 @@ export default function Client() {
       redirectToCheckout(checkout_url);
       
     } catch (error: unknown) {
-      console.error("Checkout error:", error);
+      logger.exception(error, { where: "plans.checkout" });
       
       // Extract error message safely
       let errorMessage = "Failed to start checkout. Please try again or contact support.";

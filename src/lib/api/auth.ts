@@ -64,7 +64,7 @@ export const authAPI = {
   
   logout: async () => {
     if (typeof window !== 'undefined') {
-      clearAuthData();
+      await clearAuthData();
     }
     return { success: true };
   },

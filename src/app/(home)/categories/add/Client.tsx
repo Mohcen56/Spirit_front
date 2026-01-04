@@ -267,7 +267,7 @@ export default function Client() {
                     onClick={() => setFiltersOpen((v) => !v)}
                     className="inline-flex items-center gap-2 bg-white/70 hover:bg-white/90 px-8 py-2 rounded-xl border border-primary-200 shadow-sm text-sm text-primary-800"
                     aria-haspopup="true"
-                    aria-expanded={filtersOpen ? 'true' : 'false'}
+                    aria-expanded={filtersOpen}
                   >
                     <ArrowDownUp className="w-4 h-4" />
                     Sort

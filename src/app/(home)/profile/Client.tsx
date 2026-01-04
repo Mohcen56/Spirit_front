@@ -18,8 +18,8 @@ export default function Client() {
   // Helper to update both local state and Redux store
   const updateUserEverywhere = (updatedUser: any) => {
     setUser(updatedUser);
-    const token = localStorage.getItem('authToken');
-    dispatch(setCredentials({ token: token || undefined, user: updatedUser }));
+    // ✅ SECURITY: No need to pass token - it's in HttpOnly cookie
+    dispatch(setCredentials({ user: updatedUser }));
   };
 
   const handleSave = async (data: {

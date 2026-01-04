@@ -1,5 +1,5 @@
 import { authAPI } from '@/lib/api/auth';
-import { setCurrentUser } from '@/lib/utils/auth-utils';
+import { setCurrentUser, setAuthToken } from '@/lib/utils/auth-utils';
 import { logger } from '@/lib/utils/logger';
 
 /**
@@ -24,8 +24,8 @@ export async function handleGoogleOAuth(
       };
     }
 
-    // Store auth token
-    localStorage.setItem('authToken', result.token!);
+    // Store auth token (syncs to HTTP-only cookie for SSR)
+    await setAuthToken(result.token!);
 
     // Store user in auth utils
     setCurrentUser(result.user);

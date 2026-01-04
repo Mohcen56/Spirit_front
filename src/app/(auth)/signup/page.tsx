@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { authAPI } from '@/lib/api/index';
 import { SignupForm } from '@/components/User/signup-form';
 import { useNotification } from '@/hooks/useNotification';
+import { setAuthToken, setCurrentUser } from '@/lib/utils/auth-utils';
 
 type SignupData = {
   email: string;
@@ -27,8 +28,8 @@ export default function SignupPage() {
     });
     
     if (response?.success) {
-      localStorage.setItem('authToken', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
+      await setAuthToken(response.token);
+      setCurrentUser(response.user);
       notify.accountVerified();
       router.push('/dashboard');
     } else {
