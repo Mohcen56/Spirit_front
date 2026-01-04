@@ -1,7 +1,7 @@
 import QuestionClient from './QuestionClient';
 
 type PageProps = {
-  params: { id: string; questionId: string };
+  params: Promise<{ id: string; questionId: string }>;
 };
 
 /**
@@ -10,8 +10,7 @@ type PageProps = {
  * This page simply extracts the params and passes them to the client component.
  */
 export default async function QuestionPage({ params }: PageProps) {
-  const gameId = params.id;
-  const questionId = parseInt(params.questionId, 10);
+  const { id, questionId } = await params;
 
-  return <QuestionClient gameId={gameId} questionId={questionId} />;
+  return <QuestionClient gameId={id} questionId={parseInt(questionId, 10)} />;
 }
