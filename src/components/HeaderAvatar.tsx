@@ -1,13 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import type { User } from "@/types/game";
+import { useSession } from "@/providers/SessionProvider";
 
-interface HeaderAvatarProps {
-  user: User | null;
-}
-
-export default function HeaderAvatar({ user }: HeaderAvatarProps) {
+export default function HeaderAvatar() {
+  const { user } = useSession();
   const avatar = user?.avatar && user?.avatar !== "/avatars/thumbs.svg"
     ? user.avatar
     : "/avatars/thumbs.svg";

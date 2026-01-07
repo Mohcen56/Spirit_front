@@ -5,16 +5,14 @@ import Image from "next/image";
 import { ArrowLeft, } from "lucide-react";
 
 import UserDropdown from "./User/UserProfileDropdown";
-import type { User } from "@/types/game";
 
 
 interface HeaderProps {
   title: string;
   backHref: string;
-  user: User | null;
 }
 
-export default function Header({ title, backHref, user }: HeaderProps) {
+export default function Header({ title, backHref }: HeaderProps) {
  
 
   
@@ -33,7 +31,7 @@ export default function Header({ title, backHref, user }: HeaderProps) {
             </Link>
             <div className="h-8 w-px bg-white/30"></div>
             <div className="flex items-center md:space-x-3">
-               <UserDropdown user={user} />
+               <UserDropdown />
               
             </div>
           </div>

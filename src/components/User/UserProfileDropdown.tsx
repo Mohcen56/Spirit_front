@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { logoutAction } from "@/lib/auth/actions";
 import { VerifyIcon } from "@/components/ui/verify-badge";
-import type { User } from "@/types/game";
+import { useSession } from "@/providers/SessionProvider";
 
 const Icon = {
   User: (p: React.SVGProps<SVGSVGElement>) => (
@@ -42,11 +42,11 @@ const Icon = {
 };
 
 interface UserDropdownProps {
-  user: User | null;
   align?: "left" | "right";
 }
 
-export default function UserDropdown({ user, align = "left" }: UserDropdownProps) {
+export default function UserDropdown({ align = "left" }: UserDropdownProps) {
+  const { user } = useSession();
   const [open, setOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const ref = useRef<HTMLDivElement>(null);

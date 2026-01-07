@@ -1,14 +1,11 @@
 import { SpeedInsights } from "@vercel/speed-insights/next"
-import { getSession } from "@/lib/auth/session";
-import HomeLayoutClient from "./HomeLayoutClient";
+import HomeLayoutContent from "./HomeLayoutContent";
 
-export default async function HomeLayout({ children }: { children: React.ReactNode }) {
-  const session = await getSession();
-
+export default function HomeLayout({ children }: { children: React.ReactNode }) {
   return (
-    <HomeLayoutClient user={session.user}>
+    <HomeLayoutContent>
       {children}
       <SpeedInsights />
-    </HomeLayoutClient>
+    </HomeLayoutContent>
   );
 }
