@@ -186,10 +186,8 @@ src/
 │   └── Premium/              # Premium/membership components
 │
 ├── hooks/                    # Custom React Hooks
-│   ├── useAuthGate.ts        # Auth state management
 │   ├── useCategoriesData.ts  # Categories fetching
 │   ├── useGameData.ts        # Game state management
-│   ├── useMembership.ts      # Premium membership
 │   ├── useNotification.ts    # Toast notifications
 │   └── useTurnTracking.ts    # Team turn management
 │

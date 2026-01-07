@@ -7,7 +7,7 @@ import QuestionsList from '@/components/category/QuestionsList';
 import CategoryFormFields from '@/components/category/CategoryFormFields';
 import CategoryPublicView from '@/components/category/CategoryPublicView';
 import { useHeader } from '@/contexts/HeaderContext';
-import { useAuthGate } from '@/hooks/useAuthGate';
+import { useSession } from '@/providers/SessionProvider';
 import BounceLoader from '@/components/ui/loadingscreen';
 import { useCategoryData } from '@/hooks/useCategoryData';
 import { useCategoryActions } from '@/hooks/useCategoryActions';
@@ -17,7 +17,7 @@ export default function Client() {
   const params = useParams();
   const categoryId = params.id as string;
   const { setHeader } = useHeader();
-  const { user } = useAuthGate();
+  const { user } = useSession();
 
   const {
     categoryName,
