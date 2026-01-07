@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { userCategoriesAPI } from '@/lib/api';
 import { User, Category } from '@/types/game';
-import { Search,Lock, ArrowDownUp } from 'lucide-react';
+import { Search, Lock, ArrowDownUp } from 'lucide-react';
 
 import Image from 'next/image';
 import Usersprofiles from '@/components/User/Usersprofiles';
@@ -19,12 +19,12 @@ import { logger } from '@/lib/utils/logger';
 import BounceLoader from '@/components/ui/loadingscreen';
 import { getFullImageUrl } from '@/lib/utils/imageUtils';
 
-interface Props {
-  userIsPremium: boolean;
-  userId: number;
-}
-
-export default function Client({ userIsPremium, userId }: Props) {
+/**
+ * Browse and manage user-added categories.
+ * Uses SessionProvider for user/premium data.
+ */
+export default function AddedCategoriesBrowser() {
+  const { user, isPremium } = useSession();
   const [showProfile, setShowProfile] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [search, setSearch] = useState('');
@@ -32,7 +32,6 @@ export default function Client({ userIsPremium, userId }: Props) {
   const [sortMode, setSortMode] = useState<'default' | 'likes' | 'saves' | 'newest'>('default');
   const router = useRouter();
   const { setHeader } = useHeader();
-  const { user } = useSession();
   const { handleError: handleImageError, hasError: hasImageError } = useImageError<number>();
   const { categories, isLoading: isLoadingCategories, error: categoriesError } = useCategoriesData('user');
   const [error, setError] = useState('');
@@ -170,7 +169,6 @@ export default function Client({ userIsPremium, userId }: Props) {
     
     // Check if user is premium or owns the category
     const isOwner = user && category.created_by_id === user.id;
-    const isPremium = userIsPremium;
     
     if (!isOwner && !isPremium) {
       setError('Saving categories is a premium feature. Upgrade to premium to save categories created by others!');
@@ -182,7 +180,7 @@ export default function Client({ userIsPremium, userId }: Props) {
       categoryId: category.id,
       isSaved: category.is_saved || false,
     });
-  }, [user, userIsPremium, saveMutation]);
+  }, [user, isPremium, saveMutation]);
 
   const handleLikeCategory = useCallback(async (e: React.MouseEvent, category: Category) => {
     e.stopPropagation();
@@ -348,7 +346,7 @@ export default function Client({ userIsPremium, userId }: Props) {
                 filteredCategories.map((category) => {
                   const isOwner = user && category.created_by_id === user.id;
                   const isPending = isOwner && !category.is_approved;
-                  const canSave = isOwner || userIsPremium;
+                  const canSave = isOwner || isPremium;
 
                   return (
                     <div

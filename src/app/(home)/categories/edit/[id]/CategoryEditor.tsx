@@ -12,7 +12,7 @@ import BounceLoader from '@/components/ui/loadingscreen';
 import { useCategoryData } from '@/hooks/useCategoryData';
 import { useCategoryActions } from '@/hooks/useCategoryActions';
 
-export default function Client() {
+export default function CategoryEditor() {
   const router = useRouter();
   const params = useParams();
   const categoryId = params.id as string;

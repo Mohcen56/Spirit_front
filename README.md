@@ -164,9 +164,19 @@ src/
 │   │       └── question/[questionId]/
 │   ├── (home)/               # Main app pages
 │   │   ├── categories/       # Browse & create categories
+│   │   │   ├── CategoriesList.tsx    # Category browser
+│   │   │   ├── add/
+│   │   │   │   └── AddedCategoriesBrowser.tsx
+│   │   │   ├── create/
+│   │   │   │   └── CategoryCreator.tsx
+│   │   │   └── edit/[id]/
+│   │   │       └── CategoryEditor.tsx
 │   │   ├── dashboard/        # User dashboard
 │   │   ├── history/          # Game history
+│   │   ├── plans/            # Pricing plans
+│   │   │   └── PricingPlans.tsx
 │   │   ├── profile/          # User profile
+│   │   │   └── ProfileEditor.tsx
 │   │   └── teams/            # Team setup
 │   ├── api/                  # API Routes (BFF)
 │   │   ├── auth/             # Auth cookie management
