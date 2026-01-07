@@ -1,19 +1,13 @@
 // Shared types for authentication
 // This file is safe to import in both client and server components
 
-export interface ServerUser {
-  id: number;
-  username: string;
-  email: string;
-  first_name?: string;
-  last_name?: string;
-  avatar: string;  // Required to match User type from game.ts
-  is_premium?: boolean;
-  premium_expiry?: string | null;
-}
+import type { User } from '@/types/game';
+
+// Re-export User for convenience
+export type { User };
 
 export interface AuthSession {
-  user: ServerUser;
+  user: User;
   isAuthenticated: true;
   isPremium: boolean;
 }

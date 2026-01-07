@@ -1,16 +1,14 @@
-"use client";
 import { SpeedInsights } from "@vercel/speed-insights/next"
-import { useState } from "react";
-import Header from "@/components/Header";
-import { HeaderContext } from "@/contexts/HeaderContext";
+import { getSession } from "@/lib/auth/session";
+import HomeLayoutClient from "./HomeLayoutClient";
 
-export default function HomeLayout({ children }: { children: React.ReactNode }) {
-  const [headerData, setHeaderData] = useState({ title: "", backHref: "/" });
+export default async function HomeLayout({ children }: { children: React.ReactNode }) {
+  const session = await getSession();
 
   return (
-    <HeaderContext.Provider value={{ ...headerData, setHeader: setHeaderData }}>
-      <Header title={headerData.title} backHref={headerData.backHref} />
-      <main>{children}<SpeedInsights /></main>
-    </HeaderContext.Provider>
+    <HomeLayoutClient user={session.user}>
+      {children}
+      <SpeedInsights />
+    </HomeLayoutClient>
   );
 }

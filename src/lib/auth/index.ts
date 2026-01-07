@@ -14,7 +14,7 @@
 
 // Re-export types (safe to import anywhere)
 export type {
-  ServerUser,
+  User,
   AuthSession,
   NoAuthSession,
   Session,

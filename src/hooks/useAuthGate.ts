@@ -6,6 +6,7 @@ import { setCredentials, logout as logoutAction } from '@/store/authSlice';
 import type { User } from '@/types/game';
 import { logger } from '@/lib/utils/logger';
 import { logoutAction as serverLogoutAction } from '@/lib/auth/actions';
+import { CACHE } from '@/lib/config';
 
 /**
  * Client-side auth hook for components that need user data reactively.
@@ -23,7 +24,6 @@ import { logoutAction as serverLogoutAction } from '@/lib/auth/actions';
 // ✅ REQUEST DEDUPLICATION: Track in-flight profile requests
 let profileFetchInFlight: Promise<{ user: User }> | null = null;
 let cachedProfile: { user: User } | null = null;
-const cacheExpiry = 5 * 60 * 1000; // 5 minutes
 let cacheTimestamp = 0;
 
 export function useAuthGate({ redirectIfGuest }: { redirectIfGuest?: string } = {}) {
@@ -40,9 +40,9 @@ export function useAuthGate({ redirectIfGuest }: { redirectIfGuest?: string } = 
     if (typeof window === 'undefined') return;
 
     try {
-      // ✅ Check cache first (valid for 5 minutes)
+      // ✅ Check cache first (valid for configured expiry time)
       const now = Date.now();
-      if (cachedProfile && now - cacheTimestamp < cacheExpiry) {
+      if (cachedProfile && now - cacheTimestamp < CACHE.PROFILE_EXPIRY_MS) {
         logger.log('Using cached profile');
         setUser(cachedProfile.user);
         setLoading(false);

@@ -3,10 +3,10 @@ import Link from "next/link";
 import HeaderAvatar from "@/components/HeaderAvatar";
 import HeroCTA from "@/components/HeroCTA";
 import { Timer,GalleryHorizontalEnd  } from "lucide-react";
+import { getSession } from "@/lib/auth/session";
 
-export default function HomePage() {
-
- 
+export default async function HomePage() {
+  const session = await getSession();
   
   return (
     <>
@@ -14,7 +14,7 @@ export default function HomePage() {
         {/* Header */}
       <header className="relative z-10 backdrop-blur-md">
   <div className="container mx-auto flex items-center px-3 py-3 relative">
-    <HeaderAvatar />
+    <HeaderAvatar user={session.user} />
   </div>
 </header>
 

@@ -10,7 +10,7 @@ import BounceLoader from '@/components/ui/loadingscreen';
 import { getFullImageUrl } from '@/lib/utils/imageUtils';
 import { gameAPI } from '@/lib/api';
 import { logger } from '@/lib/utils/logger';
-import { Game, Category, Team, Question } from '@/types/game';
+import { Game, Category, Team, Question, User } from '@/types/game';
 import { hydrateFullGameState } from '@/store/gameSlice';
 import { RootState } from '@/store';
 
@@ -24,9 +24,10 @@ type FullGamePayload = Game & {
 type Props = {
   gameId: string;
   initialGame: FullGamePayload | null;
+  user: User | null;
 };
 
-export default function GameClient({ gameId, initialGame }: Props) {
+export default function GameClient({ gameId, initialGame, user }: Props) {
   const router = useRouter();
   const dispatch = useDispatch();
   const hasHydratedRef = useRef(false);
@@ -155,7 +156,7 @@ export default function GameClient({ gameId, initialGame }: Props) {
 
   return (
     <div className="min-h-screen bg-eastern-blue-50">
-      <Header title="Game Information" backHref="/categories" />
+      <Header title="Game Information" backHref="/categories" user={user} />
 
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl 2xl:max-w-screen-2xl mx-auto mt-8 2xl:mt-15">

@@ -8,10 +8,10 @@ import { useNotification } from '@/hooks/useNotification';
 import { useAppDispatch } from '@/store/hooks';
 import { setCredentials } from '@/store/authSlice';
 import { refreshUserAction } from '@/lib/auth/actions';
-import type { ServerUser } from '@/lib/auth/types';
+import type { User } from '@/lib/auth/types';
 
 interface ProfileClientProps {
-  initialUser: ServerUser;
+  initialUser: User;
 }
 
 export default function ProfileClient({ initialUser }: ProfileClientProps) {
@@ -21,7 +21,7 @@ export default function ProfileClient({ initialUser }: ProfileClientProps) {
   const dispatch = useAppDispatch();
 
   // Helper to update both local state and Redux store
-  const updateUserEverywhere = (updatedUser: ServerUser) => {
+  const updateUserEverywhere = (updatedUser: User) => {
     setUser(updatedUser);
     // Update Redux store for client components that need it
     dispatch(setCredentials({ user: updatedUser }));
@@ -115,7 +115,7 @@ export default function ProfileClient({ initialUser }: ProfileClientProps) {
         try {
           const result = await authAPI.getProfile();
           if (result.user) {
-            updateUserEverywhere(result.user as ServerUser);
+            updateUserEverywhere(result.user as User);
           }
           // Invalidate server-side cache
           await refreshUserAction();

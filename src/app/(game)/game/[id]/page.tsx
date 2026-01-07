@@ -1,6 +1,7 @@
 import GameClient from './GameClient';
 import { logger } from '@/lib/utils/logger';
 import { Game, Question } from '@/types/game';
+import { getSession } from '@/lib/auth/session';
 
 type FullGamePayload = Game & {
   available_questions?: Question[];
@@ -31,7 +32,10 @@ async function fetchGameOnServer(gameId: string): Promise<FullGamePayload | null
 
 export default async function GamePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const initialGame = await fetchGameOnServer(id);
+  const [initialGame, session] = await Promise.all([
+    fetchGameOnServer(id),
+    getSession()
+  ]);
 
-  return <GameClient gameId={id} initialGame={initialGame} />;
+  return <GameClient gameId={id} initialGame={initialGame} user={session.user} />;
 }

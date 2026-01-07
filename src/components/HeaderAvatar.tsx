@@ -1,11 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { useAuthGate } from "@/hooks/useAuthGate";
+import type { User } from "@/types/game";
 
-export default function HeaderAvatar() {
-  const { user } = useAuthGate();
+interface HeaderAvatarProps {
+  user: User | null;
+}
 
+export default function HeaderAvatar({ user }: HeaderAvatarProps) {
   const avatar = user?.avatar && user?.avatar !== "/avatars/thumbs.svg"
     ? user.avatar
     : "/avatars/thumbs.svg";

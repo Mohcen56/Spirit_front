@@ -1,10 +1,10 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { cache } from 'react';
-import type { ServerUser, AuthSession, NoAuthSession, Session } from './types';
+import type { User, AuthSession, NoAuthSession, Session } from './types';
 
 // Re-export types for convenience
-export type { ServerUser, AuthSession, NoAuthSession, Session };
+export type { User, AuthSession, NoAuthSession, Session };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -28,7 +28,7 @@ export async function isAuthenticated(): Promise<boolean> {
  * Fetch user profile from backend (cached per request)
  * Uses React's cache() for request deduplication
  */
-export const getServerUser = cache(async (): Promise<ServerUser | null> => {
+export const getServerUser = cache(async (): Promise<User | null> => {
   const token = await getAuthToken();
   
   if (!token || !API_BASE_URL) {
@@ -54,7 +54,7 @@ export const getServerUser = cache(async (): Promise<ServerUser | null> => {
     return {
       ...user,
       avatar: user.avatar || '/avatars/thumbs.svg',
-    } as ServerUser;
+    } as User;
   } catch (error) {
     console.error('Failed to fetch user profile:', error);
     return null;
