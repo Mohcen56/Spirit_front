@@ -1,11 +1,24 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authAPI } from '@/lib/api/auth';
-import { checkAuth, setCurrentUser } from '@/lib/utils/auth-utils';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { setCredentials, logout as logoutAction } from '@/store/authSlice';
 import type { User } from '@/types/game';
 import { logger } from '@/lib/utils/logger';
+import { logoutAction as serverLogoutAction } from '@/lib/auth/actions';
+
+/**
+ * Client-side auth hook for components that need user data reactively.
+ * 
+ * NOTE: For route protection, prefer using:
+ * - Next.js middleware (src/middleware.ts) for route-level protection
+ * - Server Components with requireAuth() for page-level protection
+ * 
+ * This hook is useful when you need:
+ * - Real-time user state updates in client components
+ * - Access to logout function
+ * - Redux store synchronization
+ */
 
 // ✅ REQUEST DEDUPLICATION: Track in-flight profile requests
 let profileFetchInFlight: Promise<{ user: User }> | null = null;
@@ -25,17 +38,6 @@ export function useAuthGate({ redirectIfGuest }: { redirectIfGuest?: string } = 
 
   const fetchUser = async () => {
     if (typeof window === 'undefined') return;
-
-    // ✅ SECURITY: Check auth via server endpoint (cookie-based)
-    const isAuthenticated = await checkAuth();
-
-    // 🔹 Short-circuit safely (don't call API if no auth)
-    if (!isAuthenticated) {
-      logger.log('No auth cookie, skipping getCurrentUser');
-      setLoading(false);
-      if (redirectIfGuest) router.replace(redirectIfGuest);
-      return;
-    }
 
     try {
       // ✅ Check cache first (valid for 5 minutes)
@@ -65,12 +67,12 @@ export function useAuthGate({ redirectIfGuest }: { redirectIfGuest?: string } = 
       profileFetchInFlight = null;
 
       setUser(profile.user);
-      setCurrentUser(profile.user);
       
       // ✅ CRITICAL: Dispatch to Redux so useMembership can read it
       dispatch(setCredentials({ user: profile.user }));
     } catch {
       profileFetchInFlight = null;
+      // Let middleware handle the redirect - it's more reliable
       if (redirectIfGuest) router.replace(redirectIfGuest);
     } finally {
       setLoading(false);
@@ -92,8 +94,6 @@ export function useAuthGate({ redirectIfGuest }: { redirectIfGuest?: string } = 
   }, [reduxIsLoaded, reduxUser]);
 
   const logout = async () => {
-    await authAPI.logout();
-    
     // ✅ Clear Redux state (important for account switching)
     dispatch(logoutAction());
     
@@ -102,7 +102,8 @@ export function useAuthGate({ redirectIfGuest }: { redirectIfGuest?: string } = 
     cacheTimestamp = 0;
     profileFetchInFlight = null;
     
-    router.replace('/login');
+    // Use server action for logout (clears HttpOnly cookie and redirects)
+    await serverLogoutAction();
   };
 
   const refetchUser = async () => {
