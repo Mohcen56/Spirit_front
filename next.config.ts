@@ -3,7 +3,18 @@ import type { NextConfig } from "next";
 import bundleAnalyzer from "@next/bundle-analyzer";
 
 const nextConfig: NextConfig = {
- 
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          // Required for popup-based OAuth providers (Google, etc.).
+          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin-allow-popups' },
+          { key: 'Cross-Origin-Embedder-Policy', value: 'unsafe-none' },
+        ],
+      },
+    ];
+  },
 
   images: {
     unoptimized: true,

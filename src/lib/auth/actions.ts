@@ -181,12 +181,12 @@ export async function googleLoginAction(credential: string): Promise<ActionLogin
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/auth/google/`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/google-oauth/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ credential }),
+      body: JSON.stringify({ token: credential }),
     });
 
     const data = await response.json();
