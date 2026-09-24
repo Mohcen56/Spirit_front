@@ -9,6 +9,10 @@
 </p>
 
 <p align="center">
+  <a href="https://ai-mock-interviews-main-iota.vercel.app"><strong>🚀 Try the live demo</strong></a>
+</p>
+
+<p align="center">
   <a href="https://www.triviaspirit.com">Live application</a> ·
   <a href="https://github.com/Mohcen56/TriviaSpirit_frontend">Frontend source</a> ·
   <a href="https://github.com/Mohcen56/triviaspirit-backend-Nest.js">NestJS backend</a>
