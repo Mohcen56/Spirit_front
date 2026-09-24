@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { getBackendApiUrl } from '@/lib/config/backend';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE_URL = getBackendApiUrl();
 
 /**
  * Catch-all API proxy route.

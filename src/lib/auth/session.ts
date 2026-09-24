@@ -2,12 +2,13 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { cache } from 'react';
 import { logger } from '@/lib/utils/logger';
+import { getBackendApiUrl } from '@/lib/config/backend';
 import type { User, AuthSession, NoAuthSession, Session } from './types';
 
 // Re-export types for convenience
 export type { User, AuthSession, NoAuthSession, Session };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE_URL = getBackendApiUrl();
 
 /** Request timeout in milliseconds */
 const REQUEST_TIMEOUT = 5000;

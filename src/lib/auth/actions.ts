@@ -3,11 +3,12 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import { getBackendApiUrl } from '@/lib/config/backend';
 
 // Types are defined in ./types.ts but we can't re-export types from 'use server' files
 // Import types directly from @/lib/auth/types in client components
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE_URL = getBackendApiUrl();
 
 // Inline type for return values since we can't re-export
 interface ActionLoginResult {

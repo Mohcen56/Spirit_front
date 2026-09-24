@@ -9,6 +9,12 @@
 </p>
 
 <p align="center">
+  <a href="https://www.triviaspirit.com">Live application</a> ·
+  <a href="https://github.com/Mohcen56/TriviaSpirit_frontend">Frontend source</a> ·
+  <a href="https://github.com/Mohcen56/triviaspirit-backend-Nest.js">NestJS backend</a>
+</p>
+
+<p align="center">
   <a href="#features">Features</a> •
   <a href="#tech-stack">Tech Stack</a> •
   <a href="#architecture">Architecture</a> •
@@ -30,7 +36,7 @@
 ## ✨ Features
 
 ### 🎯 Core Gameplay
-- **Team-Based Trivia** – Create teams and compete in real-time trivia battles
+- **Turn-Based Trivia** – Create teams and take turns on one device
 - **Custom Categories** – Browse, create, and save your favorite trivia categories
 - **Thousands of Questions** – Curated questions across history, science, movies, anime, sports & more
 - **Turn-Based System** – Fair turn tracking with team rotation
@@ -76,7 +82,7 @@ All API calls are proxied through Next.js API routes, keeping authentication tok
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │                 │     │                 │     │                 │
-│  React Client   │────▶│  Next.js API    │────▶│  Django Backend │
+│  React Client   │────▶│  Next.js API    │────▶│  NestJS Backend │
 │  (Browser)      │     │  (BFF Proxy)    │     │  (REST API)     │
 │                 │     │                 │     │                 │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
@@ -107,18 +113,24 @@ The app uses Next.js route groups for logical organization:
 
 - Node.js 20+
 - npm or yarn
-- Django backend running (see backend README)
+- NestJS backend running (see `../nestjs-backend/README.md`)
 
 ### Environment Variables
 
 Create a `.env.local` file:
 
 ```env
-# Backend API URL
+# Private API URL used by server-side proxy and auth requests
+BACKEND_API_URL=http://127.0.0.1:8000
+
+# Public API URL used only to resolve media URLs in the browser
 NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000
 
+# Frontend URL
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
 # Google OAuth
-NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id
+NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID=your-google-client-id
 
 # Sentry (optional)
 NEXT_PUBLIC_SENTRY_DSN=your-sentry-dsn
@@ -182,7 +194,7 @@ src/
 │   │   ├── auth/             # Auth cookie management
 │   │   │   ├── check/        # Verify authentication
 │   │   │   └── set-cookie/   # Set/clear auth cookie
-│   │   └── backend/          # Catch-all proxy to Django
+│   │   └── backend/          # Catch-all proxy to NestJS
 │   │       └── [...path]/    # Proxy all backend requests
 │   ├── layout.tsx            # Root layout with providers
 │   ├── page.tsx              # Landing page
@@ -268,11 +280,11 @@ export function middleware(request: NextRequest) {
 ### 🔒 Token Flow
 
 ```
-1. User logs in → Django returns token
+1. User logs in → NestJS returns token
 2. Frontend calls POST /api/auth/set-cookie with token
 3. Next.js sets HttpOnly cookie (token never in JS)
 4. All API calls go through /api/backend/* proxy
-5. Proxy reads cookie, attaches token to Django requests
+5. Proxy reads cookie, attaches token to NestJS requests
 6. On logout, DELETE /api/auth/set-cookie clears cookie
 ```
 
@@ -290,14 +302,14 @@ export function middleware(request: NextRequest) {
 
 ### Backend Proxy
 
-All requests to `/api/backend/*` are proxied to the Django backend with auth token attached:
+All requests to `/api/backend/*` are proxied to the NestJS backend with the auth token attached:
 
 ```typescript
 // Client code (token handled automatically)
 const response = await api.get('/api/content/categories/');
 
 // Proxy transforms to:
-// GET https://api.triviaspirit.com/api/content/categories/
+// GET https://api.triviaspirit.com/api/content/categories
 // Authorization: Token <from-cookie>
 ```
 
@@ -435,8 +447,9 @@ vercel
 ### Environment Variables for Production
 
 ```env
+BACKEND_API_URL=https://api.triviaspirit.com
 NEXT_PUBLIC_API_BASE_URL=https://api.triviaspirit.com
-NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-production-client-id
+NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID=your-production-client-id
 SENTRY_AUTH_TOKEN=your-sentry-token
 ```
 
@@ -460,5 +473,5 @@ See [CHANGELOG.md](CHANGELOG.md) for recent updates and architecture changes.
 
 <p align="center">
   <a href="https://www.triviaspirit.com">🌐 Live Demo</a> •
-  <a href="https://github.com/yourusername/trivia-spirit">📦 Repository</a>
+  <a href="https://github.com/Mohcen56/TriviaSpirit_frontend">📦 Frontend repository</a>
 </p>

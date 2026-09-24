@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getBackendApiUrl } from '@/lib/config/backend';
 
 /**
  * Next.js Proxy for Server-Side Route Protection
@@ -26,7 +27,35 @@ const protectedRoutes = [
 // Using lowercase for consistent matching
 const authRoutes = ['/login', '/signup', '/forgotpassword', '/resetpassword'];
 
-export function proxy(request: NextRequest) {
+const API_BASE_URL = getBackendApiUrl();
+
+async function isValidToken(token: string | undefined): Promise<boolean> {
+  if (!token || !API_BASE_URL) return false;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/profile/`, {
+      headers: { Authorization: `Token ${token}` },
+      cache: 'no-store',
+      signal: AbortSignal.timeout(5000),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+function clearInvalidToken(response: NextResponse): NextResponse {
+  response.cookies.set('authToken', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 0,
+  });
+  return response;
+}
+
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const normalizedPath = pathname.toLowerCase(); // Normalize for case-insensitive matching
   const authToken = request.cookies.get('authToken')?.value;
@@ -46,10 +75,13 @@ export function proxy(request: NextRequest) {
     normalizedPath === route || normalizedPath.startsWith(`${route}/`)
   );
 
-  if (isProtectedRoute && !authToken) {
+  const authenticated = authToken ? await isValidToken(authToken) : false;
+
+  if (isProtectedRoute && !authenticated) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
-    return NextResponse.redirect(loginUrl);
+    const response = NextResponse.redirect(loginUrl);
+    return authToken ? clearInvalidToken(response) : response;
   }
 
   // Check if accessing auth routes while already authenticated
@@ -57,10 +89,14 @@ export function proxy(request: NextRequest) {
     normalizedPath === route || normalizedPath.startsWith(`${route}/`)
   );
   
-  if (isAuthRoute && authToken) {
+  if (isAuthRoute && authenticated) {
     // Get redirect URL from query params, or default to dashboard
     const redirect = request.nextUrl.searchParams.get('redirect') || '/dashboard';
     return NextResponse.redirect(new URL(redirect, request.url));
+  }
+
+  if (authToken && !authenticated) {
+    return clearInvalidToken(NextResponse.next());
   }
 
   return NextResponse.next();

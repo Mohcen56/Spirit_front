@@ -65,7 +65,7 @@ export function PremiumDashboard() {
           </p>
           <div className="grid md:grid-cols-2 gap-4">
             {[
-            { icon: <Smartphone className="w-5 h-5" />, text: "Brainigo Mobile App (iOS & Android)" },
+            { icon: <Smartphone className="w-5 h-5" />, text: "triviaspirit Mobile App (iOS & Android)" },
             { icon: <Gamepad2 className="w-5 h-5" />, text: "Real-Time 1v1 Multiplayer Mode" },
             { icon: <Layers className="w-5 h-5" />, text: "New Categories Added Regularly" },
             { icon: <Trophy className="w-5 h-5" />, text: "Global Leaderboards" },
