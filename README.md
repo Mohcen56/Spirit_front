@@ -39,7 +39,7 @@
 - **Turn-Based Trivia** – Create teams and take turns on one device
 - **Custom Categories** – Browse, create, and save your favorite trivia categories
 - **Thousands of Questions** – Curated questions across history, science, movies, anime, sports & more
-- **Turn-Based System** – Fair turn tracking with team rotation
+- **Power-Ups & Perks** – Use Double Points, Reroll, and Show Choices to shape the game
 
 ### 👤 User Experience
 - **Google OAuth** – One-click sign-in with Google
@@ -113,7 +113,7 @@ The app uses Next.js route groups for logical organization:
 
 - Node.js 20+
 - npm or yarn
-- NestJS backend running (see `../nestjs-backend/README.md`)
+- NestJS backend running (see the [NestJS backend README](https://github.com/Mohcen56/triviaspirit-backend/blob/main/README.md))
 
 ### Environment Variables
 
@@ -458,12 +458,6 @@ SENTRY_AUTH_TOKEN=your-sentry-token
 ## 📄 License
 
 This project is proprietary software. See [LICENSE](LICENSE) for details.
-
----
-
-## 📋 Changelog
-
-See [CHANGELOG.md](CHANGELOG.md) for recent updates and architecture changes.
 
 ---
 
